@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Counselling Role-Play Practice</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9f9f8; color: #1a1a1a; min-height: 100vh; }
+  #root { max-width: 700px; margin: 0 auto; padding: 1rem; }
+  textarea { font-family: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  :root {
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #6b6b6b;
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f4f4f3;
+    --color-border-tertiary: #e0e0de;
+    --color-border-secondary: #d0d0ce;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+
+// ── DATA ──
+const APPROACHES = [
+  { id: "person_centred", label: "Person-Centred", desc: "Empathy, unconditional positive regard, congruence (Rogers)" },
+  { id: "sfbt", label: "Solution-Focused", desc: "Miracle question, scaling, exceptions, strengths" },
+  { id: "cbt", label: "CBT", desc: "Identify thoughts, feelings, behaviours and challenge distortions" },
+  { id: "motivational", label: "Motivational Interviewing", desc: "Evoke motivation, explore ambivalence, OARS skills" },
+  { id: "narrative", label: "Narrative Therapy", desc: "Externalise problems, re-author dominant stories" },
+  { id: "mindfulness", label: "Mindfulness-Based", desc: "Present-moment awareness, acceptance, grounding" },
+];
+
+const SCENARIOS = [
+  { id: "anxiety", label: "Anxiety & Worry", desc: "Overwhelmed by work and constant anxious thoughts", category: "Mood" },
+  { id: "grief", label: "Grief & Loss", desc: "Recently lost a loved one, struggling to cope", category: "Life Events" },
+  { id: "relationship", label: "Relationship Issues", desc: "Conflict and communication breakdown with partner", category: "Relationships" },
+  { id: "career", label: "Career Stress", desc: "Feeling stuck, unfulfilled, and burnt out at work", category: "Work" },
+  { id: "selfesteem", label: "Low Self-Esteem", desc: "Persistent feelings of not being good enough", category: "Mood" },
+  { id: "depression", label: "Low Mood", desc: "Withdrawn, lacking motivation, feeling hopeless", category: "Mood" },
+  { id: "trauma", label: "Past Trauma", desc: "Childhood experiences resurfacing and affecting daily life", category: "Trauma" },
+  { id: "alcohol", label: "Alcohol & Drug Use", desc: "Struggling with alcohol use and wants to cut down", category: "Substance Use" },
+  { id: "family", label: "Family Conflict", desc: "Tension and estrangement from family members", category: "Relationships" },
+  { id: "anger", label: "Anger Management", desc: "Explosive anger episodes affecting relationships and work", category: "Mood" },
+  { id: "social_anxiety", label: "Social Anxiety", desc: "Fear of judgment in social situations, avoids going out", category: "Mood" },
+  { id: "divorce", label: "Separation & Divorce", desc: "Going through a difficult divorce with children involved", category: "Life Events" },
+  { id: "chronic_illness", label: "Chronic Illness", desc: "Adjusting to life with a long-term health condition", category: "Life Events" },
+  { id: "identity", label: "Identity & Purpose", desc: "Questioning sense of self, values, and life direction", category: "Existential" },
+  { id: "loneliness", label: "Loneliness & Isolation", desc: "No close connections, feels invisible and forgotten", category: "Relationships" },
+  { id: "parenting", label: "Parenting Stress", desc: "Overwhelmed by parenting demands, feeling like a failure", category: "Relationships" },
+  { id: "financial", label: "Financial Stress", desc: "Debt and financial pressure causing significant distress", category: "Work" },
+  { id: "bereavement_child", label: "Child Bereavement", desc: "Parent grieving the loss of a child, unable to move forward", category: "Trauma" },
+  { id: "crisis_suicidal", label: "Suicidal Ideation", desc: "Client discloses passive thoughts of not wanting to be alive", category: "Crisis" },
+  { id: "crisis_selfharm", label: "Self-Harm Disclosure", desc: "Client reveals recent self-harming behaviour", category: "Crisis" },
+  { id: "crisis_dv", label: "Domestic Violence", desc: "Client discloses ongoing abuse at home", category: "Crisis" },
+  { id: "crisis_psychosis", label: "Acute Distress", desc: "Client presents highly distressed and overwhelmed", category: "Crisis" },
+];
+
+const CRISIS_IDS = ["crisis_suicidal", "crisis_selfharm", "crisis_dv", "crisis_psychosis"];
+
+const DIFFICULTIES = [
+  { id: "beginner", label: "Beginner", color: "#EAF3DE", textColor: "#3B6D11", points: 1 },
+  { id: "intermediate", label: "Intermediate", color: "#FAEEDA", textColor: "#854F0B", points: 2 },
+  { id: "advanced", label: "Advanced", color: "#FCEBEB", textColor: "#A32D2D", points: 3 },
+];
+
+const FEEDBACK_MODES = [
+  { id: "step", label: "Step-by-Step", desc: "Feedback after each response — guided learning mode" },
+  { id: "end", label: "End of Session", desc: "Full immersive role-play, then debrief at the end" },
+];
+
+const difficultyPrompt = {
+  beginner: "You are cooperative and open. You respond to empathy positively and make progress.",
+  intermediate: "You have some resistance. You occasionally go off-topic or minimise feelings.",
+  advanced: "You are defensive and resistant. You challenge, deflect, or shut down. You only open up if the counselor is skilled.",
+};
+
+const crisisSystemPrompt = {
+  crisis_suicidal: `You are a client who has just disclosed passive suicidal thoughts. You are not in immediate danger but are clearly in distress. React realistically — you may minimise or feel ashamed. The student must practise safe crisis response. Keep responses to 2-4 sentences.`,
+  crisis_selfharm: `You are a client who has just disclosed self-harming. You feel embarrassed. You need the counselor to stay calm and non-judgmental. React authentically. Keep responses to 2-4 sentences.`,
+  crisis_dv: `You are a client disclosing partner abuse. You are ambivalent — you still love them and are scared. The student must show empathy without pressure. Keep responses to 2-4 sentences.`,
+  crisis_psychosis: `You are a client in acute distress — overwhelmed, thoughts racing. You need grounding and calm presence. Keep responses to 2-4 sentences.`,
+};
+
+const CRISIS_GUIDANCE = {
+  crisis_suicidal: ["Use open, non-judgmental questions", "Assess risk gently — frequency, intent, plan, means", "Do not panic — stay present first", "Discuss support: safety plan, crisis lines", "Mandatory reporting obligations may apply"],
+  crisis_selfharm: ["Stay calm — your reaction matters enormously", "Ask about behaviour without shame or alarm", "Assess current safety and medical needs first", "Explore function — what does it do for them?", "Collaborate on safer coping alternatives"],
+  crisis_dv: ["Believe and validate — never minimise", "Do not pressure them to leave", "Explore safety: is there immediate danger?", "Provide information about supports", "Mandatory reporting may apply if children are at risk"],
+  crisis_psychosis: ["Slow down, use simple clear language", "Ground them: name, place, time", "Assess immediate safety", "Do not challenge distorted thinking directly", "Consider urgent referral if needed"],
+};
+
+const approachLabels = {
+  person_centred: "Person-Centred", sfbt: "Solution-Focused", cbt: "CBT",
+  motivational: "Motivational Interviewing", narrative: "Narrative Therapy", mindfulness: "Mindfulness-Based",
+};
+
+const ratingPoints = { good: 3, okay: 1, needs_work: 0 };
+const categories = [...new Set(SCENARIOS.map(s => s.category))];
+
+const STORAGE_KEY = "counselling_progress_v1";
+function loadProgress() {
+  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : { sessions: [], totalSessions: 0, totalPoints: 0 }; }
+  catch { return { sessions: [], totalSessions: 0, totalPoints: 0 }; }
+}
+function saveProgress(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch {} }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ── MAIN APP ──
+function App() {
+  const [apiKey, setApiKey] = useState(localStorage.getItem("counselling_api_key") || "");
+  const [apiKeySaved, setApiKeySaved] = useState(!!localStorage.getItem("counselling_api_key"));
+  const [screen, setScreen] = useState("home");
+  const [approach, setApproach] = useState(null);
+  const [scenario, setScenario] = useState(null);
+  const [difficulty, setDifficulty] = useState(null);
+  const [feedbackMode, setFeedbackMode] = useState(null);
+  const [filterCat, setFilterCat] = useState("All");
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [stepFeedback, setStepFeedback] = useState(null);
+  const [showingFeedback, setShowingFeedback] = useState(false);
+  const [finalFeedback, setFinalFeedback] = useState(null);
+  const [gettingFinal, setGettingFinal] = useState(false);
+  const [progress, setProgress] = useState(loadProgress);
+  const [showCrisisGuide, setShowCrisisGuide] = useState(false);
+  const [quickStartConfig, setQuickStartConfig] = useState(null);
+  const bottomRef = useRef(null);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, stepFeedback, finalFeedback, loading]);
+
+  const isCrisis = CRISIS_IDS.includes(scenario);
+
+  const saveApiKey = () => {
+    localStorage.setItem("counselling_api_key", apiKey);
+    setApiKeySaved(true);
+  };
+
+  const ratingColor = (r) => {
+    if (r === "good") return { bg: "#EAF3DE", text: "#3B6D11", label: "Good" };
+    if (r === "okay") return { bg: "#FAEEDA", text: "#854F0B", label: "Okay" };
+    return { bg: "#FCEBEB", text: "#A32D2D", label: "Needs work" };
+  };
+
+  const callAPI = async (systemPrompt, messages) => {
+    const key = localStorage.getItem("counselling_api_key") || apiKey;
+    const res = await fetch(ANTHROPIC_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: systemPrompt, messages }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.content[0].text;
+  };
+
+  const handleQuickStart = (type) => {
+    const nonCrisis = SCENARIOS.filter(s => !CRISIS_IDS.includes(s.id));
+    const crisisOnly = SCENARIOS.filter(s => CRISIS_IDS.includes(s.id));
+    let sc, ap = pick(APPROACHES).id, diff, fm = pick(FEEDBACK_MODES).id;
+    if (type === "random") { sc = pick(nonCrisis).id; diff = pick(DIFFICULTIES).id; }
+    else if (type === "challenge") { sc = pick(nonCrisis).id; diff = "advanced"; }
+    else { sc = pick(crisisOnly).id; diff = pick([DIFFICULTIES[0], DIFFICULTIES[1]]).id; }
+    setApproach(ap); setScenario(sc); setDifficulty(diff); setFeedbackMode(fm);
+    setQuickStartConfig({ approach: ap, scenario: sc, difficulty: diff, feedbackMode: fm });
+  };
+
+  useEffect(() => {
+    if (quickStartConfig && approach && scenario && difficulty && feedbackMode) {
+      startSession(); setQuickStartConfig(null);
+    }
+  }, [quickStartConfig]);
+
+  const buildSystemPrompt = () => {
+    const sc = SCENARIOS.find(s => s.id === scenario);
+    const ap = APPROACHES.find(a => a.id === approach);
+    if (isCrisis) return `You are playing the role of a client in a crisis counseling role-play for student counselors. ${crisisSystemPrompt[scenario]} The student is practising: ${ap.label}. Stay fully in character. Begin by presenting your situation.`;
+    return `You are playing the role of a client in a counseling role-play for student counselors. Scenario: ${sc.label} — ${sc.desc}. Approach: ${ap.label}. Difficulty: ${difficultyPrompt[difficulty]}. Stay in character. 2-4 sentences. Start by briefly introducing your issue.`;
+  };
+
+  const startSession = async () => {
+    setScreen("session"); setLoading(true); setMessages([]); setStepFeedback(null); setFinalFeedback(null); setShowCrisisGuide(false);
+    try {
+      const text = await callAPI(buildSystemPrompt(), [{ role: "user", content: "Begin the session." }]);
+      setMessages([{ role: "client", text }]);
+    } catch (e) { setMessages([{ role: "client", text: "Something went wrong: " + e.message }]); }
+    setLoading(false);
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading || showingFeedback) return;
+    const userText = input.trim(); setInput("");
+    const newMessages = [...messages, { role: "counselor", text: userText }];
+    setMessages(newMessages); setLoading(true); setStepFeedback(null);
+    const sc = SCENARIOS.find(s => s.id === scenario);
+    const ap = APPROACHES.find(a => a.id === approach);
+
+    if (feedbackMode === "step") {
+      try {
+        const crisisCtx = isCrisis ? `This is a CRISIS scenario. Evaluate whether the counselor stayed calm, assessed safety, showed empathy without panic.` : "";
+        const text = await callAPI(
+          `You are a counseling supervisor giving brief feedback to a student practising ${ap.label} with a client presenting ${sc.label}. ${crisisCtx} Respond ONLY with JSON, no markdown: {"rating":"good"|"okay"|"needs_work","strength":"one sentence","improve":"one sentence","tip":"one specific technique or phrase"}`,
+          [{ role: "user", content: `Conversation:\n${newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n")}\n\nLatest counselor response: "${userText}"` }]
+        );
+        setStepFeedback(JSON.parse(text.trim())); setShowingFeedback(true);
+      } catch { setStepFeedback({ rating: "okay", strength: "Response received.", improve: "Keep practising.", tip: "Stay with the approach." }); setShowingFeedback(true); }
+      setLoading(false); return;
+    }
+    await getClientReply(newMessages, ap, sc);
+  };
+
+  const getClientReply = async (msgs, ap, sc) => {
+    setLoading(true);
+    const history = msgs.map(m => ({ role: m.role === "counselor" ? "user" : "assistant", content: m.text }));
+    try {
+      const text = await callAPI(buildSystemPrompt(), history);
+      setMessages(prev => [...prev, { role: "client", text }]);
+    } catch (e) { setMessages(prev => [...prev, { role: "client", text: "Sorry, could you repeat that?" }]); }
+    setLoading(false);
+  };
+
+  const continueAfterFeedback = async () => {
+    setShowingFeedback(false);
+    await getClientReply(messages, APPROACHES.find(a => a.id === approach), SCENARIOS.find(s => s.id === scenario));
+    setStepFeedback(null);
+  };
+
+  const getFinalFeedback = async () => {
+    setGettingFinal(true);
+    const ap = APPROACHES.find(a => a.id === approach);
+    const sc = SCENARIOS.find(s => s.id === scenario);
+    const transcript = messages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n");
+    const crisisCtx = isCrisis ? `This is a CRISIS scenario. Evaluate crisis-specific skills: Did they stay calm? Assess risk? Show empathy? Handle referral?` : "";
+    try {
+      const text = await callAPI(
+        `You are a counseling supervisor reviewing a student session using ${ap.label} with a client presenting ${sc.label} at ${difficulty} difficulty. ${crisisCtx} Respond ONLY with JSON, no markdown: {"overall":"good"|"okay"|"needs_work","summary":"2-3 sentences","strengths":["s1","s2"],"areas":["a1","a2"],"technique_use":"1-2 sentences","example_response":"one stronger example response"}`,
+        [{ role: "user", content: `Transcript:\n${transcript}` }]
+      );
+      const fb = JSON.parse(text.trim()); setFinalFeedback(fb); recordSession(fb); setScreen("feedback");
+    } catch { const fb = { overall: "okay", summary: "Session complete.", strengths: ["You engaged with the client"], areas: ["Continue developing"], technique_use: "Keep working on the approach.", example_response: "Try using more open questions." }; setFinalFeedback(fb); recordSession(fb); setScreen("feedback"); }
+    setGettingFinal(false);
+  };
+
+  const recordSession = (feedback) => {
+    const sc = SCENARIOS.find(s => s.id === scenario);
+    const diff = DIFFICULTIES.find(d => d.id === difficulty);
+    const pts = (ratingPoints[feedback.overall] || 0) * diff.points;
+    const entry = { date: new Date().toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }), approach: approachLabels[approach], scenario: sc.label, difficulty: diff.label, overall: feedback.overall, points: pts, exchanges: Math.floor(messages.length / 2), crisis: isCrisis };
+    const updated = { sessions: [entry, ...progress.sessions].slice(0, 50), totalSessions: progress.totalSessions + 1, totalPoints: progress.totalPoints + pts };
+    setProgress(updated); saveProgress(updated);
+  };
+
+  const reset = () => { setScreen("home"); setApproach(null); setScenario(null); setDifficulty(null); setFeedbackMode(null); setMessages([]); setInput(""); setStepFeedback(null); setFinalFeedback(null); setShowingFeedback(false); setShowCrisisGuide(false); };
+
+  const canStart = approach && scenario && difficulty && feedbackMode;
+  const filteredScenarios = filterCat === "All" ? SCENARIOS : SCENARIOS.filter(s => s.category === filterCat);
+
+  const SL = ({ n, children }) => <p style={{ fontWeight: 500, fontSize: 13, color: "var(--color-text-secondary)", margin: "0 0 0.5rem", letterSpacing: "0.04em", textTransform: "uppercase" }}>{n}. {children}</p>;
+  const Badge = ({ children, bg, color }) => <span style={{ fontSize: 12, background: bg, color, padding: "3px 10px", borderRadius: 20, fontWeight: 500 }}>{children}</span>;
+
+  // API Key setup screen
+  if (!apiKeySaved) return (
+    <div style={{ maxWidth: 500, margin: "4rem auto", padding: "2rem", background: "#fff", borderRadius: 12, border: "0.5px solid #e0e0de" }}>
+      <h2 style={{ fontSize: 20, fontWeight: 500, margin: "0 0 0.5rem" }}>Counselling Role-Play Practice</h2>
+      <p style={{ color: "#6b6b6b", fontSize: 14, margin: "0 0 1.5rem" }}>Enter your Anthropic API key to get started. This is stored locally in your browser only.</p>
+      <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-ant-..." style={{ width: "100%", padding: "10px 12px", fontSize: 14, borderRadius: 8, border: "0.5px solid #d0d0ce", marginBottom: "0.75rem", fontFamily: "monospace" }} />
+      <button onClick={saveApiKey} disabled={!apiKey.startsWith("sk-")} style={{ width: "100%", padding: "11px", fontSize: 14, fontWeight: 500, background: apiKey.startsWith("sk-") ? "#1D9E75" : "#e0e0de", color: apiKey.startsWith("sk-") ? "#fff" : "#999", border: "none", borderRadius: 8 }}>
+        Start Practising
+      </button>
+      <p style={{ fontSize: 12, color: "#999", margin: "0.75rem 0 0", textAlign: "center" }}>Get your API key at console.anthropic.com</p>
+    </div>
+  );
+
+  // Progress screen
+  if (screen === "progress") {
+    const { sessions, totalSessions, totalPoints } = progress;
+    const good = sessions.filter(s => s.overall === "good").length;
+    const okay = sessions.filter(s => s.overall === "okay").length;
+    const needsWork = sessions.filter(s => s.overall === "needs_work").length;
+    const crisisSessions = sessions.filter(s => s.crisis).length;
+    const approachCounts = {}; sessions.forEach(s => { approachCounts[s.approach] = (approachCounts[s.approach] || 0) + 1; });
+    const topApproach = Object.entries(approachCounts).sort((a, b) => b[1] - a[1])[0];
+    const diffCounts = { Beginner: 0, Intermediate: 0, Advanced: 0 }; sessions.forEach(s => { if (diffCounts[s.difficulty] !== undefined) diffCounts[s.difficulty]++; });
+    const level = totalPoints < 10 ? { label: "Trainee", next: 10, color: "#888780" } : totalPoints < 25 ? { label: "Practitioner", next: 25, color: "#1D9E75" } : totalPoints < 50 ? { label: "Skilled", next: 50, color: "#7F77DD" } : totalPoints < 100 ? { label: "Advanced", next: 100, color: "#D85A30" } : { label: "Expert", next: null, color: "#BA7517" };
+    const pct = level.next ? Math.min(100, Math.round((totalPoints / level.next) * 100)) : 100;
+    return (
+      <div style={{ maxWidth: 620, margin: "0 auto", padding: "1.5rem 1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 500, margin: 0 }}>Progress Tracker</h2>
+          <button onClick={() => setScreen("home")} style={{ fontSize: 13, padding: "5px 14px", borderRadius: 8, border: "0.5px solid #e0e0de", background: "#f4f4f3", color: "#6b6b6b", cursor: "pointer" }}>Back</button>
+        </div>
+        <div style={{ padding: "16px", borderRadius: 12, background: "#f4f4f3", border: "0.5px solid #e0e0de", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div><p style={{ fontSize: 13, color: "#6b6b6b", margin: "0 0 2px" }}>Current level</p><p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: level.color }}>{level.label}</p></div>
+            <div style={{ textAlign: "right" }}><p style={{ fontSize: 13, color: "#6b6b6b", margin: "0 0 2px" }}>Total points</p><p style={{ fontSize: 20, fontWeight: 500, margin: 0 }}>{totalPoints}</p></div>
+          </div>
+          <div style={{ height: 8, background: "#fff", borderRadius: 4, overflow: "hidden" }}><div style={{ height: "100%", width: `${pct}%`, background: level.color, borderRadius: 4 }} /></div>
+          <p style={{ fontSize: 12, color: "#6b6b6b", margin: "6px 0 0" }}>{level.next ? `${totalPoints} / ${level.next} pts to next level` : "Maximum level reached"}</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: "1rem" }}>
+          {[{ label: "Sessions", val: totalSessions, bg: "#f4f4f3" }, { label: "Good", val: good, bg: "#EAF3DE", color: "#3B6D11" }, { label: "Okay", val: okay, bg: "#FAEEDA", color: "#854F0B" }, { label: "Needs work", val: needsWork, bg: "#FCEBEB", color: "#A32D2D" }, { label: "Crisis", val: crisisSessions, bg: "#EEEDFE", color: "#3C3489" }].map(({ label, val, bg, color }) => (
+            <div key={label} style={{ padding: "10px 8px", borderRadius: 8, background: bg, border: "0.5px solid #e0e0de", textAlign: "center" }}>
+              <p style={{ fontSize: 20, fontWeight: 500, margin: "0 0 2px", color: color || "#1a1a1a" }}>{val}</p>
+              <p style={{ fontSize: 11, color: color || "#6b6b6b", margin: 0 }}>{label}</p>
+            </div>
+          ))}
+        </div>
+        {sessions.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "1rem" }}>
+            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de" }}>
+              <p style={{ fontSize: 12, color: "#6b6b6b", margin: "0 0 4px" }}>Most practised</p>
+              <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>{topApproach ? topApproach[0] : "—"}</p>
+            </div>
+            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de" }}>
+              <p style={{ fontSize: 12, color: "#6b6b6b", margin: "0 0 6px" }}>Difficulty breakdown</p>
+              {Object.entries(diffCounts).map(([k, v]) => (
+                <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                  <div style={{ flex: 1, height: 5, background: "#fff", borderRadius: 3, overflow: "hidden" }}><div style={{ height: "100%", width: totalSessions ? `${Math.round((v / totalSessions) * 100)}%` : "0%", background: k === "Beginner" ? "#3B6D11" : k === "Intermediate" ? "#854F0B" : "#A32D2D", borderRadius: 3 }} /></div>
+                  <span style={{ fontSize: 11, color: "#6b6b6b", minWidth: 68 }}>{k}: {v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 0.6rem" }}>Session history</p>
+        {sessions.length === 0 ? <p style={{ color: "#6b6b6b", fontSize: 14 }}>No sessions yet — complete a role-play to see your history here.</p> : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {sessions.map((s, i) => { const rc = ratingColor(s.overall); return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: rc.text, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <p style={{ fontSize: 13, fontWeight: 500, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.scenario}</p>
+                    {s.crisis && <span style={{ fontSize: 10, background: "#EEEDFE", color: "#534AB7", padding: "1px 6px", borderRadius: 10, flexShrink: 0 }}>Crisis</span>}
+                  </div>
+                  <p style={{ fontSize: 12, color: "#6b6b6b", margin: 0 }}>{s.approach} · {s.difficulty} · {s.exchanges} exchanges</p>
+                </div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: rc.text, margin: 0 }}>{rc.label}</p>
+                  <p style={{ fontSize: 11, color: "#6b6b6b", margin: 0 }}>+{s.points} pts · {s.date}</p>
+                </div>
+              </div>
+            ); })}
+          </div>
+        )}
+        {sessions.length > 0 && <button onClick={() => { if (window.confirm("Clear all progress?")) { const e = { sessions: [], totalSessions: 0, totalPoints: 0 }; setProgress(e); saveProgress(e); } }} style={{ marginTop: "1.25rem", fontSize: 13, color: "#A32D2D", background: "none", border: "0.5px solid #F09595", borderRadius: 8, padding: "6px 14px", cursor: "pointer" }}>Clear all progress</button>}
+      </div>
+    );
+  }
+
+  // Home screen
+  if (screen === "home") return (
+    <div style={{ maxWidth: 660, margin: "0 auto", padding: "1.5rem 1rem" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+        <div>
+          <h2 style={{ fontSize: 22, fontWeight: 500, margin: "0 0 0.25rem" }}>Counselling Role-Play Practice</h2>
+          <p style={{ color: "#6b6b6b", margin: 0, fontSize: 15 }}>Practice client sessions with AI-powered feedback.</p>
+        </div>
+        <button onClick={() => setScreen("progress")} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 14px", borderRadius: 8, border: "0.5px solid #e0e0de", background: "#f4f4f3", cursor: "pointer", flexShrink: 0, marginLeft: 12 }}>
+          <span style={{ fontSize: 18, fontWeight: 500, color: "#7F77DD", lineHeight: 1 }}>{progress.totalPoints}</span>
+          <span style={{ fontSize: 11, color: "#6b6b6b", marginTop: 2 }}>pts · Progress</span>
+        </button>
+      </div>
+
+      <div style={{ padding: "14px", borderRadius: 12, background: "#f4f4f3", border: "0.5px solid #e0e0de", marginBottom: "1.75rem" }}>
+        <p style={{ fontWeight: 500, fontSize: 13, color: "#6b6b6b", margin: "0 0 0.6rem", letterSpacing: "0.04em", textTransform: "uppercase" }}>Quick Start</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+          {[{ type: "random", label: "Random session", desc: "Random approach, scenario & difficulty", bg: "#E1F5EE", color: "#0F6E56", border: "#5DCAA5" }, { type: "challenge", label: "Challenge me", desc: "Advanced difficulty", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775" }, { type: "crisis", label: "Crisis practice", desc: "Random crisis scenario", bg: "#EEEDFE", color: "#3C3489", border: "#AFA9EC" }].map(({ type, label, desc, bg, color, border }) => (
+            <button key={type} onClick={() => handleQuickStart(type)} style={{ padding: "10px 12px", borderRadius: 8, border: `0.5px solid ${border}`, background: bg, cursor: "pointer", textAlign: "left" }}>
+              <p style={{ fontWeight: 500, fontSize: 13, margin: "0 0 3px", color }}>{label}</p>
+              <p style={{ fontSize: 11, color, margin: 0, lineHeight: 1.4, opacity: 0.85 }}>{desc}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <SL n="1">Choose your approach</SL>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 8, marginBottom: "1.5rem" }}>
+        {APPROACHES.map(a => (
+          <div key={a.id} onClick={() => setApproach(a.id)} style={{ padding: "10px 12px", borderRadius: 8, border: approach === a.id ? "2px solid #1D9E75" : "0.5px solid #e0e0de", background: approach === a.id ? "#E1F5EE" : "#fff", cursor: "pointer" }}>
+            <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 2px", color: approach === a.id ? "#0F6E56" : "#1a1a1a" }}>{a.label}</p>
+            <p style={{ fontSize: 12, color: approach === a.id ? "#0F6E56" : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{a.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <SL n="2">Choose a client scenario</SL>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: "0.6rem" }}>
+        {["All", ...categories].map(cat => (
+          <button key={cat} onClick={() => setFilterCat(cat)} style={{ fontSize: 12, padding: "3px 10px", borderRadius: 20, border: filterCat === cat ? "none" : "0.5px solid #e0e0de", background: filterCat === cat ? (cat === "Crisis" ? "#534AB7" : "#7F77DD") : "#f4f4f3", color: filterCat === cat ? "#fff" : cat === "Crisis" ? "#534AB7" : "#6b6b6b", fontWeight: cat === "Crisis" ? 500 : 400, cursor: "pointer" }}>{cat === "Crisis" ? "⚠ Crisis" : cat}</button>
+        ))}
+      </div>
+      {filterCat === "All" && (
+        <div style={{ marginBottom: "0.75rem", padding: "10px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <p style={{ fontSize: 13, color: "#3C3489", margin: 0 }}>Looking for crisis scenarios? Filter by <strong>⚠ Crisis</strong> above.</p>
+          <button onClick={() => setFilterCat("Crisis")} style={{ fontSize: 12, padding: "4px 12px", borderRadius: 20, background: "#534AB7", color: "#fff", border: "none", cursor: "pointer", flexShrink: 0, marginLeft: 10 }}>Show crisis</button>
+        </div>
+      )}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 8, marginBottom: "1.5rem" }}>
+        {filteredScenarios.map(s => { const isCrisisSc = CRISIS_IDS.includes(s.id); const sel = scenario === s.id; return (
+          <div key={s.id} onClick={() => setScenario(s.id)} style={{ padding: "10px 12px", borderRadius: 8, border: sel ? `2px solid ${isCrisisSc ? "#534AB7" : "#7F77DD"}` : isCrisisSc ? "0.5px solid #AFA9EC" : "0.5px solid #e0e0de", background: sel ? "#EEEDFE" : isCrisisSc ? "#F5F4FE" : "#fff", cursor: "pointer" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
+              <p style={{ fontWeight: 500, fontSize: 14, margin: 0, color: sel ? "#3C3489" : isCrisisSc ? "#534AB7" : "#1a1a1a" }}>{s.label}</p>
+              <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 10, background: isCrisisSc ? "#AFA9EC" : "#f4f4f3", color: isCrisisSc ? "#26215C" : "#6b6b6b" }}>{isCrisisSc ? "Crisis" : s.category}</span>
+            </div>
+            <p style={{ fontSize: 12, color: sel ? "#534AB7" : isCrisisSc ? "#7F77DD" : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{s.desc}</p>
+          </div>
+        ); })}
+      </div>
+
+      <SL n="3">Choose difficulty level</SL>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: "1.5rem" }}>
+        {DIFFICULTIES.map(d => (
+          <div key={d.id} onClick={() => setDifficulty(d.id)} style={{ padding: "10px 12px", borderRadius: 8, border: difficulty === d.id ? `2px solid ${d.textColor}` : "0.5px solid #e0e0de", background: difficulty === d.id ? d.color : "#fff", cursor: "pointer" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
+              <p style={{ fontWeight: 500, fontSize: 14, margin: 0, color: difficulty === d.id ? d.textColor : "#1a1a1a" }}>{d.label}</p>
+              <span style={{ fontSize: 10, color: difficulty === d.id ? d.textColor : "#6b6b6b" }}>×{d.points} pts</span>
+            </div>
+            <p style={{ fontSize: 12, color: difficulty === d.id ? d.textColor : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{d.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <SL n="4">Choose feedback style</SL>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "1.75rem" }}>
+        {FEEDBACK_MODES.map(f => (
+          <div key={f.id} onClick={() => setFeedbackMode(f.id)} style={{ padding: "10px 12px", borderRadius: 8, border: feedbackMode === f.id ? "2px solid #378ADD" : "0.5px solid #e0e0de", background: feedbackMode === f.id ? "#E6F1FB" : "#fff", cursor: "pointer" }}>
+            <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 2px", color: feedbackMode === f.id ? "#0C447C" : "#1a1a1a" }}>{f.label}</p>
+            <p style={{ fontSize: 12, color: feedbackMode === f.id ? "#185FA5" : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{f.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <button onClick={startSession} disabled={!canStart} style={{ width: "100%", padding: "12px", fontSize: 15, fontWeight: 500, background: canStart ? "#1D9E75" : "#f4f4f3", color: canStart ? "#fff" : "#6b6b6b", border: "none", borderRadius: 8, cursor: canStart ? "pointer" : "not-allowed" }}>
+        Start Session
+      </button>
+
+      <button onClick={() => { localStorage.removeItem("counselling_api_key"); setApiKeySaved(false); setApiKey(""); }} style={{ width: "100%", marginTop: 8, padding: "8px", fontSize: 12, background: "none", color: "#999", border: "none", cursor: "pointer" }}>Change API key</button>
+    </div>
+  );
+
+  // Session screen
+  if (screen === "session") {
+    const diff = DIFFICULTIES.find(d => d.id === difficulty);
+    const sc = SCENARIOS.find(s => s.id === scenario);
+    const guide = CRISIS_IDS.includes(scenario) ? CRISIS_GUIDANCE[scenario] : null;
+    return (
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem", flexWrap: "wrap", gap: 6 }}>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <Badge bg="#E1F5EE" color="#0F6E56">{approachLabels[approach]}</Badge>
+            <Badge bg="#EEEDFE" color="#3C3489">{sc?.label}</Badge>
+            <Badge bg={diff.color} color={diff.textColor}>{diff.label}</Badge>
+            {isCrisis && <Badge bg="#EEEDFE" color="#534AB7">Crisis</Badge>}
+          </div>
+          <button onClick={reset} style={{ fontSize: 13, color: "#6b6b6b", background: "none", border: "0.5px solid #e0e0de", borderRadius: 8, padding: "4px 10px", cursor: "pointer" }}>End</button>
+        </div>
+
+        {isCrisis && (
+          <div style={{ marginBottom: "0.75rem", padding: "10px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#3C3489", margin: 0 }}>Crisis scenario — practise safe response skills</p>
+              <button onClick={() => setShowCrisisGuide(v => !v)} style={{ fontSize: 12, color: "#534AB7", background: "none", border: "0.5px solid #AFA9EC", borderRadius: 8, padding: "3px 10px", cursor: "pointer" }}>{showCrisisGuide ? "Hide" : "Show"} guide</button>
+            </div>
+            {showCrisisGuide && guide && (
+              <div style={{ marginTop: 10, borderTop: "0.5px solid #AFA9EC", paddingTop: 10 }}>
+                <p style={{ fontSize: 12, fontWeight: 500, color: "#3C3489", margin: "0 0 6px" }}>Key considerations:</p>
+                {guide.map((tip, i) => <p key={i} style={{ fontSize: 12, color: "#534AB7", margin: "0 0 3px", lineHeight: 1.4 }}>· {tip}</p>)}
+                <p style={{ fontSize: 11, color: "#7F77DD", margin: "8px 0 0", fontStyle: "italic" }}>This is a training simulation. Always follow your institution's actual crisis protocols.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ minHeight: 300, marginBottom: "1rem" }}>
+          {messages.map((m, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: m.role === "counselor" ? "flex-end" : "flex-start", marginBottom: 10 }}>
+              <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: 14, background: m.role === "counselor" ? "#1D9E75" : "#f4f4f3", color: m.role === "counselor" ? "#fff" : "#1a1a1a", fontSize: 14, lineHeight: 1.55 }}>
+                <p style={{ margin: "0 0 3px", fontSize: 11, fontWeight: 500, opacity: 0.7 }}>{m.role === "counselor" ? "You (Counselor)" : "Client"}</p>
+                {m.text}
+              </div>
+            </div>
+          ))}
+          {loading && <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}><div style={{ padding: "10px 14px", borderRadius: 14, background: "#f4f4f3", fontSize: 14, color: "#6b6b6b" }}>Client is responding...</div></div>}
+          {stepFeedback && showingFeedback && (
+            <div style={{ margin: "12px 0", padding: "14px", borderRadius: 8, background: ratingColor(stepFeedback.rating).bg }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 500, padding: "2px 10px", borderRadius: 20, background: ratingColor(stepFeedback.rating).text, color: "#fff" }}>{ratingColor(stepFeedback.rating).label}</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: ratingColor(stepFeedback.rating).text }}>Supervisor Feedback</span>
+              </div>
+              <p style={{ fontSize: 13, margin: "0 0 5px" }}><strong>What worked:</strong> {stepFeedback.strength}</p>
+              <p style={{ fontSize: 13, margin: "0 0 5px" }}><strong>To improve:</strong> {stepFeedback.improve}</p>
+              <p style={{ fontSize: 13, margin: "0 0 10px" }}><strong>Try:</strong> {stepFeedback.tip}</p>
+              <button onClick={continueAfterFeedback} style={{ fontSize: 13, padding: "6px 14px", borderRadius: 8, background: ratingColor(stepFeedback.rating).text, color: "#fff", border: "none", cursor: "pointer" }}>Continue Session</button>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+          <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="Type your counselor response..." rows={2} disabled={loading || showingFeedback} style={{ flex: 1, resize: "none", padding: "10px 12px", fontSize: 14, borderRadius: 8, border: "0.5px solid #d0d0ce", background: "#fff", color: "#1a1a1a", fontFamily: "inherit", lineHeight: 1.5 }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <button onClick={sendMessage} disabled={loading || showingFeedback || !input.trim()} style={{ padding: "8px 16px", fontSize: 14, fontWeight: 500, background: "#1D9E75", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}>Send</button>
+            {messages.length >= 4 && <button onClick={getFinalFeedback} disabled={gettingFinal || loading} style={{ padding: "8px 16px", fontSize: 13, background: "#f4f4f3", color: "#6b6b6b", border: "0.5px solid #e0e0de", borderRadius: 8, cursor: "pointer" }}>{gettingFinal ? "..." : "Finish"}</button>}
+          </div>
+        </div>
+        <p style={{ fontSize: 12, color: "#6b6b6b", margin: "6px 0 0", textAlign: "center" }}>Enter to send · Shift+Enter for new line</p>
+      </div>
+    );
+  }
+
+  // Feedback screen
+  if (screen === "feedback") {
+    const diff = DIFFICULTIES.find(d => d.id === difficulty);
+    const earned = finalFeedback ? (ratingPoints[finalFeedback.overall] || 0) * diff.points : 0;
+    return (
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "1.5rem 1rem" }}>
+        <h2 style={{ fontSize: 22, fontWeight: 500, margin: "0 0 0.25rem" }}>Session Debrief</h2>
+        <p style={{ color: "#6b6b6b", margin: "0 0 1.25rem", fontSize: 14 }}>{approachLabels[approach]} · {SCENARIOS.find(s => s.id === scenario)?.label} · {diff.label}{isCrisis ? " · Crisis" : ""}</p>
+        <div style={{ padding: "10px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC", marginBottom: "1rem", display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontSize: 22, fontWeight: 500, color: "#3C3489" }}>+{earned}</span>
+          <div><p style={{ fontSize: 13, fontWeight: 500, color: "#3C3489", margin: 0 }}>Points earned</p><p style={{ fontSize: 12, color: "#534AB7", margin: 0 }}>{ratingColor(finalFeedback?.overall).label} × {diff.points} difficulty · Total: {progress.totalPoints} pts</p></div>
+        </div>
+        {finalFeedback && (
+          <>
+            <div style={{ padding: "14px 16px", borderRadius: 12, background: ratingColor(finalFeedback.overall).bg, marginBottom: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 500, padding: "2px 12px", borderRadius: 20, background: ratingColor(finalFeedback.overall).text, color: "#fff" }}>Overall: {ratingColor(finalFeedback.overall).label}</span>
+                {isCrisis && <span style={{ fontSize: 12, padding: "2px 10px", borderRadius: 20, background: "#EEEDFE", color: "#3C3489" }}>Crisis response</span>}
+              </div>
+              <p style={{ fontSize: 14, margin: 0, lineHeight: 1.6 }}>{finalFeedback.summary}</p>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: "1rem" }}>
+              <div style={{ padding: "12px 14px", borderRadius: 8, background: "#EAF3DE", border: "0.5px solid #9FE1CB" }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#3B6D11", margin: "0 0 8px" }}>Strengths</p>
+                {finalFeedback.strengths.map((s, i) => <p key={i} style={{ fontSize: 13, color: "#27500A", margin: "0 0 4px", lineHeight: 1.4 }}>· {s}</p>)}
+              </div>
+              <div style={{ padding: "12px 14px", borderRadius: 8, background: "#FAEEDA", border: "0.5px solid #FAC775" }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#854F0B", margin: "0 0 8px" }}>To develop</p>
+                {finalFeedback.areas.map((a, i) => <p key={i} style={{ fontSize: 13, color: "#633806", margin: "0 0 4px", lineHeight: 1.4 }}>· {a}</p>)}
+              </div>
+            </div>
+            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de", marginBottom: "1rem" }}>
+              <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 6px" }}>Use of {approachLabels[approach]}</p>
+              <p style={{ fontSize: 13, color: "#6b6b6b", margin: 0, lineHeight: 1.5 }}>{finalFeedback.technique_use}</p>
+            </div>
+            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC", marginBottom: "1.5rem" }}>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#3C3489", margin: "0 0 6px" }}>Example stronger response</p>
+              <p style={{ fontSize: 13, color: "#534AB7", margin: 0, lineHeight: 1.5, fontStyle: "italic" }}>"{finalFeedback.example_response}"</p>
+            </div>
+          </>
+        )}
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={reset} style={{ flex: 1, padding: "12px", fontSize: 15, fontWeight: 500, background: "#1D9E75", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}>New session</button>
+          <button onClick={() => setScreen("progress")} style={{ padding: "12px 18px", fontSize: 14, background: "#f4f4f3", color: "#6b6b6b", border: "0.5px solid #e0e0de", borderRadius: 8, cursor: "pointer" }}>View progress</button>
+        </div>
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+</script>
+</body>
+</html>
