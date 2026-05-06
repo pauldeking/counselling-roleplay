@@ -158,7 +158,7 @@ function App() {
     const key = "";
     const res = await fetch(ANTHROPIC_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1000, system: systemPrompt, messages }),
     });
     const data = await res.json();
@@ -213,7 +213,7 @@ function App() {
         const transcript = newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n");
         const fbRes = await fetch(ANTHROPIC_API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             model: "claude-haiku-4-5",
             max_tokens: 600,
