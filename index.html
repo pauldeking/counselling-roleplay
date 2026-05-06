@@ -207,26 +207,43 @@ function App() {
     const sc = SCENARIOS.find(s => s.id === scenario);
     const ap = APPROACHES.find(a => a.id === approach);
 
-    if (feedbackMode === "step") {
+   if (feedbackMode === "step") {
       try {
-        const crisisCtx = isCrisis ? `This is a CRISIS scenario (${sc.label}). Evaluate whether the counselor: stayed calm and non-judgmental, acknowledged the disclosure warmly, assessed safety appropriately, avoided panic or dismissal, and used person-centred language.` : "";
-        const text = await callAPI(
-          `You are an experienced counseling supervisor giving detailed, specific feedback to a student practising ${ap.label} with a client presenting ${sc.label}. ${crisisCtx}
+        const key = localStorage.getItem("counselling_api_key") || apiKey;
+        const transcript = newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n");
+        const fbRes = await fetch(ANTHROPIC_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5",
+            max_tokens: 600,
+            system: `You are a counseling supervisor. Evaluate this counselor response and reply in this exact format, no JSON, no markdown:
 
-Analyse the counselor's latest response carefully and respond ONLY with a JSON object, no markdown, no backticks:
-{
-  "rating": "good" or "okay" or "needs_work",
-  "strength": "2-3 sentences describing specifically what the counselor did well and why it was effective therapeutically",
-  "improve": "2-3 sentences describing specifically what was missing or unhelpful and the therapeutic impact of this",
-  "example": "Write a full example of a stronger counselor response to the same client message — 2-4 sentences in the counselor's voice, demonstrating the ${ap.label} approach correctly",
-  "technique": "Name the specific skill or technique the counselor should focus on (e.g. reflection of feeling, open questioning, validation, paraphrasing)"
-}`,
-          [{ role: "user", content: `Full conversation so far:\n${newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n")}\n\nThe counselor just said: "${userText}"\n\nThe client's message they were responding to was: "${newMessages[newMessages.length - 2]?.text || ""}"` }]
-        );
-        setStepFeedback(JSON.parse(text.trim())); setShowingFeedback(true);
-      } catch { setStepFeedback({ rating: "okay", strength: "Response received.", improve: "Keep practising.", tip: "Stay with the approach." }); setShowingFeedback(true); }
+RATING: good
+STRENGTH: what worked here in 2 sentences
+IMPROVE: what to improve in 2 sentences  
+EXAMPLE: write a better response example here
+TECHNIQUE: one technique name`,
+            messages: [{ role: "user", content: `Approach: ${ap.label}\nScenario: ${sc.label}\n\nConversation:\n${transcript}\n\nRate the counselor's last message: "${userText}"` }]
+          })
+        });
+        const fbData = await fbRes.json();
+        if (fbData.error) throw new Error(fbData.error.message);
+        const raw = fbData.content[0].text;
+        console.log("RAW FEEDBACK:", raw);
+        const get = (label) => { const m = raw.match(new RegExp(`${label}:([\\s\\S]*?)(?=\\n[A-Z]+:|$)`)); return m ? m[1].trim() : null; };
+        const ratingRaw = (get("RATING") || "okay").toLowerCase();
+        const rating = ratingRaw.includes("good") ? "good" : ratingRaw.includes("needs") ? "needs_work" : "okay";
+        setStepFeedback({ rating, strength: get("STRENGTH") || "Good attempt.", improve: get("IMPROVE") || "Keep developing.", example: get("EXAMPLE") || "Try reflecting feelings.", technique: get("TECHNIQUE") || "Active listening" });
+        setShowingFeedback(true);
+      } catch(err) {
+        console.error("Feedback error:", err);
+        setStepFeedback({ rating: "okay", strength: "Error: " + err.message, improve: "Check console.", example: "Try again.", technique: "Debug" });
+        setShowingFeedback(true);
+      }
       setLoading(false); return;
     }
+
     await getClientReply(newMessages, ap, sc);
   };
 
