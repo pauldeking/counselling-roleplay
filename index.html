@@ -209,10 +209,19 @@ function App() {
 
     if (feedbackMode === "step") {
       try {
-        const crisisCtx = isCrisis ? `This is a CRISIS scenario. Evaluate whether the counselor stayed calm, assessed safety, showed empathy without panic.` : "";
+        const crisisCtx = isCrisis ? `This is a CRISIS scenario (${sc.label}). Evaluate whether the counselor: stayed calm and non-judgmental, acknowledged the disclosure warmly, assessed safety appropriately, avoided panic or dismissal, and used person-centred language.` : "";
         const text = await callAPI(
-          `You are a counseling supervisor giving brief feedback to a student practising ${ap.label} with a client presenting ${sc.label}. ${crisisCtx} Respond ONLY with JSON, no markdown: {"rating":"good"|"okay"|"needs_work","strength":"one sentence","improve":"one sentence","tip":"one specific technique or phrase"}`,
-          [{ role: "user", content: `Conversation:\n${newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n")}\n\nLatest counselor response: "${userText}"` }]
+          `You are an experienced counseling supervisor giving detailed, specific feedback to a student practising ${ap.label} with a client presenting ${sc.label}. ${crisisCtx}
+
+Analyse the counselor's latest response carefully and respond ONLY with a JSON object, no markdown, no backticks:
+{
+  "rating": "good" or "okay" or "needs_work",
+  "strength": "2-3 sentences describing specifically what the counselor did well and why it was effective therapeutically",
+  "improve": "2-3 sentences describing specifically what was missing or unhelpful and the therapeutic impact of this",
+  "example": "Write a full example of a stronger counselor response to the same client message — 2-4 sentences in the counselor's voice, demonstrating the ${ap.label} approach correctly",
+  "technique": "Name the specific skill or technique the counselor should focus on (e.g. reflection of feeling, open questioning, validation, paraphrasing)"
+}`,
+          [{ role: "user", content: `Full conversation so far:\n${newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n")}\n\nThe counselor just said: "${userText}"\n\nThe client's message they were responding to was: "${newMessages[newMessages.length - 2]?.text || ""}"` }]
         );
         setStepFeedback(JSON.parse(text.trim())); setShowingFeedback(true);
       } catch { setStepFeedback({ rating: "okay", strength: "Response received.", improve: "Keep practising.", tip: "Stay with the approach." }); setShowingFeedback(true); }
@@ -496,13 +505,23 @@ function App() {
           {loading && <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}><div style={{ padding: "10px 14px", borderRadius: 14, background: "#f4f4f3", fontSize: 14, color: "#6b6b6b" }}>Client is responding...</div></div>}
           {stepFeedback && showingFeedback && (
             <div style={{ margin: "12px 0", padding: "14px", borderRadius: 8, background: ratingColor(stepFeedback.rating).bg }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 12, fontWeight: 500, padding: "2px 10px", borderRadius: 20, background: ratingColor(stepFeedback.rating).text, color: "#fff" }}>{ratingColor(stepFeedback.rating).label}</span>
                 <span style={{ fontSize: 13, fontWeight: 500, color: ratingColor(stepFeedback.rating).text }}>Supervisor Feedback</span>
+                {stepFeedback.technique && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 10, background: "rgba(0,0,0,0.08)", color: ratingColor(stepFeedback.rating).text }}>Focus: {stepFeedback.technique}</span>}
               </div>
-              <p style={{ fontSize: 13, margin: "0 0 5px" }}><strong>What worked:</strong> {stepFeedback.strength}</p>
-              <p style={{ fontSize: 13, margin: "0 0 5px" }}><strong>To improve:</strong> {stepFeedback.improve}</p>
-              <p style={{ fontSize: 13, margin: "0 0 10px" }}><strong>Try:</strong> {stepFeedback.tip}</p>
+              <div style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 6, background: "rgba(255,255,255,0.5)" }}>
+                <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 3px", color: ratingColor(stepFeedback.rating).text }}>✓ What worked</p>
+                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.5 }}>{stepFeedback.strength}</p>
+              </div>
+              <div style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 6, background: "rgba(255,255,255,0.5)" }}>
+                <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 3px", color: ratingColor(stepFeedback.rating).text }}>↑ To improve</p>
+                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.5 }}>{stepFeedback.improve}</p>
+              </div>
+              <div style={{ marginBottom: 10, padding: "8px 10px", borderRadius: 6, background: "rgba(255,255,255,0.5)" }}>
+                <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 3px", color: ratingColor(stepFeedback.rating).text }}>💬 Stronger response example</p>
+                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.5, fontStyle: "italic" }}>"{stepFeedback.example}"</p>
+              </div>
               <button onClick={continueAfterFeedback} style={{ fontSize: 13, padding: "6px 14px", borderRadius: 8, background: ratingColor(stepFeedback.rating).text, color: "#fff", border: "none", cursor: "pointer" }}>Continue Session</button>
             </div>
           )}
