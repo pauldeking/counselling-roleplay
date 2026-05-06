@@ -31,7 +31,7 @@
 <script type="text/babel">
 const { useState, useRef, useEffect } = React;
 
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+const ANTHROPIC_API_URL = "/api/chat";
 
 // ── DATA ──
 const APPROACHES = [
@@ -120,7 +120,7 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 // ── MAIN APP ──
 function App() {
   const [apiKey, setApiKey] = useState(localStorage.getItem("counselling_api_key") || "");
-  const [apiKeySaved, setApiKeySaved] = useState(!!localStorage.getItem("counselling_api_key"));
+ const [apiKeySaved, setApiKeySaved] = useState(true);
   const [screen, setScreen] = useState("home");
   const [approach, setApproach] = useState(null);
   const [scenario, setScenario] = useState(null);
@@ -155,7 +155,7 @@ function App() {
   };
 
   const callAPI = async (systemPrompt, messages) => {
-    const key = localStorage.getItem("counselling_api_key") || apiKey;
+    const key = "";
     const res = await fetch(ANTHROPIC_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
@@ -209,7 +209,7 @@ function App() {
 
    if (feedbackMode === "step") {
       try {
-        const key = localStorage.getItem("counselling_api_key") || apiKey;
+        const key = "";
         const transcript = newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n");
         const fbRes = await fetch(ANTHROPIC_API_URL, {
           method: "POST",
