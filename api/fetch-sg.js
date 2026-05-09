@@ -1,83 +1,132 @@
 // api/fetch-sg.js
-// Vercel serverless function — fetches a Google Drive PDF and extracts text
-// Deploy this to: counselling-roleplay.vercel.app/api/fetch-sg
-//
-// Usage: GET /api/fetch-sg?fileId=GOOGLE_DRIVE_FILE_ID
-// Returns: { text: "extracted text content..." }
-//
-// Requires: pdfjs-dist (add to package.json)
-// The file must be shared as "Anyone with the link can view" in Google Drive
+// Fetches an AIPC study guide PDF from Google Drive and returns clean text
+// Handles Google's virus-scan redirect for larger files
 
 export default async function handler(req, res) {
-  // CORS headers — allow requests from any origin (the app can be on any domain)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { fileId } = req.query;
-  if (!fileId) {
-    return res.status(400).json({ error: 'Missing fileId parameter' });
-  }
+  if (!fileId) return res.status(400).json({ error: 'Missing fileId' });
 
-  // Whitelist of allowed file IDs — only AIPC study guides
-  const ALLOWED_FILE_IDS = [
-    '1xZKPkU9PAfBQjWfyePX-Ryfg5mUSU7pP', // SG1
-    '1eNZfzlq-ck8nmW2MQ5HVGjOvg9di3e5c', // SG2
-    '1GNJA1B9QEg72dKbZXkbGzfZT2uq03VKt', // SG3
-    '12CPriGB-Ddhn_33d92BpW7SmjHlv5hm3', // SG4
-    '1XfF3IFfOt07CqQKawAytTadZBCI5jjJM', // SG5
-    '1pCAuFOM8pZux7RpAAeBoUmarMMs9Oz3m', // SG6
-    '1CQIXhJBAvvPXudeIFDjg7WhsQ-tGyuDp', // SG7
-    '1x0dx0aGfj3vMOeZFviwUNg23Qo-Ufdi-', // SG8
-    '1hmisbuVvhLFiZKqRH4kSBeRyv6eRfElq', // SG9
-    '1mhjypvN6UjqhoCm-G8WxHg3wFFCFaLBk', // SG10
-    '1IF-arCAtyLdwpTozW8k4cbci2CudDkIU', // SG11
-    '19c6k5LEr_UqYMWaq2jsT-DDR0YJHIlLZ', // SG12
-    '1nL2Znv_a7WEkCsau5VE7tPLHq6-lnXxT', // SG13
-    '1efkW9XqDvA_L4tBaHR7uRN0BSpqiod-q', // SG14
-    '1f4UDqiFvJlzZB3ie7vX-g4LoO-ieuPJN', // SG15
-    '1POoy732n3077I2YJipvQHbOC9etcwob3', // SG16
-    '1VhPA0G0WXSG5BobFHXQzNt15F-c5ndQn', // SG17
+  const ALLOWED = [
+    '1xZKPkU9PAfBQjWfyePX-Ryfg5mUSU7pP',
+    '1eNZfzlq-ck8nmW2MQ5HVGjOvg9di3e5c',
+    '1GNJA1B9QEg72dKbZXkbGzfZT2uq03VKt',
+    '12CPriGB-Ddhn_33d92BpW7SmjHlv5hm3',
+    '1XfF3IFfOt07CqQKawAytTadZBCI5jjJM',
+    '1pCAuFOM8pZux7RpAAeBoUmarMMs9Oz3m',
+    '1CQIXhJBAvvPXudeIFDjg7WhsQ-tGyuDp',
+    '1x0dx0aGfj3vMOeZFviwUNg23Qo-Ufdi-',
+    '1hmisbuVvhLFiZKqRH4kSBeRyv6eRfElq',
+    '1mhjypvN6UjqhoCm-G8WxHg3wFFCFaLBk',
+    '1IF-arCAtyLdwpTozW8k4cbci2CudDkIU',
+    '19c6k5LEr_UqYMWaq2jsT-DDR0YJHIlLZ',
+    '1nL2Znv_a7WEkCsau5VE7tPLHq6-lnXxT',
+    '1efkW9XqDvA_L4tBaHR7uRN0BSpqiod-q',
+    '1f4UDqiFvJlzZB3ie7vX-g4LoO-ieuPJN',
+    '1POoy732n3077I2YJipvQHbOC9etcwob3',
+    '1VhPA0G0WXSG5BobFHXQzNt15F-c5ndQn',
   ];
 
-  if (!ALLOWED_FILE_IDS.includes(fileId)) {
+  if (!ALLOWED.includes(fileId)) {
     return res.status(403).json({ error: 'File not permitted' });
   }
 
   try {
-    // Fetch the PDF from Google Drive public download URL
-    const driveUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    const pdfResponse = await fetch(driveUrl, {
-      headers: { 'User-Agent': 'CounsellorReady/1.0' },
+    const pdfBuffer = await fetchGoogleDrivePDF(fileId);
+    const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default;
+    const data = await pdfParse(pdfBuffer, { max: 0 });
+    const cleaned = cleanPdfText(data.text);
+
+    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600');
+    return res.status(200).json({
+      text: cleaned,
+      pages: data.numpages,
+      chars: cleaned.length
+    });
+
+  } catch (err) {
+    console.error('fetch-sg error:', err);
+    return res.status(500).json({ error: 'Failed to fetch study guide', detail: err.message });
+  }
+}
+
+async function fetchGoogleDrivePDF(fileId) {
+  // Step 1: Hit the standard download URL
+  const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+  const res1 = await fetch(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+    redirect: 'follow',
+  });
+
+  const contentType = res1.headers.get('content-type') || '';
+
+  // Step 2: If we got a PDF directly, return it
+  if (contentType.includes('pdf') || contentType.includes('octet-stream')) {
+    const buf = await res1.arrayBuffer();
+    return Buffer.from(buf);
+  }
+
+  // Step 3: Google returned an HTML virus-scan warning page
+  // Extract the confirm token and retry with it
+  const html = await res1.text();
+
+  // Look for the confirm token in the warning page
+  // Google uses: confirm=t& or confirm=XXXX&
+  const confirmMatch = html.match(/confirm=([^&"]+)/);
+  if (!confirmMatch) {
+    // Try the newer Google Drive download format
+    const url2 = `https://drive.usercontent.google.com/download?id=${fileId}&export=download&authuser=0&confirm=t`;
+    const res2 = await fetch(url2, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
       redirect: 'follow',
     });
-
-    if (!pdfResponse.ok) {
-      throw new Error(`Drive fetch failed: ${pdfResponse.status}`);
-    }
-
-    const pdfBuffer = await pdfResponse.arrayBuffer();
-
-    // Extract text using pdf-parse (lighter than pdfjs for serverless)
-    const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default;
-    const data = await pdfParse(Buffer.from(pdfBuffer), {
-      max: 0, // parse all pages
-    });
-
-    // Return the extracted text
-    // Limit to 15000 chars to keep response size manageable
-    const text = data.text.slice(0, 15000);
-
-    // Cache for 24 hours — study guides don't change often
-    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate');
-    return res.status(200).json({ text, pages: data.numpages });
-
-  } catch (error) {
-    console.error('fetch-sg error:', error);
-    return res.status(500).json({ error: 'Failed to fetch study guide', detail: error.message });
+    const buf = await res2.arrayBuffer();
+    return Buffer.from(buf);
   }
+
+  const confirm = confirmMatch[1];
+
+  // Also extract any uuid cookie Google sets
+  const uuidMatch = html.match(/uuid=([^&"]+)/);
+  const uuid = uuidMatch ? uuidMatch[1] : '';
+
+  const cookieHeader = res1.headers.get('set-cookie') || '';
+
+  // Retry with the confirm token
+  const confirmUrl = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=${confirm}${uuid ? `&uuid=${uuid}` : ''}`;
+  const res3 = await fetch(confirmUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0',
+      'Cookie': cookieHeader,
+    },
+    redirect: 'follow',
+  });
+
+  const buf = await res3.arrayBuffer();
+  return Buffer.from(buf);
+}
+
+function cleanPdfText(raw) {
+  return raw
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    // Remove dotted TOC lines
+    .replace(/\.{4,}\s*\d+/g, '')
+    // Remove standalone page numbers
+    .replace(/^\s*\d{1,3}\s*$/gm, '')
+    // Remove copyright boilerplate
+    .replace(/This book is protected by copyright[\s\S]{0,400}of the copyright\./g, '')
+    .replace(/Published by: Australian Institute[\s\S]{0,300}ACN 077 738 035/g, '')
+    .replace(/All Case Histories[\s\S]{0,200}purely coincidental\./g, '')
+    .replace(/Australian Institute of Professional Counsellors\nHead Office[\s\S]{0,100}QLD 4006\./g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    // 15000 chars gives Claude rich content — roughly 25-30 pages of text
+    .slice(0, 15000);
 }
