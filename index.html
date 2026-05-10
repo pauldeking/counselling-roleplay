@@ -2,612 +2,792 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Counselling Role-Play Practice</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9f9f8; color: #1a1a1a; min-height: 100vh; }
-  #root { max-width: 700px; margin: 0 auto; padding: 1rem; }
-  textarea { font-family: inherit; }
-  button { font-family: inherit; cursor: pointer; }
-  :root {
-    --color-text-primary: #1a1a1a;
-    --color-text-secondary: #6b6b6b;
-    --color-background-primary: #ffffff;
-    --color-background-secondary: #f4f4f3;
-    --color-border-tertiary: #e0e0de;
-    --color-border-secondary: #d0d0ce;
-    --border-radius-md: 8px;
-    --border-radius-lg: 12px;
-    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: #f7f5f2; color: #1c1c1a; min-height: 100%; font-size: 15px; line-height: 1.6; }
+#root { height: 100%; }
+textarea, button, input { font-family: inherit; }
+button { cursor: pointer; }
+:root {
+  --sage:#4a6741; --sage-light:#6a8f60; --sage-pale:#eef3ed; --sage-mid:#c8dcc5;
+  --cream:#f7f5f2; --warm:#faf9f7;
+  --charcoal:#1c1c1a; --mid:#5a5a55; --muted:#9a9a92;
+  --border:#e2ddd8; --border-light:#ede9e4;
+  --teal:#1a6b5c; --teal-pale:#e4f2ef; --teal-mid:#a8d4cc;
+  --amber:#b06010; --amber-pale:#fdf0e4; --amber-mid:#f0c080;
+  --red:#943030; --red-pale:#faeaea; --red-mid:#e0a0a0;
+  --indigo:#3c3c8c; --indigo-pale:#eeeeff; --indigo-mid:#b0b0e8;
+  --r:10px; --r-lg:16px;
+}
+.page { max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem 2rem; }
+.label-upper { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; display: block; }
+.card { background: var(--warm); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: 1rem 1.1rem; }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; border-radius: var(--r); border: none; font-size: 14px; font-weight: 500; transition: opacity 0.15s; }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--sage); color: white; }
+.btn-primary:hover:not(:disabled) { opacity: 0.9; }
+.btn-ghost { background: var(--border-light); color: var(--mid); }
+.btn-ghost:hover:not(:disabled) { background: var(--border); }
+
+/* Grid layouts */
+.approach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+.scenario-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+.option-row { display: grid; gap: 8px; margin-bottom: 1.5rem; }
+.option-row-3 { grid-template-columns: repeat(3, 1fr); }
+.option-row-2 { grid-template-columns: repeat(2, 1fr); }
+
+/* Selection cards */
+.sel-card { padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--border-light); background: var(--warm); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.sel-card:hover { border-color: var(--border); }
+.sel-card.active { border: 2px solid var(--sage); background: var(--sage-pale); }
+.sel-card.active-teal { border: 2px solid var(--teal); background: var(--teal-pale); }
+.sel-card.active-indigo { border: 2px solid var(--indigo); background: var(--indigo-pale); }
+.sel-card.crisis-base { border-color: var(--indigo-mid); background: #f8f8ff; }
+.sel-card-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.sel-card-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+/* Filter tabs */
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.filter-tab { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--warm); color: var(--mid); cursor: pointer; transition: all 0.15s; }
+.filter-tab.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
+.filter-tab.active-crisis { background: var(--indigo); border-color: var(--indigo); color: white; }
+
+/* Quick start */
+.quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 2rem; }
+.qs-card { padding: 12px; border-radius: var(--r); border: 1px solid; cursor: pointer; text-align: left; transition: opacity 0.15s; }
+.qs-card:hover { opacity: 0.85; }
+.qs-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.qs-desc { font-size: 11px; line-height: 1.4; opacity: 0.8; }
+
+/* Session layout */
+.session-layout { display: flex; flex-direction: column; height: 100dvh; max-width: 680px; margin: 0 auto; }
+.session-header { background: var(--warm); border-bottom: 1px solid var(--border-light); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
+.chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Messages */
+.msg-wrap { display: flex; }
+.msg-wrap.counsellor { justify-content: flex-end; }
+.msg-bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
+.msg-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.6; margin-bottom: 3px; }
+.msg-wrap.client .msg-bubble { background: var(--warm); border: 1px solid var(--border-light); border-radius: 4px 16px 16px 16px; }
+.msg-wrap.counsellor .msg-bubble { background: var(--sage); color: white; border-radius: 16px 4px 16px 16px; }
+.msg-wrap.counsellor .msg-label { color: rgba(255,255,255,0.7); }
+.typing-bubble { background: var(--warm); border: 1px solid var(--border-light); border-radius: 4px 16px 16px 16px; padding: 12px 16px; display: flex; gap: 4px; align-items: center; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: pulse 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,80%,100%{opacity:0.3;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
+
+/* Feedback */
+.fb-card { border-radius: var(--r-lg); padding: 14px 16px; border: 1px solid; }
+.fb-section { margin-bottom: 10px; }
+.fb-section:last-child { margin-bottom: 0; }
+.fb-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.fb-text { font-size: 13px; line-height: 1.6; }
+.example-box { padding: 8px 12px; border-radius: 8px; font-size: 13px; font-style: italic; line-height: 1.6; }
+
+/* Crisis banner */
+.crisis-banner { background: var(--indigo-pale); border: 1px solid var(--indigo-mid); border-radius: var(--r); padding: 10px 14px; margin: 8px 14px 0; flex-shrink: 0; }
+
+/* Progress bar */
+.prog-wrap { height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; margin: 6px 0; }
+.prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+
+/* Input area */
+.input-area { background: var(--warm); border-top: 1px solid var(--border-light); padding: 10px 14px; padding-bottom: max(10px, env(safe-area-inset-bottom)); flex-shrink: 0; }
+.input-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-input { flex: 1; resize: none; padding: 9px 12px; font-size: 14px; border-radius: var(--r); border: 1px solid var(--border); background: var(--cream); color: var(--charcoal); line-height: 1.5; min-height: 42px; max-height: 110px; outline: none; transition: border-color 0.15s; }
+.chat-input:focus { border-color: var(--sage-mid); }
+.chat-input::placeholder { color: var(--muted); }
+.send-btn { width: 42px; height: 42px; border-radius: var(--r); background: var(--sage); color: white; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s; }
+.send-btn:hover:not(:disabled) { opacity: 0.85; }
+.send-btn:disabled { background: var(--border); cursor: not-allowed; }
+.action-row { display: flex; gap: 7px; margin-top: 8px; }
+.action-btn { flex: 1; padding: 9px; border-radius: var(--r); border: 1px solid var(--border); font-size: 12px; font-weight: 500; background: var(--warm); color: var(--mid); transition: all 0.15s; cursor: pointer; }
+.action-btn:hover:not(:disabled) { border-color: var(--charcoal); color: var(--charcoal); }
+.action-btn.primary { background: var(--amber-pale); border-color: var(--amber-mid); color: var(--amber); }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Home header */
+.home-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.75rem; gap: 12px; }
+.home-title { font-family: 'Instrument Serif', serif; font-size: 26px; line-height: 1.2; margin-bottom: 4px; }
+.home-sub { font-size: 14px; color: var(--mid); }
+.pts-btn { display: flex; flex-direction: column; align-items: center; padding: 8px 14px; border-radius: var(--r); border: 1px solid var(--border-light); background: var(--warm); cursor: pointer; flex-shrink: 0; }
+.pts-btn:hover { border-color: var(--border); }
+.pts-num { font-size: 20px; font-weight: 600; color: var(--sage); line-height: 1; }
+.pts-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Progress screen */
+.stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1rem; }
+.stat-card { padding: 10px 8px; border-radius: var(--r); border: 1px solid var(--border-light); text-align: center; background: var(--warm); }
+.stat-num { font-size: 20px; font-weight: 600; line-height: 1; margin-bottom: 2px; }
+.stat-label { font-size: 11px; color: var(--muted); }
+
+/* Debrief */
+.debrief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+.exchange-counter { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Mobile */
+@media (max-width: 500px) {
+  .quick-grid { grid-template-columns: 1fr; gap: 6px; }
+  .approach-grid { grid-template-columns: repeat(2, 1fr); }
+  .scenario-grid { grid-template-columns: repeat(2, 1fr); }
+  .option-row-3 { grid-template-columns: 1fr 1fr; }
+  .debrief-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(3, 1fr); }
+}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
 const { useState, useRef, useEffect } = React;
+const API = "/api/chat";
+const STORAGE_KEY = "counselling_v3";
 
-const ANTHROPIC_API_URL = "/api/chat";
-
-// ── DATA ──
 const APPROACHES = [
-  { id: "person_centred", label: "Person-Centred", desc: "Empathy, unconditional positive regard, congruence (Rogers)" },
-  { id: "sfbt", label: "Solution-Focused", desc: "Miracle question, scaling, exceptions, strengths" },
-  { id: "cbt", label: "CBT", desc: "Identify thoughts, feelings, behaviours and challenge distortions" },
-  { id: "motivational", label: "Motivational Interviewing", desc: "Evoke motivation, explore ambivalence, OARS skills" },
-  { id: "narrative", label: "Narrative Therapy", desc: "Externalise problems, re-author dominant stories" },
-  { id: "mindfulness", label: "Mindfulness-Based", desc: "Present-moment awareness, acceptance, grounding" },
+  { id:"any", label:"Eclectic / Any", desc:"No fixed approach — universal counselling skills evaluated" },
+  { id:"person_centred", label:"Person-Centred", desc:"Empathy, unconditional positive regard, congruence" },
+  { id:"sfbt", label:"Solution-Focused", desc:"Miracle question, scaling, exceptions, strengths" },
+  { id:"cbt", label:"CBT", desc:"Identify thoughts, feelings, behaviours, challenge distortions" },
+  { id:"motivational", label:"Motivational Interviewing", desc:"Evoke motivation, explore ambivalence, OARS" },
+  { id:"narrative", label:"Narrative Therapy", desc:"Externalise problems, re-author dominant stories" },
+  { id:"mindfulness", label:"Mindfulness-Based", desc:"Present-moment awareness, acceptance, grounding" },
 ];
 
 const SCENARIOS = [
-  { id: "anxiety", label: "Anxiety & Worry", desc: "Overwhelmed by work and constant anxious thoughts", category: "Mood" },
-  { id: "grief", label: "Grief & Loss", desc: "Recently lost a loved one, struggling to cope", category: "Life Events" },
-  { id: "relationship", label: "Relationship Issues", desc: "Conflict and communication breakdown with partner", category: "Relationships" },
-  { id: "career", label: "Career Stress", desc: "Feeling stuck, unfulfilled, and burnt out at work", category: "Work" },
-  { id: "selfesteem", label: "Low Self-Esteem", desc: "Persistent feelings of not being good enough", category: "Mood" },
-  { id: "depression", label: "Low Mood", desc: "Withdrawn, lacking motivation, feeling hopeless", category: "Mood" },
-  { id: "trauma", label: "Past Trauma", desc: "Childhood experiences resurfacing and affecting daily life", category: "Trauma" },
-  { id: "alcohol", label: "Alcohol & Drug Use", desc: "Struggling with alcohol use and wants to cut down", category: "Substance Use" },
-  { id: "family", label: "Family Conflict", desc: "Tension and estrangement from family members", category: "Relationships" },
-  { id: "anger", label: "Anger Management", desc: "Explosive anger episodes affecting relationships and work", category: "Mood" },
-  { id: "social_anxiety", label: "Social Anxiety", desc: "Fear of judgment in social situations, avoids going out", category: "Mood" },
-  { id: "divorce", label: "Separation & Divorce", desc: "Going through a difficult divorce with children involved", category: "Life Events" },
-  { id: "chronic_illness", label: "Chronic Illness", desc: "Adjusting to life with a long-term health condition", category: "Life Events" },
-  { id: "identity", label: "Identity & Purpose", desc: "Questioning sense of self, values, and life direction", category: "Existential" },
-  { id: "loneliness", label: "Loneliness & Isolation", desc: "No close connections, feels invisible and forgotten", category: "Relationships" },
-  { id: "parenting", label: "Parenting Stress", desc: "Overwhelmed by parenting demands, feeling like a failure", category: "Relationships" },
-  { id: "financial", label: "Financial Stress", desc: "Debt and financial pressure causing significant distress", category: "Work" },
-  { id: "bereavement_child", label: "Child Bereavement", desc: "Parent grieving the loss of a child, unable to move forward", category: "Trauma" },
-  { id: "crisis_suicidal", label: "Suicidal Ideation", desc: "Client discloses passive thoughts of not wanting to be alive", category: "Crisis" },
-  { id: "crisis_selfharm", label: "Self-Harm Disclosure", desc: "Client reveals recent self-harming behaviour", category: "Crisis" },
-  { id: "crisis_dv", label: "Domestic Violence", desc: "Client discloses ongoing abuse at home", category: "Crisis" },
-  { id: "crisis_psychosis", label: "Acute Distress", desc: "Client presents highly distressed and overwhelmed", category: "Crisis" },
+  {id:"anxiety",label:"Anxiety & Worry",desc:"Overwhelmed by work and constant anxious thoughts",cat:"Mood"},
+  {id:"grief",label:"Grief & Loss",desc:"Recently lost a loved one, struggling to cope",cat:"Life Events"},
+  {id:"relationship",label:"Relationship Issues",desc:"Conflict and communication breakdown with partner",cat:"Relationships"},
+  {id:"career",label:"Career Stress",desc:"Feeling stuck, unfulfilled, and burnt out at work",cat:"Work"},
+  {id:"selfesteem",label:"Low Self-Esteem",desc:"Persistent feelings of not being good enough",cat:"Mood"},
+  {id:"depression",label:"Low Mood",desc:"Withdrawn, lacking motivation, feeling hopeless",cat:"Mood"},
+  {id:"trauma",label:"Past Trauma",desc:"Childhood experiences resurfacing and affecting daily life",cat:"Trauma"},
+  {id:"alcohol",label:"Alcohol & Drug Use",desc:"Struggling with alcohol use and wants to cut down",cat:"Substance Use"},
+  {id:"family",label:"Family Conflict",desc:"Tension and estrangement from family members",cat:"Relationships"},
+  {id:"anger",label:"Anger Management",desc:"Explosive anger affecting relationships and work",cat:"Mood"},
+  {id:"social_anxiety",label:"Social Anxiety",desc:"Fear of judgement in social situations, avoids going out",cat:"Mood"},
+  {id:"divorce",label:"Separation & Divorce",desc:"Going through a difficult divorce with children involved",cat:"Life Events"},
+  {id:"chronic_illness",label:"Chronic Illness",desc:"Adjusting to life with a long-term health condition",cat:"Life Events"},
+  {id:"identity",label:"Identity & Purpose",desc:"Questioning sense of self, values, and life direction",cat:"Existential"},
+  {id:"loneliness",label:"Loneliness & Isolation",desc:"No close connections, feels invisible and forgotten",cat:"Relationships"},
+  {id:"parenting",label:"Parenting Stress",desc:"Overwhelmed by parenting demands, feeling like a failure",cat:"Relationships"},
+  {id:"financial",label:"Financial Stress",desc:"Debt and financial pressure causing significant distress",cat:"Work"},
+  {id:"bereavement_child",label:"Child Bereavement",desc:"Parent grieving the loss of a child, unable to move forward",cat:"Trauma"},
+  {id:"crisis_suicidal",label:"Suicidal Ideation",desc:"Client discloses passive thoughts of not wanting to be alive",cat:"Crisis"},
+  {id:"crisis_selfharm",label:"Self-Harm Disclosure",desc:"Client reveals recent self-harming behaviour",cat:"Crisis"},
+  {id:"crisis_dv",label:"Domestic Violence",desc:"Client discloses ongoing abuse at home",cat:"Crisis"},
+  {id:"crisis_distress",label:"Acute Distress",desc:"Client presents highly distressed and overwhelmed",cat:"Crisis"},
 ];
 
-const CRISIS_IDS = ["crisis_suicidal", "crisis_selfharm", "crisis_dv", "crisis_psychosis"];
+const CRISIS_IDS = ["crisis_suicidal","crisis_selfharm","crisis_dv","crisis_distress"];
 
 const DIFFICULTIES = [
-  { id: "beginner", label: "Beginner", color: "#EAF3DE", textColor: "#3B6D11", points: 1 },
-  { id: "intermediate", label: "Intermediate", color: "#FAEEDA", textColor: "#854F0B", points: 2 },
-  { id: "advanced", label: "Advanced", color: "#FCEBEB", textColor: "#A32D2D", points: 3 },
+  {id:"beginner",label:"Beginner",desc:"Cooperative and open, responds well to empathy",pts:1,color:"var(--sage)",pale:"var(--sage-pale)",border:"var(--sage-mid)"},
+  {id:"intermediate",label:"Intermediate",desc:"Some resistance, occasional deflection or minimising",pts:2,color:"var(--amber)",pale:"var(--amber-pale)",border:"var(--amber-mid)"},
+  {id:"advanced",label:"Advanced",desc:"Defensive, guarded — only opens up with skilled work",pts:3,color:"var(--red)",pale:"var(--red-pale)",border:"var(--red-mid)"},
 ];
 
 const FEEDBACK_MODES = [
-  { id: "step", label: "Step-by-Step", desc: "Feedback after each response — guided learning mode" },
-  { id: "end", label: "End of Session", desc: "Full immersive role-play, then debrief at the end" },
+  {id:"step",label:"Step-by-Step",desc:"Supervisor feedback after each counsellor response"},
+  {id:"end",label:"End of Session",desc:"Full immersive role-play, supervisor debrief at the end"},
 ];
 
-const difficultyPrompt = {
-  beginner: "You are cooperative and open. You respond to empathy positively and make progress.",
-  intermediate: "You have some resistance. You occasionally go off-topic or minimise feelings.",
-  advanced: "You are defensive and resistant. You challenge, deflect, or shut down. You only open up if the counselor is skilled.",
-};
-
-const crisisSystemPrompt = {
-  crisis_suicidal: `You are a client who has just disclosed passive suicidal thoughts. You are not in immediate danger but are clearly in distress. React realistically — you may minimise or feel ashamed. The student must practise safe crisis response. Keep responses to 2-4 sentences.`,
-  crisis_selfharm: `You are a client who has just disclosed self-harming. You feel embarrassed. You need the counselor to stay calm and non-judgmental. React authentically. Keep responses to 2-4 sentences.`,
-  crisis_dv: `You are a client disclosing partner abuse. You are ambivalent — you still love them and are scared. The student must show empathy without pressure. Keep responses to 2-4 sentences.`,
-  crisis_psychosis: `You are a client in acute distress — overwhelmed, thoughts racing. You need grounding and calm presence. Keep responses to 2-4 sentences.`,
-};
+const SESSION_LENGTHS = [
+  {id:"short",label:"Short",desc:"~5 exchanges",max:5},
+  {id:"standard",label:"Standard",desc:"~10 exchanges",max:10},
+  {id:"extended",label:"Extended",desc:"~20 exchanges",max:20},
+];
 
 const CRISIS_GUIDANCE = {
-  crisis_suicidal: ["Use open, non-judgmental questions", "Assess risk gently — frequency, intent, plan, means", "Do not panic — stay present first", "Discuss support: safety plan, crisis lines", "Mandatory reporting obligations may apply"],
-  crisis_selfharm: ["Stay calm — your reaction matters enormously", "Ask about behaviour without shame or alarm", "Assess current safety and medical needs first", "Explore function — what does it do for them?", "Collaborate on safer coping alternatives"],
-  crisis_dv: ["Believe and validate — never minimise", "Do not pressure them to leave", "Explore safety: is there immediate danger?", "Provide information about supports", "Mandatory reporting may apply if children are at risk"],
-  crisis_psychosis: ["Slow down, use simple clear language", "Ground them: name, place, time", "Assess immediate safety", "Do not challenge distorted thinking directly", "Consider urgent referral if needed"],
+  crisis_suicidal:["Ask directly and calmly — asking does not increase risk","Assess: frequency, intent, plan, means","Stay present and empathic before problem-solving","Discuss safety plans and crisis lines (Lifeline: 13 11 14)","Mandatory reporting obligations may apply"],
+  crisis_selfharm:["Stay calm — your reaction matters enormously","Ask about the behaviour without shame or alarm","Assess current safety and any medical needs first","Explore the function — what does it do for them?","Collaborate on safer coping alternatives"],
+  crisis_dv:["Believe and validate — never minimise or question","Do not pressure them to leave — safety first","Explore immediate risk: is there danger tonight?","Provide information about DV supports (1800RESPECT)","Mandatory reporting if children are at risk"],
+  crisis_distress:["Slow down and use simple, clear language","Ground them: name, place, time, what they can see","Assess immediate safety before anything else","Do not challenge distorted thinking directly","Consider urgent referral if needed"],
 };
 
-const approachLabels = {
-  person_centred: "Person-Centred", sfbt: "Solution-Focused", cbt: "CBT",
-  motivational: "Motivational Interviewing", narrative: "Narrative Therapy", mindfulness: "Mindfulness-Based",
+const CRISIS_CLIENT = {
+  crisis_suicidal:"You are a client who has just disclosed passive suicidal thoughts — not in immediate danger but clearly distressed. You may minimise or feel ashamed.",
+  crisis_selfharm:"You are a client who has just disclosed self-harming. You feel embarrassed and need the counsellor to stay calm and non-judgmental.",
+  crisis_dv:"You are a client disclosing partner abuse. You are ambivalent — you still love them and are scared. You need empathy, not pressure to leave.",
+  crisis_distress:"You are a client in acute distress — overwhelmed, thoughts racing. You need grounding and calm presence.",
 };
 
-const ratingPoints = { good: 3, okay: 1, needs_work: 0 };
-const categories = [...new Set(SCENARIOS.map(s => s.category))];
+const DIFF_TEXT = {
+  beginner:"You are cooperative and open. You respond to empathy positively and gradually share more as trust builds.",
+  intermediate:"You have some resistance. You occasionally go off-topic, minimise feelings, or give brief answers. You open up when the counsellor shows genuine understanding.",
+  advanced:"You are defensive and guarded. You challenge, deflect, or shut down when pushed. You only open up meaningfully when the counsellor demonstrates real skill and patience.",
+};
 
-const STORAGE_KEY = "counselling_progress_v1";
-function loadProgress() {
-  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : { sessions: [], totalSessions: 0, totalPoints: 0 }; }
-  catch { return { sessions: [], totalSessions: 0, totalPoints: 0 }; }
+const AP_LABEL = {any:"Eclectic",person_centred:"Person-Centred",sfbt:"Solution-Focused",cbt:"CBT",motivational:"Motivational Interviewing",narrative:"Narrative Therapy",mindfulness:"Mindfulness-Based"};
+const CATS = ["All","Mood","Life Events","Relationships","Work","Substance Use","Trauma","Existential","Crisis"];
+const RP = {good:3,okay:1,needs_work:0};
+
+function loadProg() { try { const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):{sessions:[],totalSessions:0,totalPoints:0}; } catch{return{sessions:[],totalSessions:0,totalPoints:0};} }
+function saveProg(d) { try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch{} }
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function ratingStyle(r){
+  if(r==="good") return {bg:"var(--sage-pale)",border:"var(--sage-mid)",color:"var(--sage)",label:"Good"};
+  if(r==="okay") return {bg:"var(--amber-pale)",border:"var(--amber-mid)",color:"var(--amber)",label:"Okay"};
+  return {bg:"var(--red-pale)",border:"var(--red-mid)",color:"var(--red)",label:"Needs work"};
 }
-function saveProgress(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch {} }
-function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// ── MAIN APP ──
-function App() {
-  const [apiKey, setApiKey] = useState(localStorage.getItem("counselling_api_key") || "");
- const [apiKeySaved, setApiKeySaved] = useState(true);
-  const [screen, setScreen] = useState("home");
-  const [approach, setApproach] = useState(null);
-  const [scenario, setScenario] = useState(null);
-  const [difficulty, setDifficulty] = useState(null);
-  const [feedbackMode, setFeedbackMode] = useState(null);
-  const [filterCat, setFilterCat] = useState("All");
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [stepFeedback, setStepFeedback] = useState(null);
-  const [showingFeedback, setShowingFeedback] = useState(false);
-  const [finalFeedback, setFinalFeedback] = useState(null);
-  const [gettingFinal, setGettingFinal] = useState(false);
-  const [progress, setProgress] = useState(loadProgress);
-  const [showCrisisGuide, setShowCrisisGuide] = useState(false);
-  const [quickStartConfig, setQuickStartConfig] = useState(null);
-  const bottomRef = useRef(null);
+function App(){
+  const [screen,setScreen]=useState("home");
+  const [approach,setApproach]=useState(null);
+  const [scenario,setScenario]=useState(null);
+  const [difficulty,setDifficulty]=useState(null);
+  const [feedbackMode,setFeedbackMode]=useState(null);
+  const [sessionLength,setSessionLength]=useState(null);
+  const [filterCat,setFilterCat]=useState("All");
+  const [messages,setMessages]=useState([]);
+  const [input,setInput]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [stepFeedback,setStepFeedback]=useState(null);
+  const [showingFeedback,setShowingFeedback]=useState(false);
+  const [finalFeedback,setFinalFeedback]=useState(null);
+  const [gettingFinal,setGettingFinal]=useState(false);
+  const [progress,setProgress]=useState(loadProg);
+  const [showCrisisGuide,setShowCrisisGuide]=useState(false);
+  const [exchangeCount,setExchangeCount]=useState(0);
+  const bottomRef=useRef(null);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, stepFeedback, finalFeedback, loading]);
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[messages,stepFeedback,finalFeedback,loading]);
 
-  const isCrisis = CRISIS_IDS.includes(scenario);
+  const isCrisis=CRISIS_IDS.includes(scenario);
+  const canStart=approach&&scenario&&difficulty&&feedbackMode&&sessionLength;
+  const maxEx=SESSION_LENGTHS.find(s=>s.id===sessionLength)?.max||10;
+  const filtered=filterCat==="All"?SCENARIOS:filterCat==="Crisis"?SCENARIOS.filter(s=>CRISIS_IDS.includes(s.id)):SCENARIOS.filter(s=>s.cat===filterCat&&!CRISIS_IDS.includes(s.id));
 
-  const saveApiKey = () => {
-    localStorage.setItem("counselling_api_key", apiKey);
-    setApiKeySaved(true);
-  };
-
-  const ratingColor = (r) => {
-    if (r === "good") return { bg: "#EAF3DE", text: "#3B6D11", label: "Good" };
-    if (r === "okay") return { bg: "#FAEEDA", text: "#854F0B", label: "Okay" };
-    return { bg: "#FCEBEB", text: "#A32D2D", label: "Needs work" };
-  };
-
-  const callAPI = async (systemPrompt, messages) => {
-    const key = "";
-    const res = await fetch(ANTHROPIC_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-haiku-4-5", max_tokens: 1000, system: systemPrompt, messages }),
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+  const callAPI=async(system,msgs,max=800)=>{
+    const res=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:max,system,messages:msgs})});
+    const data=await res.json();
+    if(data.error) throw new Error(data.error.message);
     return data.content[0].text;
   };
 
-  const handleQuickStart = (type) => {
-    const nonCrisis = SCENARIOS.filter(s => !CRISIS_IDS.includes(s.id));
-    const crisisOnly = SCENARIOS.filter(s => CRISIS_IDS.includes(s.id));
-    let sc, ap = pick(APPROACHES).id, diff, fm = pick(FEEDBACK_MODES).id;
-    if (type === "random") { sc = pick(nonCrisis).id; diff = pick(DIFFICULTIES).id; }
-    else if (type === "challenge") { sc = pick(nonCrisis).id; diff = "advanced"; }
-    else { sc = pick(crisisOnly).id; diff = pick([DIFFICULTIES[0], DIFFICULTIES[1]]).id; }
-    setApproach(ap); setScenario(sc); setDifficulty(diff); setFeedbackMode(fm);
-    setQuickStartConfig({ approach: ap, scenario: sc, difficulty: diff, feedbackMode: fm });
+  const clientSystem=(ap,sc,diff)=>{
+    const sc_=SCENARIOS.find(s=>s.id===sc);
+    const ap_=APPROACHES.find(a=>a.id===ap);
+    if(CRISIS_IDS.includes(sc)) return `You are playing a counselling client in a crisis training scenario. ${CRISIS_CLIENT[sc]} The counsellor is practising ${ap_.label}. Keep responses to 2-4 sentences. Stay fully in character.`;
+    return `You are playing a counselling client in a training role-play. Scenario: ${sc_.label} — ${sc_.desc}. Counsellor approach: ${ap_.label}. Difficulty: ${DIFF_TEXT[diff]}. Keep responses to 2-4 sentences. Stay fully in character. Begin by briefly presenting your situation.`;
   };
 
-  useEffect(() => {
-    if (quickStartConfig && approach && scenario && difficulty && feedbackMode) {
-      startSession(); setQuickStartConfig(null);
-    }
-  }, [quickStartConfig]);
-
-  const buildSystemPrompt = () => {
-    const sc = SCENARIOS.find(s => s.id === scenario);
-    const ap = APPROACHES.find(a => a.id === approach);
-    if (isCrisis) return `You are playing the role of a client in a crisis counseling role-play for student counselors. ${crisisSystemPrompt[scenario]} The student is practising: ${ap.label}. Stay fully in character. Begin by presenting your situation.`;
-    return `You are playing the role of a client in a counseling role-play for student counselors. Scenario: ${sc.label} — ${sc.desc}. Approach: ${ap.label}. Difficulty: ${difficultyPrompt[difficulty]}. Stay in character. 2-4 sentences. Start by briefly introducing your issue.`;
+  const supervisorSystem=(mode,ap,sc,diff)=>{
+    const sc_=SCENARIOS.find(s=>s.id===sc);
+    const ap_=APPROACHES.find(a=>a.id===ap);
+    const approachGuide=ap==="any"
+      ?"Evaluate universal counselling skills: empathy, active listening, reflection of feeling, open questions, paraphrasing, summarising, pacing."
+      :`Evaluate use of ${ap_.label} techniques specifically, as well as general counselling skills.`;
+    const crisisNote=CRISIS_IDS.includes(sc)?`This is a CRISIS scenario (${sc_.label}). Assess: Did they stay calm? Ask directly about risk? Show empathy before problem-solving?`:"";
+    if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST — do NOT reframe poor responses positively. If the response is vague, advice-giving, or not good counselling practice, say so clearly and specifically.\n\nRespond ONLY with valid JSON (no markdown):\n{"rating":"good|okay|needs_work","strength":"1-2 honest sentences","improve":"1-2 clear sentences on the key issue","example":"a stronger alternative response in quotes","technique":"one technique name"}`;
+    return `You are a counselling supervisor writing a session debrief. ${approachGuide} ${crisisNote} Use Australian English. Be honest — do not sugarcoat poor performance. Reference specific things the student said.\n\nRespond ONLY with valid JSON (no markdown):\n{"overall":"good|okay|needs_work","summary":"2-3 honest sentences","strengths":["s1","s2"],"areas":["a1","a2"],"technique_use":"1-2 sentences on approach use","example_response":"a stronger response example"}`;
   };
 
-  const startSession = async () => {
-    setScreen("session"); setLoading(true); setMessages([]); setStepFeedback(null); setFinalFeedback(null); setShowCrisisGuide(false);
+  const doStart=async(ap,sc,diff,fm,len)=>{
+    setScreen("session"); setLoading(true); setMessages([]); setStepFeedback(null);
+    setFinalFeedback(null); setShowCrisisGuide(false); setExchangeCount(0); setShowingFeedback(false);
     try {
-      const text = await callAPI(buildSystemPrompt(), [{ role: "user", content: "Begin the session." }]);
-      setMessages([{ role: "client", text }]);
-    } catch (e) { setMessages([{ role: "client", text: "Something went wrong: " + e.message }]); }
+      const text=await callAPI(clientSystem(ap,sc,diff),[{role:"user",content:"Begin the session."}]);
+      setMessages([{role:"client",text}]);
+    } catch(e) { setMessages([{role:"client",text:"Something went wrong. Please try again."}]); }
     setLoading(false);
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading || showingFeedback) return;
-    const userText = input.trim(); setInput("");
-    const newMessages = [...messages, { role: "counselor", text: userText }];
-    setMessages(newMessages); setLoading(true); setStepFeedback(null);
-    const sc = SCENARIOS.find(s => s.id === scenario);
-    const ap = APPROACHES.find(a => a.id === approach);
+  const quickStart=(type)=>{
+    const nonC=SCENARIOS.filter(s=>!CRISIS_IDS.includes(s.id));
+    const crC=SCENARIOS.filter(s=>CRISIS_IDS.includes(s.id));
+    let sc,ap=pick(APPROACHES).id,diff,fm=pick(FEEDBACK_MODES).id,len="standard";
+    if(type==="random"){sc=pick(nonC).id;diff=pick(DIFFICULTIES).id;}
+    else if(type==="challenge"){sc=pick(nonC).id;ap=pick(APPROACHES).id;diff="advanced";}
+    else{sc=pick(crC).id;diff=pick([DIFFICULTIES[0],DIFFICULTIES[1]]).id;}
+    setApproach(ap);setScenario(sc);setDifficulty(diff);setFeedbackMode(fm);setSessionLength(len);
+    doStart(ap,sc,diff,fm,len);
+  };
 
-   if (feedbackMode === "step") {
-      try {
-        const key = "";
-        const transcript = newMessages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n");
-        const fbRes = await fetch(ANTHROPIC_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5",
-            max_tokens: 600,
-            system: `You are a counseling supervisor. Evaluate this counselor response and reply in this exact format, no JSON, no markdown:
+  const sendMessage=async()=>{
+    if(!input.trim()||loading||showingFeedback) return;
+    const userText=input.trim(); setInput("");
+    const newMsgs=[...messages,{role:"counsellor",text:userText}];
+    setMessages(newMsgs); setLoading(true); setStepFeedback(null);
+    const newCount=exchangeCount+1; setExchangeCount(newCount);
 
-RATING: good
-STRENGTH: what worked here in 2 sentences
-IMPROVE: what to improve in 2 sentences  
-EXAMPLE: write a better response example here
-TECHNIQUE: one technique name`,
-            messages: [{ role: "user", content: `Approach: ${ap.label}\nScenario: ${sc.label}\n\nConversation:\n${transcript}\n\nRate the counselor's last message: "${userText}"` }]
-          })
-        });
-        const fbData = await fbRes.json();
-        if (fbData.error) throw new Error(fbData.error.message);
-        const raw = fbData.content[0].text;
-        console.log("RAW FEEDBACK:", raw);
-        const get = (label) => { const m = raw.match(new RegExp(`${label}:([\\s\\S]*?)(?=\\n[A-Z]+:|$)`)); return m ? m[1].trim() : null; };
-        const ratingRaw = (get("RATING") || "okay").toLowerCase();
-        const rating = ratingRaw.includes("good") ? "good" : ratingRaw.includes("needs") ? "needs_work" : "okay";
-        setStepFeedback({ rating, strength: get("STRENGTH") || "Good attempt.", improve: get("IMPROVE") || "Keep developing.", example: get("EXAMPLE") || "Try reflecting feelings.", technique: get("TECHNIQUE") || "Active listening" });
-        setShowingFeedback(true);
-      } catch(err) {
-        console.error("Feedback error:", err);
-        setStepFeedback({ rating: "okay", strength: "Error: " + err.message, improve: "Check console.", example: "Try again.", technique: "Debug" });
+    if(feedbackMode==="step"){
+      try{
+        const transcript=newMsgs.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
+        const sc_=SCENARIOS.find(s=>s.id===scenario);
+        const ap_=APPROACHES.find(a=>a.id===approach);
+        const raw=await callAPI(supervisorSystem("step",approach,scenario,difficulty),
+          [{role:"user",content:`Approach: ${ap_.label}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nTranscript:\n${transcript}\n\nRate the counsellor's last message: "${userText}"`}],600);
+        let parsed;
+        try{parsed=JSON.parse(raw.trim());}
+        catch{parsed={rating:"okay",strength:"Attempted response.",improve:"Focus on the client's emotional experience.",example:"Try reflecting what the client is feeling.",technique:"Reflection"};}
+        setStepFeedback(parsed); setShowingFeedback(true);
+      }catch(e){
+        setStepFeedback({rating:"okay",strength:"Could not load feedback.",improve:"Check your connection.",example:"Try again.",technique:"—"});
         setShowingFeedback(true);
       }
-      setLoading(false); return;
+      setLoading(false);
+    } else {
+      await getClientReply(newMsgs);
     }
-
-    await getClientReply(newMessages, ap, sc);
   };
 
-  const getClientReply = async (msgs, ap, sc) => {
-    setLoading(true);
-    const history = msgs.map(m => ({ role: m.role === "counselor" ? "user" : "assistant", content: m.text }));
-    try {
-      const text = await callAPI(buildSystemPrompt(), history);
-      setMessages(prev => [...prev, { role: "client", text }]);
-    } catch (e) { setMessages(prev => [...prev, { role: "client", text: "Sorry, could you repeat that?" }]); }
+  const getClientReply=async(msgs)=>{
+    const history=msgs.map(m=>({role:m.role==="counsellor"?"user":"assistant",content:m.text}));
+    try{
+      const text=await callAPI(clientSystem(approach,scenario,difficulty),history);
+      setMessages(prev=>[...prev,{role:"client",text}]);
+    }catch{setMessages(prev=>[...prev,{role:"client",text:"Sorry, can you say that again?"}]);}
     setLoading(false);
   };
 
-  const continueAfterFeedback = async () => {
-    setShowingFeedback(false);
-    await getClientReply(messages, APPROACHES.find(a => a.id === approach), SCENARIOS.find(s => s.id === scenario));
-    setStepFeedback(null);
+  const continueAfterFeedback=async()=>{
+    setShowingFeedback(false); setLoading(true);
+    await getClientReply(messages); setStepFeedback(null);
   };
 
-  const getFinalFeedback = async () => {
-    setGettingFinal(true);
-    const ap = APPROACHES.find(a => a.id === approach);
-    const sc = SCENARIOS.find(s => s.id === scenario);
-    const transcript = messages.map(m => `${m.role === "counselor" ? "Counselor" : "Client"}: ${m.text}`).join("\n");
-    const crisisCtx = isCrisis ? `This is a CRISIS scenario. Evaluate crisis-specific skills: Did they stay calm? Assess risk? Show empathy? Handle referral?` : "";
-    try {
-      const text = await callAPI(
-        `You are a counseling supervisor reviewing a student session using ${ap.label} with a client presenting ${sc.label} at ${difficulty} difficulty. ${crisisCtx} Respond ONLY with JSON, no markdown: {"overall":"good"|"okay"|"needs_work","summary":"2-3 sentences","strengths":["s1","s2"],"areas":["a1","a2"],"technique_use":"1-2 sentences","example_response":"one stronger example response"}`,
-        [{ role: "user", content: `Transcript:\n${transcript}` }]
-      );
-      const fb = JSON.parse(text.trim()); setFinalFeedback(fb); recordSession(fb); setScreen("feedback");
-    } catch { const fb = { overall: "okay", summary: "Session complete.", strengths: ["You engaged with the client"], areas: ["Continue developing"], technique_use: "Keep working on the approach.", example_response: "Try using more open questions." }; setFinalFeedback(fb); recordSession(fb); setScreen("feedback"); }
+  const getFinalFeedback=async()=>{
+    if(gettingFinal) return; setGettingFinal(true);
+    const transcript=messages.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
+    const ap_=APPROACHES.find(a=>a.id===approach);
+    const sc_=SCENARIOS.find(s=>s.id===scenario);
+    try{
+      const raw=await callAPI(supervisorSystem("end",approach,scenario,difficulty),
+        [{role:"user",content:`Approach: ${ap_.label}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],1000);
+      let fb; try{fb=JSON.parse(raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",example_response:"Try using more open questions."};}
+      setFinalFeedback(fb); recordSession(fb); setScreen("feedback");
+    }catch{setScreen("feedback");}
     setGettingFinal(false);
   };
 
-  const recordSession = (feedback) => {
-    const sc = SCENARIOS.find(s => s.id === scenario);
-    const diff = DIFFICULTIES.find(d => d.id === difficulty);
-    const pts = (ratingPoints[feedback.overall] || 0) * diff.points;
-    const entry = { date: new Date().toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }), approach: approachLabels[approach], scenario: sc.label, difficulty: diff.label, overall: feedback.overall, points: pts, exchanges: Math.floor(messages.length / 2), crisis: isCrisis };
-    const updated = { sessions: [entry, ...progress.sessions].slice(0, 50), totalSessions: progress.totalSessions + 1, totalPoints: progress.totalPoints + pts };
-    setProgress(updated); saveProgress(updated);
+  const recordSession=(fb)=>{
+    const sc_=SCENARIOS.find(s=>s.id===scenario);
+    const d_=DIFFICULTIES.find(d=>d.id===difficulty);
+    const pts=(RP[fb.overall]||0)*d_.pts;
+    const entry={date:new Date().toLocaleDateString("en-AU",{day:"numeric",month:"short"}),approach:AP_LABEL[approach],scenario:sc_.label,difficulty:d_.label,overall:fb.overall,points:pts,exchanges:exchangeCount,crisis:isCrisis};
+    const updated={sessions:[entry,...progress.sessions].slice(0,50),totalSessions:progress.totalSessions+1,totalPoints:progress.totalPoints+pts};
+    setProgress(updated); saveProg(updated);
   };
 
-  const reset = () => { setScreen("home"); setApproach(null); setScenario(null); setDifficulty(null); setFeedbackMode(null); setMessages([]); setInput(""); setStepFeedback(null); setFinalFeedback(null); setShowingFeedback(false); setShowCrisisGuide(false); };
+  const reset=()=>{setScreen("home");setMessages([]);setInput("");setStepFeedback(null);setFinalFeedback(null);setShowingFeedback(false);setExchangeCount(0);setShowCrisisGuide(false);};
 
-  const canStart = approach && scenario && difficulty && feedbackMode;
-  const filteredScenarios = filterCat === "All" ? SCENARIOS : SCENARIOS.filter(s => s.category === filterCat);
-
-  const SL = ({ n, children }) => <p style={{ fontWeight: 500, fontSize: 13, color: "var(--color-text-secondary)", margin: "0 0 0.5rem", letterSpacing: "0.04em", textTransform: "uppercase" }}>{n}. {children}</p>;
-  const Badge = ({ children, bg, color }) => <span style={{ fontSize: 12, background: bg, color, padding: "3px 10px", borderRadius: 20, fontWeight: 500 }}>{children}</span>;
-
-  // API Key setup screen
-  if (!apiKeySaved) return (
-    <div style={{ maxWidth: 500, margin: "4rem auto", padding: "2rem", background: "#fff", borderRadius: 12, border: "0.5px solid #e0e0de" }}>
-      <h2 style={{ fontSize: 20, fontWeight: 500, margin: "0 0 0.5rem" }}>Counselling Role-Play Practice</h2>
-      <p style={{ color: "#6b6b6b", fontSize: 14, margin: "0 0 1.5rem" }}>Enter your Anthropic API key to get started. This is stored locally in your browser only.</p>
-      <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-ant-..." style={{ width: "100%", padding: "10px 12px", fontSize: 14, borderRadius: 8, border: "0.5px solid #d0d0ce", marginBottom: "0.75rem", fontFamily: "monospace" }} />
-      <button onClick={saveApiKey} disabled={!apiKey.startsWith("sk-")} style={{ width: "100%", padding: "11px", fontSize: 14, fontWeight: 500, background: apiKey.startsWith("sk-") ? "#1D9E75" : "#e0e0de", color: apiKey.startsWith("sk-") ? "#fff" : "#999", border: "none", borderRadius: 8 }}>
-        Start Practising
-      </button>
-      <p style={{ fontSize: 12, color: "#999", margin: "0.75rem 0 0", textAlign: "center" }}>Get your API key at console.anthropic.com</p>
-    </div>
-  );
-
-  // Progress screen
-  if (screen === "progress") {
-    const { sessions, totalSessions, totalPoints } = progress;
-    const good = sessions.filter(s => s.overall === "good").length;
-    const okay = sessions.filter(s => s.overall === "okay").length;
-    const needsWork = sessions.filter(s => s.overall === "needs_work").length;
-    const crisisSessions = sessions.filter(s => s.crisis).length;
-    const approachCounts = {}; sessions.forEach(s => { approachCounts[s.approach] = (approachCounts[s.approach] || 0) + 1; });
-    const topApproach = Object.entries(approachCounts).sort((a, b) => b[1] - a[1])[0];
-    const diffCounts = { Beginner: 0, Intermediate: 0, Advanced: 0 }; sessions.forEach(s => { if (diffCounts[s.difficulty] !== undefined) diffCounts[s.difficulty]++; });
-    const level = totalPoints < 10 ? { label: "Trainee", next: 10, color: "#888780" } : totalPoints < 25 ? { label: "Practitioner", next: 25, color: "#1D9E75" } : totalPoints < 50 ? { label: "Skilled", next: 50, color: "#7F77DD" } : totalPoints < 100 ? { label: "Advanced", next: 100, color: "#D85A30" } : { label: "Expert", next: null, color: "#BA7517" };
-    const pct = level.next ? Math.min(100, Math.round((totalPoints / level.next) * 100)) : 100;
-    return (
-      <div style={{ maxWidth: 620, margin: "0 auto", padding: "1.5rem 1rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-          <h2 style={{ fontSize: 22, fontWeight: 500, margin: 0 }}>Progress Tracker</h2>
-          <button onClick={() => setScreen("home")} style={{ fontSize: 13, padding: "5px 14px", borderRadius: 8, border: "0.5px solid #e0e0de", background: "#f4f4f3", color: "#6b6b6b", cursor: "pointer" }}>Back</button>
-        </div>
-        <div style={{ padding: "16px", borderRadius: 12, background: "#f4f4f3", border: "0.5px solid #e0e0de", marginBottom: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <div><p style={{ fontSize: 13, color: "#6b6b6b", margin: "0 0 2px" }}>Current level</p><p style={{ fontSize: 20, fontWeight: 500, margin: 0, color: level.color }}>{level.label}</p></div>
-            <div style={{ textAlign: "right" }}><p style={{ fontSize: 13, color: "#6b6b6b", margin: "0 0 2px" }}>Total points</p><p style={{ fontSize: 20, fontWeight: 500, margin: 0 }}>{totalPoints}</p></div>
-          </div>
-          <div style={{ height: 8, background: "#fff", borderRadius: 4, overflow: "hidden" }}><div style={{ height: "100%", width: `${pct}%`, background: level.color, borderRadius: 4 }} /></div>
-          <p style={{ fontSize: 12, color: "#6b6b6b", margin: "6px 0 0" }}>{level.next ? `${totalPoints} / ${level.next} pts to next level` : "Maximum level reached"}</p>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: "1rem" }}>
-          {[{ label: "Sessions", val: totalSessions, bg: "#f4f4f3" }, { label: "Good", val: good, bg: "#EAF3DE", color: "#3B6D11" }, { label: "Okay", val: okay, bg: "#FAEEDA", color: "#854F0B" }, { label: "Needs work", val: needsWork, bg: "#FCEBEB", color: "#A32D2D" }, { label: "Crisis", val: crisisSessions, bg: "#EEEDFE", color: "#3C3489" }].map(({ label, val, bg, color }) => (
-            <div key={label} style={{ padding: "10px 8px", borderRadius: 8, background: bg, border: "0.5px solid #e0e0de", textAlign: "center" }}>
-              <p style={{ fontSize: 20, fontWeight: 500, margin: "0 0 2px", color: color || "#1a1a1a" }}>{val}</p>
-              <p style={{ fontSize: 11, color: color || "#6b6b6b", margin: 0 }}>{label}</p>
-            </div>
-          ))}
-        </div>
-        {sessions.length > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "1rem" }}>
-            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de" }}>
-              <p style={{ fontSize: 12, color: "#6b6b6b", margin: "0 0 4px" }}>Most practised</p>
-              <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>{topApproach ? topApproach[0] : "—"}</p>
-            </div>
-            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de" }}>
-              <p style={{ fontSize: 12, color: "#6b6b6b", margin: "0 0 6px" }}>Difficulty breakdown</p>
-              {Object.entries(diffCounts).map(([k, v]) => (
-                <div key={k} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                  <div style={{ flex: 1, height: 5, background: "#fff", borderRadius: 3, overflow: "hidden" }}><div style={{ height: "100%", width: totalSessions ? `${Math.round((v / totalSessions) * 100)}%` : "0%", background: k === "Beginner" ? "#3B6D11" : k === "Intermediate" ? "#854F0B" : "#A32D2D", borderRadius: 3 }} /></div>
-                  <span style={{ fontSize: 11, color: "#6b6b6b", minWidth: 68 }}>{k}: {v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 0.6rem" }}>Session history</p>
-        {sessions.length === 0 ? <p style={{ color: "#6b6b6b", fontSize: 14 }}>No sessions yet — complete a role-play to see your history here.</p> : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {sessions.map((s, i) => { const rc = ratingColor(s.overall); return (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de" }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: rc.text, flexShrink: 0 }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <p style={{ fontSize: 13, fontWeight: 500, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.scenario}</p>
-                    {s.crisis && <span style={{ fontSize: 10, background: "#EEEDFE", color: "#534AB7", padding: "1px 6px", borderRadius: 10, flexShrink: 0 }}>Crisis</span>}
-                  </div>
-                  <p style={{ fontSize: 12, color: "#6b6b6b", margin: 0 }}>{s.approach} · {s.difficulty} · {s.exchanges} exchanges</p>
-                </div>
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <p style={{ fontSize: 12, fontWeight: 500, color: rc.text, margin: 0 }}>{rc.label}</p>
-                  <p style={{ fontSize: 11, color: "#6b6b6b", margin: 0 }}>+{s.points} pts · {s.date}</p>
-                </div>
-              </div>
-            ); })}
-          </div>
-        )}
-        {sessions.length > 0 && <button onClick={() => { if (window.confirm("Clear all progress?")) { const e = { sessions: [], totalSessions: 0, totalPoints: 0 }; setProgress(e); saveProgress(e); } }} style={{ marginTop: "1.25rem", fontSize: 13, color: "#A32D2D", background: "none", border: "0.5px solid #F09595", borderRadius: 8, padding: "6px 14px", cursor: "pointer" }}>Clear all progress</button>}
-      </div>
-    );
-  }
-
-  // Home screen
-  if (screen === "home") return (
-    <div style={{ maxWidth: 660, margin: "0 auto", padding: "1.5rem 1rem" }}>
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+  // ── HOME ──
+  if(screen==="home") return(
+    <div className="page">
+      <div className="home-header">
         <div>
-          <h2 style={{ fontSize: 22, fontWeight: 500, margin: "0 0 0.25rem" }}>Counselling Role-Play Practice</h2>
-          <p style={{ color: "#6b6b6b", margin: 0, fontSize: 15 }}>Practice client sessions with AI-powered feedback.</p>
+          <div className="home-title">Counselling<br/><em style={{fontStyle:"italic",color:"var(--sage-light)"}}>Role-Play Practice</em></div>
+          <div className="home-sub">AI-powered client sessions with supervisor feedback.</div>
         </div>
-        <button onClick={() => setScreen("progress")} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 14px", borderRadius: 8, border: "0.5px solid #e0e0de", background: "#f4f4f3", cursor: "pointer", flexShrink: 0, marginLeft: 12 }}>
-          <span style={{ fontSize: 18, fontWeight: 500, color: "#7F77DD", lineHeight: 1 }}>{progress.totalPoints}</span>
-          <span style={{ fontSize: 11, color: "#6b6b6b", marginTop: 2 }}>pts · Progress</span>
+        <button className="pts-btn" onClick={()=>setScreen("progress")}>
+          <div className="pts-num">{progress.totalPoints}</div>
+          <div className="pts-label">pts · Progress</div>
         </button>
       </div>
 
-      <div style={{ padding: "14px", borderRadius: 12, background: "#f4f4f3", border: "0.5px solid #e0e0de", marginBottom: "1.75rem" }}>
-        <p style={{ fontWeight: 500, fontSize: 13, color: "#6b6b6b", margin: "0 0 0.6rem", letterSpacing: "0.04em", textTransform: "uppercase" }}>Quick Start</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-          {[{ type: "random", label: "Random session", desc: "Random approach, scenario & difficulty", bg: "#E1F5EE", color: "#0F6E56", border: "#5DCAA5" }, { type: "challenge", label: "Challenge me", desc: "Advanced difficulty", bg: "#FAEEDA", color: "#854F0B", border: "#FAC775" }, { type: "crisis", label: "Crisis practice", desc: "Random crisis scenario", bg: "#EEEDFE", color: "#3C3489", border: "#AFA9EC" }].map(({ type, label, desc, bg, color, border }) => (
-            <button key={type} onClick={() => handleQuickStart(type)} style={{ padding: "10px 12px", borderRadius: 8, border: `0.5px solid ${border}`, background: bg, cursor: "pointer", textAlign: "left" }}>
-              <p style={{ fontWeight: 500, fontSize: 13, margin: "0 0 3px", color }}>{label}</p>
-              <p style={{ fontSize: 11, color, margin: 0, lineHeight: 1.4, opacity: 0.85 }}>{desc}</p>
+      <div style={{marginBottom:"2rem"}}>
+        <span className="label-upper">Quick start</span>
+        <div className="quick-grid">
+          {[
+            {type:"random",label:"Random session",desc:"Random approach, scenario & difficulty",bg:"var(--sage-pale)",color:"var(--sage)",border:"var(--sage-mid)"},
+            {type:"challenge",label:"Challenge me",desc:"Advanced difficulty",bg:"var(--amber-pale)",color:"var(--amber)",border:"var(--amber-mid)"},
+            {type:"crisis",label:"Crisis practice",desc:"Random crisis scenario",bg:"var(--indigo-pale)",color:"var(--indigo)",border:"var(--indigo-mid)"},
+          ].map(({type,label,desc,bg,color,border})=>(
+            <button key={type} className="qs-card" style={{background:bg,color,borderColor:border}} onClick={()=>quickStart(type)}>
+              <div className="qs-title">{label}</div>
+              <div className="qs-desc">{desc}</div>
             </button>
           ))}
         </div>
       </div>
 
-      <SL n="1">Choose your approach</SL>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 8, marginBottom: "1.5rem" }}>
-        {APPROACHES.map(a => (
-          <div key={a.id} onClick={() => setApproach(a.id)} style={{ padding: "10px 12px", borderRadius: 8, border: approach === a.id ? "2px solid #1D9E75" : "0.5px solid #e0e0de", background: approach === a.id ? "#E1F5EE" : "#fff", cursor: "pointer" }}>
-            <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 2px", color: approach === a.id ? "#0F6E56" : "#1a1a1a" }}>{a.label}</p>
-            <p style={{ fontSize: 12, color: approach === a.id ? "#0F6E56" : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{a.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      <SL n="2">Choose a client scenario</SL>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: "0.6rem" }}>
-        {["All", ...categories].map(cat => (
-          <button key={cat} onClick={() => setFilterCat(cat)} style={{ fontSize: 12, padding: "3px 10px", borderRadius: 20, border: filterCat === cat ? "none" : "0.5px solid #e0e0de", background: filterCat === cat ? (cat === "Crisis" ? "#534AB7" : "#7F77DD") : "#f4f4f3", color: filterCat === cat ? "#fff" : cat === "Crisis" ? "#534AB7" : "#6b6b6b", fontWeight: cat === "Crisis" ? 500 : 400, cursor: "pointer" }}>{cat === "Crisis" ? "⚠ Crisis" : cat}</button>
-        ))}
-      </div>
-      {filterCat === "All" && (
-        <div style={{ marginBottom: "0.75rem", padding: "10px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <p style={{ fontSize: 13, color: "#3C3489", margin: 0 }}>Looking for crisis scenarios? Filter by <strong>⚠ Crisis</strong> above.</p>
-          <button onClick={() => setFilterCat("Crisis")} style={{ fontSize: 12, padding: "4px 12px", borderRadius: 20, background: "#534AB7", color: "#fff", border: "none", cursor: "pointer", flexShrink: 0, marginLeft: 10 }}>Show crisis</button>
-        </div>
-      )}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 8, marginBottom: "1.5rem" }}>
-        {filteredScenarios.map(s => { const isCrisisSc = CRISIS_IDS.includes(s.id); const sel = scenario === s.id; return (
-          <div key={s.id} onClick={() => setScenario(s.id)} style={{ padding: "10px 12px", borderRadius: 8, border: sel ? `2px solid ${isCrisisSc ? "#534AB7" : "#7F77DD"}` : isCrisisSc ? "0.5px solid #AFA9EC" : "0.5px solid #e0e0de", background: sel ? "#EEEDFE" : isCrisisSc ? "#F5F4FE" : "#fff", cursor: "pointer" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
-              <p style={{ fontWeight: 500, fontSize: 14, margin: 0, color: sel ? "#3C3489" : isCrisisSc ? "#534AB7" : "#1a1a1a" }}>{s.label}</p>
-              <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 10, background: isCrisisSc ? "#AFA9EC" : "#f4f4f3", color: isCrisisSc ? "#26215C" : "#6b6b6b" }}>{isCrisisSc ? "Crisis" : s.category}</span>
+      <span className="label-upper">1. Choose your approach</span>
+      <div className="approach-grid">
+        {APPROACHES.map(a=>{
+          const isSel=approach===a.id;
+          const cls=isSel?(a.id==="any"?"sel-card active-teal":"sel-card active"):"sel-card";
+          return(
+            <div key={a.id} className={cls} onClick={()=>setApproach(a.id)}>
+              <div className="sel-card-title" style={{color:isSel?(a.id==="any"?"var(--teal)":"var(--sage)"):"var(--charcoal)"}}>{a.label}</div>
+              <div className="sel-card-desc">{a.desc}</div>
             </div>
-            <p style={{ fontSize: 12, color: sel ? "#534AB7" : isCrisisSc ? "#7F77DD" : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{s.desc}</p>
-          </div>
-        ); })}
+          );
+        })}
       </div>
 
-      <SL n="3">Choose difficulty level</SL>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: "1.5rem" }}>
-        {DIFFICULTIES.map(d => (
-          <div key={d.id} onClick={() => setDifficulty(d.id)} style={{ padding: "10px 12px", borderRadius: 8, border: difficulty === d.id ? `2px solid ${d.textColor}` : "0.5px solid #e0e0de", background: difficulty === d.id ? d.color : "#fff", cursor: "pointer" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
-              <p style={{ fontWeight: 500, fontSize: 14, margin: 0, color: difficulty === d.id ? d.textColor : "#1a1a1a" }}>{d.label}</p>
-              <span style={{ fontSize: 10, color: difficulty === d.id ? d.textColor : "#6b6b6b" }}>×{d.points} pts</span>
+      <span className="label-upper">2. Choose a client scenario</span>
+      <div className="filter-tabs">
+        {CATS.map(cat=>(
+          <button key={cat} className={`filter-tab ${filterCat===cat?(cat==="Crisis"?"active-crisis":"active"):""}`} onClick={()=>setFilterCat(cat)}>
+            {cat==="Crisis"?"⚠ Crisis":cat}
+          </button>
+        ))}
+      </div>
+      <div className="scenario-grid">
+        {filtered.map(s=>{
+          const isCrisisSc=CRISIS_IDS.includes(s.id);
+          const isSel=scenario===s.id;
+          const cls=`sel-card ${isSel?(isCrisisSc?"active-indigo":"active"):(isCrisisSc?"crisis-base":"")}`;
+          return(
+            <div key={s.id} className={cls} onClick={()=>setScenario(s.id)}>
+              <div className="sel-card-title" style={{color:isSel?(isCrisisSc?"var(--indigo)":"var(--sage)"):"var(--charcoal)"}}>{s.label}</div>
+              <div className="sel-card-desc">{s.desc}</div>
+              <span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:isCrisisSc?"var(--indigo-pale)":"var(--border-light)",color:isCrisisSc?"var(--indigo)":"var(--muted)",display:"inline-block",marginTop:5}}>{s.cat}</span>
             </div>
-            <p style={{ fontSize: 12, color: difficulty === d.id ? d.textColor : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{d.desc}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <SL n="4">Choose feedback style</SL>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: "1.75rem" }}>
-        {FEEDBACK_MODES.map(f => (
-          <div key={f.id} onClick={() => setFeedbackMode(f.id)} style={{ padding: "10px 12px", borderRadius: 8, border: feedbackMode === f.id ? "2px solid #378ADD" : "0.5px solid #e0e0de", background: feedbackMode === f.id ? "#E6F1FB" : "#fff", cursor: "pointer" }}>
-            <p style={{ fontWeight: 500, fontSize: 14, margin: "0 0 2px", color: feedbackMode === f.id ? "#0C447C" : "#1a1a1a" }}>{f.label}</p>
-            <p style={{ fontSize: 12, color: feedbackMode === f.id ? "#185FA5" : "#6b6b6b", margin: 0, lineHeight: 1.4 }}>{f.desc}</p>
-          </div>
-        ))}
+      <span className="label-upper">3. Difficulty level</span>
+      <div className="option-row option-row-3">
+        {DIFFICULTIES.map(d=>{
+          const isSel=difficulty===d.id;
+          return(
+            <div key={d.id} className="sel-card" style={isSel?{border:`2px solid ${d.border}`,background:d.pale}:{}} onClick={()=>setDifficulty(d.id)}>
+              <div className="sel-card-title" style={{color:isSel?d.color:"var(--charcoal)"}}>{d.label} <span style={{fontWeight:400,fontSize:11,color:isSel?d.color:"var(--muted)"}}>×{d.pts}pts</span></div>
+              <div className="sel-card-desc">{d.desc}</div>
+            </div>
+          );
+        })}
       </div>
 
-      <button onClick={startSession} disabled={!canStart} style={{ width: "100%", padding: "12px", fontSize: 15, fontWeight: 500, background: canStart ? "#1D9E75" : "#f4f4f3", color: canStart ? "#fff" : "#6b6b6b", border: "none", borderRadius: 8, cursor: canStart ? "pointer" : "not-allowed" }}>
-        Start Session
+      <span className="label-upper">4. Feedback style</span>
+      <div className="option-row option-row-2">
+        {FEEDBACK_MODES.map(f=>{
+          const isSel=feedbackMode===f.id;
+          return(
+            <div key={f.id} className="sel-card" style={isSel?{border:"2px solid var(--sage-mid)",background:"var(--sage-pale)"}:{}} onClick={()=>setFeedbackMode(f.id)}>
+              <div className="sel-card-title" style={{color:isSel?"var(--sage)":"var(--charcoal)"}}>{f.label}</div>
+              <div className="sel-card-desc">{f.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <span className="label-upper">5. Session length</span>
+      <div className="option-row option-row-3" style={{marginBottom:"2rem"}}>
+        {SESSION_LENGTHS.map(l=>{
+          const isSel=sessionLength===l.id;
+          return(
+            <div key={l.id} className="sel-card" style={isSel?{border:"2px solid var(--sage-mid)",background:"var(--sage-pale)"}:{}} onClick={()=>setSessionLength(l.id)}>
+              <div className="sel-card-title" style={{color:isSel?"var(--sage)":"var(--charcoal)"}}>{l.label}</div>
+              <div className="sel-card-desc">{l.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <button className="btn btn-primary" style={{width:"100%",padding:"13px",fontSize:15}} disabled={!canStart} onClick={()=>doStart(approach,scenario,difficulty,feedbackMode,sessionLength)}>
+        Start Session →
       </button>
-
-      <button onClick={() => { localStorage.removeItem("counselling_api_key"); setApiKeySaved(false); setApiKey(""); }} style={{ width: "100%", marginTop: 8, padding: "8px", fontSize: 12, background: "none", color: "#999", border: "none", cursor: "pointer" }}>Change API key</button>
     </div>
   );
 
-  // Session screen
-  if (screen === "session") {
-    const diff = DIFFICULTIES.find(d => d.id === difficulty);
-    const sc = SCENARIOS.find(s => s.id === scenario);
-    const guide = CRISIS_IDS.includes(scenario) ? CRISIS_GUIDANCE[scenario] : null;
-    return (
-      <div style={{ maxWidth: 640, margin: "0 auto", padding: "1rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem", flexWrap: "wrap", gap: 6 }}>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <Badge bg="#E1F5EE" color="#0F6E56">{approachLabels[approach]}</Badge>
-            <Badge bg="#EEEDFE" color="#3C3489">{sc?.label}</Badge>
-            <Badge bg={diff.color} color={diff.textColor}>{diff.label}</Badge>
-            {isCrisis && <Badge bg="#EEEDFE" color="#534AB7">Crisis</Badge>}
+  // ── SESSION ──
+  if(screen==="session"){
+    const diff_=DIFFICULTIES.find(d=>d.id===difficulty);
+    const sc_=SCENARIOS.find(s=>s.id===scenario);
+    const guide=CRISIS_GUIDANCE[scenario];
+    const progPct=Math.min(100,Math.round((exchangeCount/maxEx)*100));
+    const nearEnd=exchangeCount>=maxEx;
+
+    return(
+      <div className="session-layout">
+        <div className="session-header">
+          <div style={{display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"}}>
+            <span className="badge" style={{background:"var(--sage-pale)",color:"var(--sage)"}}>{AP_LABEL[approach]}</span>
+            <span className="badge" style={{background:"var(--border-light)",color:"var(--mid)"}}>{sc_?.label}</span>
+            <span className="badge" style={{background:diff_?.pale,color:diff_?.color}}>{diff_?.label}</span>
+            {isCrisis&&<span className="badge" style={{background:"var(--indigo-pale)",color:"var(--indigo)"}}>Crisis</span>}
           </div>
-          <button onClick={reset} style={{ fontSize: 13, color: "#6b6b6b", background: "none", border: "0.5px solid #e0e0de", borderRadius: 8, padding: "4px 10px", cursor: "pointer" }}>End</button>
+          <button className="btn btn-ghost" style={{padding:"5px 12px",fontSize:13}} onClick={reset}>End</button>
         </div>
 
-        {isCrisis && (
-          <div style={{ marginBottom: "0.75rem", padding: "10px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <p style={{ fontSize: 13, fontWeight: 500, color: "#3C3489", margin: 0 }}>Crisis scenario — practise safe response skills</p>
-              <button onClick={() => setShowCrisisGuide(v => !v)} style={{ fontSize: 12, color: "#534AB7", background: "none", border: "0.5px solid #AFA9EC", borderRadius: 8, padding: "3px 10px", cursor: "pointer" }}>{showCrisisGuide ? "Hide" : "Show"} guide</button>
+        <div style={{padding:"6px 14px 0",flexShrink:0}}>
+          <div className="prog-wrap">
+            <div className="prog-fill" style={{width:`${progPct}%`,background:nearEnd?"var(--amber)":"var(--sage)"}}/>
+          </div>
+          <div className="exchange-counter">
+            {nearEnd
+              ?<span style={{color:"var(--amber)"}}>Session length reached — consider finishing</span>
+              :<>{exchangeCount} / {maxEx} exchanges</>}
+          </div>
+        </div>
+
+        {isCrisis&&(
+          <div className="crisis-banner">
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <span style={{fontSize:13,fontWeight:500,color:"var(--indigo)"}}>⚠ Crisis scenario — practise safe response</span>
+              <button onClick={()=>setShowCrisisGuide(v=>!v)} style={{fontSize:12,color:"var(--indigo)",background:"none",border:"none",cursor:"pointer",fontWeight:500}}>{showCrisisGuide?"Hide":"Show"} guide</button>
             </div>
-            {showCrisisGuide && guide && (
-              <div style={{ marginTop: 10, borderTop: "0.5px solid #AFA9EC", paddingTop: 10 }}>
-                <p style={{ fontSize: 12, fontWeight: 500, color: "#3C3489", margin: "0 0 6px" }}>Key considerations:</p>
-                {guide.map((tip, i) => <p key={i} style={{ fontSize: 12, color: "#534AB7", margin: "0 0 3px", lineHeight: 1.4 }}>· {tip}</p>)}
-                <p style={{ fontSize: 11, color: "#7F77DD", margin: "8px 0 0", fontStyle: "italic" }}>This is a training simulation. Always follow your institution's actual crisis protocols.</p>
+            {showCrisisGuide&&guide&&(
+              <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid var(--indigo-mid)"}}>
+                {guide.map((tip,i)=><p key={i} style={{fontSize:12,color:"var(--indigo)",margin:"0 0 3px",lineHeight:1.5}}>· {tip}</p>)}
+                <p style={{fontSize:11,color:"var(--muted)",margin:"7px 0 0",fontStyle:"italic"}}>Training simulation. Always follow your institution's actual crisis protocols.</p>
               </div>
             )}
           </div>
         )}
 
-        <div style={{ minHeight: 300, marginBottom: "1rem" }}>
-          {messages.map((m, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: m.role === "counselor" ? "flex-end" : "flex-start", marginBottom: 10 }}>
-              <div style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: 14, background: m.role === "counselor" ? "#1D9E75" : "#f4f4f3", color: m.role === "counselor" ? "#fff" : "#1a1a1a", fontSize: 14, lineHeight: 1.55 }}>
-                <p style={{ margin: "0 0 3px", fontSize: 11, fontWeight: 500, opacity: 0.7 }}>{m.role === "counselor" ? "You (Counselor)" : "Client"}</p>
+        <div className="chat-area">
+          {messages.map((m,i)=>(
+            <div key={i} className={`msg-wrap ${m.role}`}>
+              <div className="msg-bubble">
+                <div className="msg-label">{m.role==="counsellor"?"You (Counsellor)":"Client"}</div>
                 {m.text}
               </div>
             </div>
           ))}
-          {loading && <div style={{ display: "flex", justifyContent: "flex-start", marginBottom: 10 }}><div style={{ padding: "10px 14px", borderRadius: 14, background: "#f4f4f3", fontSize: 14, color: "#6b6b6b" }}>Client is responding...</div></div>}
-          {stepFeedback && showingFeedback && (
-            <div style={{ margin: "12px 0", padding: "14px", borderRadius: 8, background: ratingColor(stepFeedback.rating).bg }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <span style={{ fontSize: 12, fontWeight: 500, padding: "2px 10px", borderRadius: 20, background: ratingColor(stepFeedback.rating).text, color: "#fff" }}>{ratingColor(stepFeedback.rating).label}</span>
-                <span style={{ fontSize: 13, fontWeight: 500, color: ratingColor(stepFeedback.rating).text }}>Supervisor Feedback</span>
-                {stepFeedback.technique && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 10, background: "rgba(0,0,0,0.08)", color: ratingColor(stepFeedback.rating).text }}>Focus: {stepFeedback.technique}</span>}
+
+          {loading&&(
+            <div className="msg-wrap client">
+              <div className="typing-bubble">
+                <div className="dot"/><div className="dot"/><div className="dot"/>
               </div>
-              <div style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 6, background: "rgba(255,255,255,0.5)" }}>
-                <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 3px", color: ratingColor(stepFeedback.rating).text }}>✓ What worked</p>
-                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.5 }}>{stepFeedback.strength}</p>
-              </div>
-              <div style={{ marginBottom: 8, padding: "8px 10px", borderRadius: 6, background: "rgba(255,255,255,0.5)" }}>
-                <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 3px", color: ratingColor(stepFeedback.rating).text }}>↑ To improve</p>
-                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.5 }}>{stepFeedback.improve}</p>
-              </div>
-              <div style={{ marginBottom: 10, padding: "8px 10px", borderRadius: 6, background: "rgba(255,255,255,0.5)" }}>
-                <p style={{ fontSize: 12, fontWeight: 600, margin: "0 0 3px", color: ratingColor(stepFeedback.rating).text }}>💬 Stronger response example</p>
-                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.5, fontStyle: "italic" }}>"{stepFeedback.example}"</p>
-              </div>
-              <button onClick={continueAfterFeedback} style={{ fontSize: 13, padding: "6px 14px", borderRadius: 8, background: ratingColor(stepFeedback.rating).text, color: "#fff", border: "none", cursor: "pointer" }}>Continue Session</button>
             </div>
           )}
-          <div ref={bottomRef} />
+
+          {stepFeedback&&showingFeedback&&(()=>{
+            const rs=ratingStyle(stepFeedback.rating);
+            return(
+              <div className="fb-card" style={{background:rs.bg,borderColor:rs.border,margin:"4px 0"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                  <span className="badge" style={{background:rs.color,color:"white"}}>{rs.label}</span>
+                  <span style={{fontSize:13,fontWeight:500,color:rs.color}}>Supervisor Feedback</span>
+                  {stepFeedback.technique&&stepFeedback.technique!=="—"&&(
+                    <span className="badge" style={{background:"rgba(0,0,0,0.06)",color:rs.color,fontSize:10}}>{stepFeedback.technique}</span>
+                  )}
+                </div>
+                <div className="fb-section">
+                  <div className="fb-label" style={{color:rs.color}}>✓ What worked</div>
+                  <div className="fb-text">{stepFeedback.strength}</div>
+                </div>
+                <div className="fb-section">
+                  <div className="fb-label" style={{color:rs.color}}>↑ To improve</div>
+                  <div className="fb-text">{stepFeedback.improve}</div>
+                </div>
+                {stepFeedback.example&&(
+                  <div className="fb-section">
+                    <div className="fb-label" style={{color:rs.color}}>💬 Stronger response</div>
+                    <div className="example-box" style={{background:"rgba(255,255,255,0.6)",color:"var(--mid)"}}>"{stepFeedback.example}"</div>
+                  </div>
+                )}
+                <button className="btn btn-ghost" style={{marginTop:4,fontSize:13}} onClick={continueAfterFeedback}>Continue session →</button>
+              </div>
+            );
+          })()}
+
+          <div ref={bottomRef}/>
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
-          <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="Type your counselor response..." rows={2} disabled={loading || showingFeedback} style={{ flex: 1, resize: "none", padding: "10px 12px", fontSize: 14, borderRadius: 8, border: "0.5px solid #d0d0ce", background: "#fff", color: "#1a1a1a", fontFamily: "inherit", lineHeight: 1.5 }} />
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <button onClick={sendMessage} disabled={loading || showingFeedback || !input.trim()} style={{ padding: "8px 16px", fontSize: 14, fontWeight: 500, background: "#1D9E75", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}>Send</button>
-            {messages.length >= 4 && <button onClick={getFinalFeedback} disabled={gettingFinal || loading} style={{ padding: "8px 16px", fontSize: 13, background: "#f4f4f3", color: "#6b6b6b", border: "0.5px solid #e0e0de", borderRadius: 8, cursor: "pointer" }}>{gettingFinal ? "..." : "Finish"}</button>}
+        <div className="input-area">
+          <div className="input-row">
+            <textarea className="chat-input" rows={1} value={input}
+              onChange={e=>{setInput(e.target.value);e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,110)+"px";}}
+              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
+              placeholder="Type your counsellor response…" disabled={loading||showingFeedback}/>
+            <button className="send-btn" disabled={loading||showingFeedback||!input.trim()} onClick={sendMessage}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-5 14-2-5-5-3z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="none"/></svg>
+            </button>
+          </div>
+          <div className="action-row">
+            <button className={`action-btn ${exchangeCount>=2?"primary":""}`} disabled={exchangeCount<2||gettingFinal||loading} onClick={getFinalFeedback}>
+              {gettingFinal?"Getting summary…":"Finish & get summary"}
+            </button>
+          </div>
+          <p style={{fontSize:11,color:"var(--muted)",textAlign:"center",marginTop:5}}>Enter to send · Shift+Enter for new line</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── FEEDBACK ──
+  if(screen==="feedback"){
+    const diff_=DIFFICULTIES.find(d=>d.id===difficulty);
+    const sc_=SCENARIOS.find(s=>s.id===scenario);
+    const earned=finalFeedback?(RP[finalFeedback.overall]||0)*diff_.pts:0;
+    const rs=finalFeedback?ratingStyle(finalFeedback.overall):ratingStyle("okay");
+    return(
+      <div className="page">
+        <div style={{marginBottom:"1.5rem"}}>
+          <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:4}}>Session Debrief</div>
+          <div style={{fontSize:13,color:"var(--mid)"}}>{AP_LABEL[approach]} · {sc_?.label} · {diff_?.label}{isCrisis?" · Crisis":""} · {exchangeCount} exchanges</div>
+        </div>
+
+        <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:"var(--r-lg)",background:"var(--sage-pale)",border:"1px solid var(--sage-mid)",marginBottom:"1rem"}}>
+          <div style={{fontSize:28,fontWeight:700,color:"var(--sage)",fontFamily:"Instrument Serif, serif"}}>+{earned}</div>
+          <div>
+            <div style={{fontSize:13,fontWeight:600,color:"var(--sage)"}}>Points earned</div>
+            <div style={{fontSize:12,color:"var(--sage-light)"}}>{rs.label} × {diff_?.pts} difficulty · Total: {progress.totalPoints} pts</div>
           </div>
         </div>
-        <p style={{ fontSize: 12, color: "#6b6b6b", margin: "6px 0 0", textAlign: "center" }}>Enter to send · Shift+Enter for new line</p>
-      </div>
-    );
-  }
 
-  // Feedback screen
-  if (screen === "feedback") {
-    const diff = DIFFICULTIES.find(d => d.id === difficulty);
-    const earned = finalFeedback ? (ratingPoints[finalFeedback.overall] || 0) * diff.points : 0;
-    return (
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "1.5rem 1rem" }}>
-        <h2 style={{ fontSize: 22, fontWeight: 500, margin: "0 0 0.25rem" }}>Session Debrief</h2>
-        <p style={{ color: "#6b6b6b", margin: "0 0 1.25rem", fontSize: 14 }}>{approachLabels[approach]} · {SCENARIOS.find(s => s.id === scenario)?.label} · {diff.label}{isCrisis ? " · Crisis" : ""}</p>
-        <div style={{ padding: "10px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC", marginBottom: "1rem", display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 22, fontWeight: 500, color: "#3C3489" }}>+{earned}</span>
-          <div><p style={{ fontSize: 13, fontWeight: 500, color: "#3C3489", margin: 0 }}>Points earned</p><p style={{ fontSize: 12, color: "#534AB7", margin: 0 }}>{ratingColor(finalFeedback?.overall).label} × {diff.points} difficulty · Total: {progress.totalPoints} pts</p></div>
-        </div>
-        {finalFeedback && (
+        {finalFeedback&&(
           <>
-            <div style={{ padding: "14px 16px", borderRadius: 12, background: ratingColor(finalFeedback.overall).bg, marginBottom: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 500, padding: "2px 12px", borderRadius: 20, background: ratingColor(finalFeedback.overall).text, color: "#fff" }}>Overall: {ratingColor(finalFeedback.overall).label}</span>
-                {isCrisis && <span style={{ fontSize: 12, padding: "2px 10px", borderRadius: 20, background: "#EEEDFE", color: "#3C3489" }}>Crisis response</span>}
+            <div className="fb-card" style={{background:rs.bg,borderColor:rs.border,marginBottom:"1rem"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <span className="badge" style={{background:rs.color,color:"white"}}>Overall: {rs.label}</span>
+                {isCrisis&&<span className="badge" style={{background:"var(--indigo-pale)",color:"var(--indigo)"}}>Crisis response</span>}
               </div>
-              <p style={{ fontSize: 14, margin: 0, lineHeight: 1.6 }}>{finalFeedback.summary}</p>
+              <p style={{fontSize:14,lineHeight:1.6,color:"var(--charcoal)"}}>{finalFeedback.summary}</p>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: "1rem" }}>
-              <div style={{ padding: "12px 14px", borderRadius: 8, background: "#EAF3DE", border: "0.5px solid #9FE1CB" }}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: "#3B6D11", margin: "0 0 8px" }}>Strengths</p>
-                {finalFeedback.strengths.map((s, i) => <p key={i} style={{ fontSize: 13, color: "#27500A", margin: "0 0 4px", lineHeight: 1.4 }}>· {s}</p>)}
+
+            <div className="debrief-grid">
+              <div className="card" style={{background:"var(--sage-pale)",borderColor:"var(--sage-mid)"}}>
+                <div className="fb-label" style={{color:"var(--sage)"}}>Strengths</div>
+                {(finalFeedback.strengths||[]).map((s,i)=><p key={i} style={{fontSize:13,color:"var(--sage)",margin:"0 0 4px",lineHeight:1.5}}>· {s}</p>)}
               </div>
-              <div style={{ padding: "12px 14px", borderRadius: 8, background: "#FAEEDA", border: "0.5px solid #FAC775" }}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: "#854F0B", margin: "0 0 8px" }}>To develop</p>
-                {finalFeedback.areas.map((a, i) => <p key={i} style={{ fontSize: 13, color: "#633806", margin: "0 0 4px", lineHeight: 1.4 }}>· {a}</p>)}
+              <div className="card" style={{background:"var(--amber-pale)",borderColor:"var(--amber-mid)"}}>
+                <div className="fb-label" style={{color:"var(--amber)"}}>To develop</div>
+                {(finalFeedback.areas||[]).map((a,i)=><p key={i} style={{fontSize:13,color:"var(--amber)",margin:"0 0 4px",lineHeight:1.5}}>· {a}</p>)}
               </div>
             </div>
-            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#f4f4f3", border: "0.5px solid #e0e0de", marginBottom: "1rem" }}>
-              <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 6px" }}>Use of {approachLabels[approach]}</p>
-              <p style={{ fontSize: 13, color: "#6b6b6b", margin: 0, lineHeight: 1.5 }}>{finalFeedback.technique_use}</p>
+
+            <div className="card" style={{marginBottom:"1rem",marginTop:"0.5rem"}}>
+              <div className="fb-label">Use of {AP_LABEL[approach]}</div>
+              <p style={{fontSize:13,color:"var(--mid)",lineHeight:1.6,margin:0}}>{finalFeedback.technique_use}</p>
             </div>
-            <div style={{ padding: "12px 14px", borderRadius: 8, background: "#EEEDFE", border: "0.5px solid #AFA9EC", marginBottom: "1.5rem" }}>
-              <p style={{ fontSize: 13, fontWeight: 500, color: "#3C3489", margin: "0 0 6px" }}>Example stronger response</p>
-              <p style={{ fontSize: 13, color: "#534AB7", margin: 0, lineHeight: 1.5, fontStyle: "italic" }}>"{finalFeedback.example_response}"</p>
-            </div>
+
+            {finalFeedback.example_response&&(
+              <div className="card" style={{background:"var(--indigo-pale)",borderColor:"var(--indigo-mid)",marginBottom:"1.5rem"}}>
+                <div className="fb-label" style={{color:"var(--indigo)"}}>Stronger response example</div>
+                <p style={{fontSize:13,color:"var(--indigo)",fontStyle:"italic",lineHeight:1.6,margin:0}}>"{finalFeedback.example_response}"</p>
+              </div>
+            )}
           </>
         )}
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={reset} style={{ flex: 1, padding: "12px", fontSize: 15, fontWeight: 500, background: "#1D9E75", color: "#fff", border: "none", borderRadius: 8, cursor: "pointer" }}>New session</button>
-          <button onClick={() => setScreen("progress")} style={{ padding: "12px 18px", fontSize: 14, background: "#f4f4f3", color: "#6b6b6b", border: "0.5px solid #e0e0de", borderRadius: 8, cursor: "pointer" }}>View progress</button>
+
+        <div style={{display:"flex",gap:8}}>
+          <button className="btn btn-primary" style={{flex:1,padding:"12px"}} onClick={reset}>New session</button>
+          <button className="btn btn-ghost" style={{padding:"12px 16px"}} onClick={()=>setScreen("progress")}>Progress</button>
         </div>
       </div>
     );
   }
+
+  // ── PROGRESS ──
+  if(screen==="progress"){
+    const {sessions,totalSessions,totalPoints}=progress;
+    const good=sessions.filter(s=>s.overall==="good").length;
+    const okay=sessions.filter(s=>s.overall==="okay").length;
+    const nw=sessions.filter(s=>s.overall==="needs_work").length;
+    const crisis=sessions.filter(s=>s.crisis).length;
+    const levels=[
+      {label:"Trainee",max:10,color:"var(--muted)"},
+      {label:"Practitioner",max:25,color:"var(--teal)"},
+      {label:"Skilled",max:50,color:"var(--sage)"},
+      {label:"Advanced",max:100,color:"var(--amber)"},
+      {label:"Expert",max:null,color:"var(--red)"},
+    ];
+    const level=levels.find(l=>l.max===null||totalPoints<l.max)||levels[levels.length-1];
+    const pct=level.max?Math.min(100,Math.round((totalPoints/level.max)*100)):100;
+    const apCounts={};sessions.forEach(s=>{apCounts[s.approach]=(apCounts[s.approach]||0)+1;});
+    const topAp=Object.entries(apCounts).sort((a,b)=>b[1]-a[1])[0];
+
+    return(
+      <div className="page">
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1.5rem"}}>
+          <div style={{fontFamily:"Instrument Serif, serif",fontSize:24}}>Progress Tracker</div>
+          <button className="btn btn-ghost" style={{fontSize:13}} onClick={()=>setScreen("home")}>← Back</button>
+        </div>
+
+        <div className="card" style={{marginBottom:"1rem"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+            <div>
+              <div style={{fontSize:12,color:"var(--muted)",marginBottom:2}}>Current level</div>
+              <div style={{fontSize:22,fontWeight:600,color:level.color,fontFamily:"Instrument Serif, serif"}}>{level.label}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:12,color:"var(--muted)",marginBottom:2}}>Total points</div>
+              <div style={{fontSize:22,fontWeight:600}}>{totalPoints}</div>
+            </div>
+          </div>
+          <div className="prog-wrap">
+            <div className="prog-fill" style={{width:`${pct}%`,background:level.color}}/>
+          </div>
+          <p style={{fontSize:12,color:"var(--muted)",margin:"5px 0 0"}}>{level.max?`${totalPoints} / ${level.max} pts`:"Maximum level reached"}</p>
+        </div>
+
+        <div className="stat-grid" style={{marginBottom:"1rem"}}>
+          {[
+            {label:"Sessions",val:totalSessions,color:"var(--charcoal)"},
+            {label:"Good",val:good,color:"var(--sage)"},
+            {label:"Okay",val:okay,color:"var(--amber)"},
+            {label:"Needs work",val:nw,color:"var(--red)"},
+            {label:"Crisis",val:crisis,color:"var(--indigo)"},
+          ].map(({label,val,color})=>(
+            <div key={label} className="stat-card">
+              <div className="stat-num" style={{color}}>{val}</div>
+              <div className="stat-label">{label}</div>
+            </div>
+          ))}
+        </div>
+
+        {topAp&&(
+          <div className="card" style={{marginBottom:"1rem"}}>
+            <div style={{fontSize:12,color:"var(--muted)",marginBottom:2}}>Most practised</div>
+            <div style={{fontSize:15,fontWeight:500}}>{topAp[0]} <span style={{color:"var(--muted)",fontWeight:400,fontSize:13}}>({topAp[1]} sessions)</span></div>
+          </div>
+        )}
+
+        <div style={{fontWeight:600,fontSize:14,margin:"0 0 0.6rem"}}>Session history</div>
+        {sessions.length===0
+          ?<p style={{color:"var(--muted)",fontSize:14}}>No sessions yet — complete a role-play to see your history.</p>
+          :<div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:"1rem"}}>
+            {sessions.map((s,i)=>{
+              const rs=ratingStyle(s.overall);
+              return(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:"var(--r)",background:"var(--warm)",border:"1px solid var(--border-light)"}}>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:rs.color,flexShrink:0}}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                      {s.scenario}{s.crisis&&<span style={{fontSize:10,background:"var(--indigo-pale)",color:"var(--indigo)",padding:"1px 6px",borderRadius:10,marginLeft:4}}>Crisis</span>}
+                    </div>
+                    <div style={{fontSize:12,color:"var(--muted)"}}>{s.approach} · {s.difficulty} · {s.exchanges} exchanges</div>
+                  </div>
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontSize:12,fontWeight:500,color:rs.color}}>{rs.label}</div>
+                    <div style={{fontSize:11,color:"var(--muted)"}}>+{s.points} pts · {s.date}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        }
+        {sessions.length>0&&(
+          <button onClick={()=>{if(window.confirm("Clear all progress? This cannot be undone.")){const e={sessions:[],totalSessions:0,totalPoints:0};setProgress(e);saveProg(e);}}}
+            style={{fontSize:13,color:"var(--red)",background:"none",border:"1px solid var(--red-mid)",borderRadius:"var(--r)",padding:"6px 14px",cursor:"pointer"}}>
+            Clear all progress
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return null;
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<App/>,document.getElementById("root"));
 </script>
 </body>
 </html>
