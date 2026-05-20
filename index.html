@@ -255,7 +255,8 @@ function ratingStyle(r){
 
 function App(){
   const [screen,setScreen]=useState("home");
-  const [approach,setApproach]=useState(null);
+  const [approach,setApproach]=useState([]);
+  const [showDisclaimer,setShowDisclaimer]=useState(true);
   const [scenario,setScenario]=useState(null);
   const [difficulty,setDifficulty]=useState(null);
   const [feedbackMode,setFeedbackMode]=useState(null);
@@ -275,8 +276,15 @@ function App(){
 
   useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[messages,stepFeedback,finalFeedback,loading]);
 
+  const toggleApproach=(id)=>setApproach(prev=>{
+    if(id==="any") return prev.includes("any")?[]:["any"];
+    const base=prev.filter(a=>a!=="any");
+    return base.includes(id)?base.filter(a=>a!==id):[...base,id];
+  });
+  const getApLabel=(ap)=>(!ap||ap.length===0||ap.includes("any"))?"Eclectic":ap.map(id=>AP_LABEL[id]).join(" + ");
+
   const isCrisis=CRISIS_IDS.includes(scenario);
-  const canStart=approach&&scenario&&difficulty&&feedbackMode&&sessionLength;
+  const canStart=approach.length>0&&scenario&&difficulty&&feedbackMode&&sessionLength;
   const maxEx=SESSION_LENGTHS.find(s=>s.id===sessionLength)?.max||10;
   const filtered=filterCat==="All"?SCENARIOS:filterCat==="Crisis"?SCENARIOS.filter(s=>CRISIS_IDS.includes(s.id)):SCENARIOS.filter(s=>s.cat===filterCat&&!CRISIS_IDS.includes(s.id));
 
@@ -290,17 +298,18 @@ function App(){
 
   const clientSystem=(ap,sc,diff)=>{
     const sc_=SCENARIOS.find(s=>s.id===sc);
-    const ap_=APPROACHES.find(a=>a.id===ap);
-    if(CRISIS_IDS.includes(sc)) return `You are playing a counselling client in a crisis training scenario. ${CRISIS_CLIENT[sc]} The counsellor is practising ${ap_.label}. Keep responses to 2-4 sentences. Stay fully in character.`;
-    return `You are playing a counselling client in a training role-play. Scenario: ${sc_.label} — ${sc_.desc}. Counsellor approach: ${ap_.label}. Difficulty: ${DIFF_TEXT[diff]}. Keep responses to 2-4 sentences. Stay fully in character. Begin by briefly presenting your situation.`;
+    const apText=getApLabel(ap);
+    if(CRISIS_IDS.includes(sc)) return `You are playing a counselling client in a crisis training scenario. ${CRISIS_CLIENT[sc]} The counsellor is practising ${apText}. Keep responses to 2-4 sentences. Stay fully in character.`;
+    return `You are playing a counselling client in a training role-play. Scenario: ${sc_.label} — ${sc_.desc}. Counsellor approach: ${apText}. Difficulty: ${DIFF_TEXT[diff]}. Keep responses to 2-4 sentences. Stay fully in character. Begin by briefly presenting your situation.`;
   };
 
   const supervisorSystem=(mode,ap,sc,diff)=>{
     const sc_=SCENARIOS.find(s=>s.id===sc);
-    const ap_=APPROACHES.find(a=>a.id===ap);
-    const approachGuide=ap==="any"
+    const isAny=!ap||ap.length===0||ap.includes("any");
+    const apNames=ap.filter(id=>id!=="any").map(id=>APPROACHES.find(a=>a.id===id)?.label).filter(Boolean);
+    const approachGuide=isAny
       ?"Evaluate universal counselling skills: empathy, active listening, reflection of feeling, open questions, paraphrasing, summarising, pacing."
-      :`Evaluate use of ${ap_.label} techniques specifically, as well as general counselling skills.`;
+      :`Evaluate use of ${apNames.join(" and ")} techniques specifically, as well as general counselling skills.`;
     const crisisNote=CRISIS_IDS.includes(sc)?`This is a CRISIS scenario (${sc_.label}). Assess: Did they stay calm? Ask directly about risk? Show empathy before problem-solving?`:"";
     if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST — do NOT reframe poor responses positively. If the response is vague, advice-giving, or not good counselling practice, say so clearly and specifically.\n\nRespond ONLY with valid JSON (no markdown):\n{"rating":"good|okay|needs_work","strength":"1-2 honest sentences","improve":"1-2 clear sentences on the key issue","example":"a stronger alternative response in quotes","technique":"one technique name"}`;
     return `You are a counselling supervisor writing a session debrief. ${approachGuide} ${crisisNote} Use Australian English. Be honest — do not sugarcoat poor performance. Reference specific things the student said.\n\nRespond ONLY with valid JSON (no markdown):\n{"overall":"good|okay|needs_work","summary":"2-3 honest sentences","strengths":["s1","s2"],"areas":["a1","a2"],"technique_use":"1-2 sentences on approach use","example_response":"a stronger response example"}`;
@@ -319,9 +328,10 @@ function App(){
   const quickStart=(type)=>{
     const nonC=SCENARIOS.filter(s=>!CRISIS_IDS.includes(s.id));
     const crC=SCENARIOS.filter(s=>CRISIS_IDS.includes(s.id));
-    let sc,ap=pick(APPROACHES).id,diff,fm=pick(FEEDBACK_MODES).id,len="standard";
+    const nonAny=APPROACHES.filter(a=>a.id!=="any");
+    let sc,ap=[pick(nonAny).id],diff,fm=pick(FEEDBACK_MODES).id,len="standard";
     if(type==="random"){sc=pick(nonC).id;diff=pick(DIFFICULTIES).id;}
-    else if(type==="challenge"){sc=pick(nonC).id;ap=pick(APPROACHES).id;diff="advanced";}
+    else if(type==="challenge"){sc=pick(nonC).id;ap=[pick(nonAny).id];diff="advanced";}
     else{sc=pick(crC).id;diff=pick([DIFFICULTIES[0],DIFFICULTIES[1]]).id;}
     setApproach(ap);setScenario(sc);setDifficulty(diff);setFeedbackMode(fm);setSessionLength(len);
     doStart(ap,sc,diff,fm,len);
@@ -338,9 +348,8 @@ function App(){
       try{
         const transcript=newMsgs.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
         const sc_=SCENARIOS.find(s=>s.id===scenario);
-        const ap_=APPROACHES.find(a=>a.id===approach);
         const raw=await callAPI(supervisorSystem("step",approach,scenario,difficulty),
-          [{role:"user",content:`Approach: ${ap_.label}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nTranscript:\n${transcript}\n\nRate the counsellor's last message: "${userText}"`}],600);
+          [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nTranscript:\n${transcript}\n\nRate the counsellor's last message: "${userText}"`}],600);
         let parsed;
         try{parsed=JSON.parse(raw.trim());}
         catch{parsed={rating:"okay",strength:"Attempted response.",improve:"Focus on the client's emotional experience.",example:"Try reflecting what the client is feeling.",technique:"Reflection"};}
@@ -372,11 +381,10 @@ function App(){
   const getFinalFeedback=async()=>{
     if(gettingFinal) return; setGettingFinal(true);
     const transcript=messages.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
-    const ap_=APPROACHES.find(a=>a.id===approach);
     const sc_=SCENARIOS.find(s=>s.id===scenario);
     try{
       const raw=await callAPI(supervisorSystem("end",approach,scenario,difficulty),
-        [{role:"user",content:`Approach: ${ap_.label}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],1000);
+        [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],1000);
       let fb; try{fb=JSON.parse(raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",example_response:"Try using more open questions."};}
       setFinalFeedback(fb); recordSession(fb); setScreen("feedback");
     }catch{setScreen("feedback");}
@@ -387,7 +395,7 @@ function App(){
     const sc_=SCENARIOS.find(s=>s.id===scenario);
     const d_=DIFFICULTIES.find(d=>d.id===difficulty);
     const pts=(RP[fb.overall]||0)*d_.pts;
-    const entry={date:new Date().toLocaleDateString("en-AU",{day:"numeric",month:"short"}),approach:AP_LABEL[approach],scenario:sc_.label,difficulty:d_.label,overall:fb.overall,points:pts,exchanges:exchangeCount,crisis:isCrisis};
+    const entry={date:new Date().toLocaleDateString("en-AU",{day:"numeric",month:"short"}),approach:getApLabel(approach),scenario:sc_.label,difficulty:d_.label,overall:fb.overall,points:pts,exchanges:exchangeCount,crisis:isCrisis};
     const updated={sessions:[entry,...progress.sessions].slice(0,50),totalSessions:progress.totalSessions+1,totalPoints:progress.totalPoints+pts};
     setProgress(updated); saveProg(updated);
   };
@@ -396,6 +404,17 @@ function App(){
 
   // ── HOME ──
   if(screen==="home") return(
+    <>
+    {showDisclaimer&&(
+      <div style={{position:"fixed",inset:0,background:"rgba(28,28,26,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:"1.25rem"}}>
+        <div style={{background:"var(--warm)",borderRadius:"var(--r-lg)",padding:"1.5rem 1.25rem",maxWidth:400,width:"100%"}}>
+          <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,marginBottom:"0.75rem"}}>Before you begin</div>
+          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>This is a <strong style={{color:"var(--charcoal)"}}>counselling practice tool for students</strong>. It simulates client sessions using AI and is for skill development only.</p>
+          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"1.25rem"}}>It is <strong style={{color:"var(--charcoal)"}}>not a mental health service</strong>. If you need support, call <strong style={{color:"var(--charcoal)"}}>Lifeline 13 11 14</strong> or <strong style={{color:"var(--charcoal)"}}>Beyond Blue 1300 22 4636</strong>.</p>
+          <button className="btn btn-primary" style={{width:"100%"}} onClick={()=>setShowDisclaimer(false)}>I understand — get started</button>
+        </div>
+      </div>
+    )}
     <div className="page">
       <div className="home-header">
         <div>
@@ -424,13 +443,13 @@ function App(){
         </div>
       </div>
 
-      <span className="label-upper">1. Choose your approach</span>
+      <span className="label-upper">1. Choose approach(es) — select one or more</span>
       <div className="approach-grid">
         {APPROACHES.map(a=>{
-          const isSel=approach===a.id;
+          const isSel=approach.includes(a.id);
           const cls=isSel?(a.id==="any"?"sel-card active-teal":"sel-card active"):"sel-card";
           return(
-            <div key={a.id} className={cls} onClick={()=>setApproach(a.id)}>
+            <div key={a.id} className={cls} onClick={()=>toggleApproach(a.id)}>
               <div className="sel-card-title" style={{color:isSel?(a.id==="any"?"var(--teal)":"var(--sage)"):"var(--charcoal)"}}>{a.label}</div>
               <div className="sel-card-desc">{a.desc}</div>
             </div>
@@ -504,6 +523,7 @@ function App(){
         Start Session →
       </button>
     </div>
+    </>
   );
 
   // ── SESSION ──
@@ -518,7 +538,7 @@ function App(){
       <div className="session-layout">
         <div className="session-header">
           <div style={{display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"}}>
-            <span className="badge" style={{background:"var(--sage-pale)",color:"var(--sage)"}}>{AP_LABEL[approach]}</span>
+            <span className="badge" style={{background:"var(--sage-pale)",color:"var(--sage)"}}>{getApLabel(approach)}</span>
             <span className="badge" style={{background:"var(--border-light)",color:"var(--mid)"}}>{sc_?.label}</span>
             <span className="badge" style={{background:diff_?.pale,color:diff_?.color}}>{diff_?.label}</span>
             {isCrisis&&<span className="badge" style={{background:"var(--indigo-pale)",color:"var(--indigo)"}}>Crisis</span>}
@@ -634,7 +654,7 @@ function App(){
       <div className="page">
         <div style={{marginBottom:"1.5rem"}}>
           <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:4}}>Session Debrief</div>
-          <div style={{fontSize:13,color:"var(--mid)"}}>{AP_LABEL[approach]} · {sc_?.label} · {diff_?.label}{isCrisis?" · Crisis":""} · {exchangeCount} exchanges</div>
+          <div style={{fontSize:13,color:"var(--mid)"}}>{getApLabel(approach)} · {sc_?.label} · {diff_?.label}{isCrisis?" · Crisis":""} · {exchangeCount} exchanges</div>
         </div>
 
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:"var(--r-lg)",background:"var(--sage-pale)",border:"1px solid var(--sage-mid)",marginBottom:"1rem"}}>
@@ -667,7 +687,7 @@ function App(){
             </div>
 
             <div className="card" style={{marginBottom:"1rem",marginTop:"0.5rem"}}>
-              <div className="fb-label">Use of {AP_LABEL[approach]}</div>
+              <div className="fb-label">Use of {getApLabel(approach)}</div>
               <p style={{fontSize:13,color:"var(--mid)",lineHeight:1.6,margin:0}}>{finalFeedback.technique_use}</p>
             </div>
 
