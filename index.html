@@ -351,7 +351,7 @@ function App(){
         const raw=await callAPI(supervisorSystem("step",approach,scenario,difficulty),
           [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nTranscript:\n${transcript}\n\nRate the counsellor's last message: "${userText}"`}],600);
         let parsed;
-        try{parsed=JSON.parse(raw.trim());}
+        try{const m=raw.match(/\{[\s\S]*\}/);parsed=JSON.parse(m?m[0]:raw.trim());}
         catch{parsed={rating:"okay",strength:"Attempted response.",improve:"Focus on the client's emotional experience.",example:"Try reflecting what the client is feeling.",technique:"Reflection"};}
         setStepFeedback(parsed); setShowingFeedback(true);
       }catch(e){
@@ -385,7 +385,7 @@ function App(){
     try{
       const raw=await callAPI(supervisorSystem("end",approach,scenario,difficulty),
         [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],1000);
-      let fb; try{fb=JSON.parse(raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",example_response:"Try using more open questions."};}
+      let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",example_response:"Try using more open questions."};}
       setFinalFeedback(fb); recordSession(fb); setScreen("feedback");
     }catch{setScreen("feedback");}
     setGettingFinal(false);
