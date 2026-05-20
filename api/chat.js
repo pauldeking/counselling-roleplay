@@ -22,6 +22,9 @@ export default async function handler(req, res) {
       body: JSON.stringify(req.body),
     });
     const data = await response.json();
+    if (!response.ok) {
+      console.error("Anthropic error", response.status, JSON.stringify(data));
+    }
     return res.status(response.status).json(data);
   } catch (error) {
     return res.status(500).json({ error: error.message });
