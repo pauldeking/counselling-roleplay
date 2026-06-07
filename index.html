@@ -311,8 +311,18 @@ function App(){
       ?"Evaluate universal counselling skills: empathy, active listening, reflection of feeling, open questions, paraphrasing, summarising, pacing."
       :`Evaluate use of ${apNames.join(" and ")} techniques specifically, as well as general counselling skills.`;
     const crisisNote=CRISIS_IDS.includes(sc)?`This is a CRISIS scenario (${sc_.label}). Assess: Did they stay calm? Ask directly about risk? Show empathy before problem-solving?`:"";
-    if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST — do NOT reframe poor responses positively. If the response is vague, advice-giving, or not good counselling practice, say so clearly and specifically.\n\nRespond ONLY with valid JSON (no markdown):\n{"rating":"good|okay|needs_work","strength":"1-2 honest sentences","improve":"1-2 clear sentences on the key issue","example":"a stronger alternative response in quotes","technique":"one technique name"}`;
-    return `You are a counselling supervisor writing a session debrief. ${approachGuide} ${crisisNote} Use Australian English. Be honest — do not sugarcoat poor performance. Reference specific things the student said.\n\nRespond ONLY with valid JSON (no markdown):\n{"overall":"good|okay|needs_work","summary":"2-3 honest sentences","strengths":["s1","s2"],"areas":["a1","a2"],"technique_use":"1-2 sentences on approach use","example_response":"a stronger response example"}`;
+
+    if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST — do NOT reframe poor responses positively. If the response is vague, advice-giving, or not good counselling practice, say so clearly and specifically.
+
+IMPORTANT for crisis scenarios involving suicidal ideation or self-harm: The stronger example response must follow a GRADUATED assessment approach. Do not suggest jumping straight to asking about method or plan unless the client has already clearly confirmed suicidal intent in the transcript. The clinically appropriate sequence is: (1) reflect and validate the feeling, (2) gently clarify the ideation — what do they mean by that?, (3) explore frequency and intensity, (4) only then explore intent — do they want to act on it?, (5) then plan and means. When suggesting a stronger response, identify where the student is in this sequence and suggest the NEXT appropriate step only — not steps further ahead than the conversation warrants.
+
+Respond ONLY with valid JSON (no markdown):
+{"rating":"good|okay|needs_work","strength":"1-2 honest sentences","improve":"1-2 clear sentences on the key issue","example":"a stronger alternative response in quotes","technique":"one technique name"}`;
+
+    return `You are a counselling supervisor writing a detailed, substantive session debrief. ${approachGuide} ${crisisNote} Use Australian English. Be honest and specific — do not sugarcoat poor performance. Reference specific things the student said in your feedback. Write enough detail to be genuinely useful for a student's learning and development.
+
+Respond ONLY with valid JSON (no markdown):
+{"overall":"good|okay|needs_work","summary":"3-5 sentences giving an honest overall picture of the session, referencing specific moments from the transcript","strengths":["3-4 specific strengths with a brief explanation of why each worked clinically — not just labels but actual reasoning"],"areas":["3-4 specific areas to develop, each with a concrete suggestion for how to improve — practical and actionable"],"technique_use":"2-3 sentences evaluating how well the student used the chosen therapeutic approach, with specific examples from the transcript","relational_quality":"2-3 sentences on the therapeutic relationship — rapport, empathy, pacing, and how the client responded to the counsellor","key_moment":"Identify the single most important moment in the session — describe what happened and what it reveals about the student's current skill level","example_response":"A full, well-crafted example of a stronger counsellor response from a key moment in the session, written in first person as if speaking directly to the client"}`;
   };
 
   const doStart=async(ap,sc,diff,fm,len)=>{
@@ -349,7 +359,7 @@ function App(){
         const transcript=newMsgs.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
         const sc_=SCENARIOS.find(s=>s.id===scenario);
         const raw=await callAPI(supervisorSystem("step",approach,scenario,difficulty),
-          [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nTranscript:\n${transcript}\n\nRate the counsellor's last message: "${userText}"`}],600);
+          [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nTranscript:\n${transcript}\n\nRate the counsellor's last message: "${userText}"`}],700);
         let parsed;
         try{const m=raw.match(/\{[\s\S]*\}/);parsed=JSON.parse(m?m[0]:raw.trim());}
         catch{parsed={rating:"okay",strength:"Attempted response.",improve:"Focus on the client's emotional experience.",example:"Try reflecting what the client is feeling.",technique:"Reflection"};}
@@ -384,8 +394,8 @@ function App(){
     const sc_=SCENARIOS.find(s=>s.id===scenario);
     try{
       const raw=await callAPI(supervisorSystem("end",approach,scenario,difficulty),
-        [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],1000);
-      let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",example_response:"Try using more open questions."};}
+        [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],2500);
+      let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",relational_quality:"",key_moment:"",example_response:"Try using more open questions."};}
       setFinalFeedback(fb); recordSession(fb); setScreen("feedback");
     }catch{setScreen("feedback");}
     setGettingFinal(false);
@@ -686,15 +696,29 @@ function App(){
               </div>
             </div>
 
-            <div className="card" style={{marginBottom:"1rem",marginTop:"0.5rem"}}>
+            <div className="card" style={{marginBottom:"0.75rem",marginTop:"0.5rem"}}>
               <div className="fb-label">Use of {getApLabel(approach)}</div>
               <p style={{fontSize:13,color:"var(--mid)",lineHeight:1.6,margin:0}}>{finalFeedback.technique_use}</p>
             </div>
 
+            {finalFeedback.relational_quality&&(
+              <div className="card" style={{marginBottom:"0.75rem"}}>
+                <div className="fb-label">Therapeutic relationship</div>
+                <p style={{fontSize:13,color:"var(--mid)",lineHeight:1.6,margin:0}}>{finalFeedback.relational_quality}</p>
+              </div>
+            )}
+
+            {finalFeedback.key_moment&&(
+              <div className="card" style={{marginBottom:"0.75rem",background:"var(--amber-pale)",borderColor:"var(--amber-mid)"}}>
+                <div className="fb-label" style={{color:"var(--amber)"}}>⭐ Key moment</div>
+                <p style={{fontSize:13,color:"var(--amber)",lineHeight:1.6,margin:0}}>{finalFeedback.key_moment}</p>
+              </div>
+            )}
+
             {finalFeedback.example_response&&(
               <div className="card" style={{background:"var(--indigo-pale)",borderColor:"var(--indigo-mid)",marginBottom:"1.5rem"}}>
                 <div className="fb-label" style={{color:"var(--indigo)"}}>Stronger response example</div>
-                <p style={{fontSize:13,color:"var(--indigo)",fontStyle:"italic",lineHeight:1.6,margin:0}}>"{finalFeedback.example_response}"</p>
+                <p style={{fontSize:13,color:"var(--indigo)",fontStyle:"italic",lineHeight:1.6,margin:0}}>{finalFeedback.example_response}</p>
               </div>
             )}
           </>
