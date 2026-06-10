@@ -16,7 +16,7 @@
 html, body { height: 100%; }
 body { font-family: 'DM Sans', sans-serif; background: #f7f5f2; color: #1c1c1a; min-height: 100%; font-size: 15px; line-height: 1.6; }
 #root { height: 100%; }
-textarea, button, input { font-family: inherit; }
+textarea, button, input, select { font-family: inherit; }
 button { cursor: pointer; }
 :root {
   --sage:#4a6741; --sage-light:#6a8f60; --sage-pale:#eef3ed; --sage-mid:#c8dcc5;
@@ -41,14 +41,12 @@ button { cursor: pointer; }
 .btn-ghost { background: var(--border-light); color: var(--mid); }
 .btn-ghost:hover:not(:disabled) { background: var(--border); }
 
-/* Grid layouts */
 .approach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
 .scenario-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
 .option-row { display: grid; gap: 8px; margin-bottom: 1.5rem; }
 .option-row-3 { grid-template-columns: repeat(3, 1fr); }
 .option-row-2 { grid-template-columns: repeat(2, 1fr); }
 
-/* Selection cards */
 .sel-card { padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--border-light); background: var(--warm); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
 .sel-card:hover { border-color: var(--border); }
 .sel-card.active { border: 2px solid var(--sage); background: var(--sage-pale); }
@@ -58,25 +56,21 @@ button { cursor: pointer; }
 .sel-card-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
 .sel-card-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
 
-/* Filter tabs */
 .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.75rem; }
 .filter-tab { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--warm); color: var(--mid); cursor: pointer; transition: all 0.15s; }
 .filter-tab.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
 .filter-tab.active-crisis { background: var(--indigo); border-color: var(--indigo); color: white; }
 
-/* Quick start */
 .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 2rem; }
 .qs-card { padding: 12px; border-radius: var(--r); border: 1px solid; cursor: pointer; text-align: left; transition: opacity 0.15s; }
 .qs-card:hover { opacity: 0.85; }
 .qs-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
 .qs-desc { font-size: 11px; line-height: 1.4; opacity: 0.8; }
 
-/* Session layout */
 .session-layout { display: flex; flex-direction: column; height: 100dvh; max-width: 680px; margin: 0 auto; }
 .session-header { background: var(--warm); border-bottom: 1px solid var(--border-light); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
 .chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
 
-/* Messages */
 .msg-wrap { display: flex; }
 .msg-wrap.counsellor { justify-content: flex-end; }
 .msg-bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
@@ -90,7 +84,112 @@ button { cursor: pointer; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes pulse { 0%,80%,100%{opacity:0.3;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
 
-/* Feedback */
+/* Reaction strip */
+.reaction-strip {
+  background: #f0ede8;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.reaction-strip-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-right: 2px;
+  white-space: nowrap;
+}
+.reaction-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--warm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  position: relative;
+}
+.reaction-btn:hover { border-color: var(--charcoal); color: var(--charcoal); background: white; }
+.reaction-btn.reacted { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); }
+
+/* Tooltip */
+.tooltip-wrap { position: relative; display: inline-flex; }
+.tooltip-wrap .tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--charcoal);
+  color: white;
+  font-size: 11px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 50;
+  line-height: 1.4;
+  max-width: 220px;
+  white-space: normal;
+  text-align: center;
+}
+.tooltip-wrap:hover .tooltip { display: block; }
+
+/* Note input popup */
+.note-popup {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: white;
+  border-top: 2px solid var(--border);
+  padding: 12px 14px;
+  z-index: 40;
+  max-width: 680px;
+  margin: 0 auto;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+.note-popup-title { font-size: 12px; font-weight: 600; color: var(--mid); margin-bottom: 6px; }
+.note-input { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; font-size: 13px; resize: none; outline: none; line-height: 1.5; }
+.note-input:focus { border-color: var(--sage-mid); }
+
+/* Reaction log in chat */
+.reaction-log-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: var(--border-light);
+  font-size: 12px;
+  color: var(--mid);
+  align-self: center;
+  max-width: 90%;
+}
+.note-log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: var(--r);
+  background: #fffbf0;
+  border: 1px solid var(--amber-mid);
+  font-size: 12px;
+  color: var(--amber);
+  align-self: center;
+  max-width: 90%;
+}
+
 .fb-card { border-radius: var(--r-lg); padding: 14px 16px; border: 1px solid; }
 .fb-section { margin-bottom: 10px; }
 .fb-section:last-child { margin-bottom: 0; }
@@ -98,14 +197,11 @@ button { cursor: pointer; }
 .fb-text { font-size: 13px; line-height: 1.6; }
 .example-box { padding: 8px 12px; border-radius: 8px; font-size: 13px; font-style: italic; line-height: 1.6; }
 
-/* Crisis banner */
 .crisis-banner { background: var(--indigo-pale); border: 1px solid var(--indigo-mid); border-radius: var(--r); padding: 10px 14px; margin: 8px 14px 0; flex-shrink: 0; }
 
-/* Progress bar */
 .prog-wrap { height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; margin: 6px 0; }
 .prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
 
-/* Input area */
 .input-area { background: var(--warm); border-top: 1px solid var(--border-light); padding: 10px 14px; padding-bottom: max(10px, env(safe-area-inset-bottom)); flex-shrink: 0; }
 .input-row { display: flex; gap: 8px; align-items: flex-end; }
 .chat-input { flex: 1; resize: none; padding: 9px 12px; font-size: 14px; border-radius: var(--r); border: 1px solid var(--border); background: var(--cream); color: var(--charcoal); line-height: 1.5; min-height: 42px; max-height: 110px; outline: none; transition: border-color 0.15s; }
@@ -120,7 +216,6 @@ button { cursor: pointer; }
 .action-btn.primary { background: var(--amber-pale); border-color: var(--amber-mid); color: var(--amber); }
 .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* Home header */
 .home-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.75rem; gap: 12px; }
 .home-title { font-family: 'Instrument Serif', serif; font-size: 26px; line-height: 1.2; margin-bottom: 4px; }
 .home-sub { font-size: 14px; color: var(--mid); }
@@ -129,22 +224,37 @@ button { cursor: pointer; }
 .pts-num { font-size: 20px; font-weight: 600; color: var(--sage); line-height: 1; }
 .pts-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-/* Progress screen */
 .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1rem; }
 .stat-card { padding: 10px 8px; border-radius: var(--r); border: 1px solid var(--border-light); text-align: center; background: var(--warm); }
 .stat-num { font-size: 20px; font-weight: 600; line-height: 1; margin-bottom: 2px; }
 .stat-label { font-size: 11px; color: var(--muted); }
 
-/* Debrief */
 .debrief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
 .exchange-counter { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; }
 
-/* Scrollbar */
+/* End of session form */
+.eos-form { background: var(--warm); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: 1.25rem; margin-bottom: 1rem; }
+.eos-form input, .eos-form textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 9px 12px; font-size: 14px; outline: none; transition: border-color 0.15s; background: var(--cream); }
+.eos-form input:focus, .eos-form textarea:focus { border-color: var(--sage-mid); }
+.eos-form label { font-size: 13px; font-weight: 500; color: var(--mid); display: block; margin-bottom: 5px; }
+.eos-form .field { margin-bottom: 1rem; }
+.star-row { display: flex; gap: 8px; }
+.star-btn { width: 40px; height: 40px; border-radius: var(--r); border: 1px solid var(--border); background: var(--cream); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.star-btn.active { background: var(--amber-pale); border-color: var(--amber-mid); }
+.star-btn:hover { border-color: var(--amber-mid); }
+
+/* PDF styles (hidden, used for print) */
+@media print {
+  body * { visibility: hidden; }
+  #pdf-content, #pdf-content * { visibility: visible; }
+  #pdf-content { position: fixed; left: 0; top: 0; width: 100%; padding: 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.6; color: #1c1c1a; }
+}
+#pdf-content { display: none; }
+
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* Mobile */
 @media (max-width: 500px) {
   .quick-grid { grid-template-columns: 1fr; gap: 6px; }
   .approach-grid { grid-template-columns: repeat(2, 1fr); }
@@ -152,13 +262,16 @@ button { cursor: pointer; }
   .option-row-3 { grid-template-columns: 1fr 1fr; }
   .debrief-grid { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
+  .reaction-strip { gap: 4px; }
+  .reaction-btn { font-size: 11px; padding: 3px 8px; }
 }
 </style>
 </head>
 <body>
 <div id="root"></div>
+<div id="pdf-content"></div>
 <script type="text/babel">
-const { useState, useRef, useEffect } = React;
+const { useState, useRef, useEffect, useCallback } = React;
 const API = "/api/chat";
 const STORAGE_KEY = "counselling_v3";
 
@@ -243,14 +356,95 @@ const AP_LABEL = {any:"Eclectic",person_centred:"Person-Centred",sfbt:"Solution-
 const CATS = ["All","Mood","Life Events","Relationships","Work","Substance Use","Trauma","Existential","Crisis"];
 const RP = {good:3,okay:1,needs_work:0};
 
+const REACTIONS = [
+  { id:"went_well", emoji:"👍", label:"Went well", desc:"This exchange felt effective — good technique or connection" },
+  { id:"breakthrough", emoji:"💡", label:"Breakthrough", desc:"Something clicked — an insight, shift, or meaningful moment" },
+  { id:"unsure", emoji:"🤔", label:"Unsure", desc:"Not sure if that was the right response — worth reflecting on" },
+  { id:"stuck", emoji:"😟", label:"Stuck", desc:"Felt stuck or uncertain about how to proceed" },
+];
+
 function loadProg() { try { const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):{sessions:[],totalSessions:0,totalPoints:0}; } catch{return{sessions:[],totalSessions:0,totalPoints:0};} }
 function saveProg(d) { try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch{} }
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function formatTime(ts){ const d=new Date(ts); return d.toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"}); }
 
 function ratingStyle(r){
   if(r==="good") return {bg:"var(--sage-pale)",border:"var(--sage-mid)",color:"var(--sage)",label:"Good"};
   if(r==="okay") return {bg:"var(--amber-pale)",border:"var(--amber-mid)",color:"var(--amber)",label:"Okay"};
   return {bg:"var(--red-pale)",border:"var(--red-mid)",color:"var(--red)",label:"Needs work"};
+}
+
+async function saveToSupabase(sessionData) {
+  try {
+    await fetch("/api/db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sessionData),
+    });
+  } catch(e) { console.warn("Could not save to database:", e); }
+}
+
+function generatePDF(opts) {
+  const { includeTranscript, studentName, sessionDate, scenario, approach, difficulty, exchanges, reactions, notes, selfRating, reflection, debrief, messages } = opts;
+  const sc_ = SCENARIOS.find(s=>s.id===scenario);
+  const diff_ = DIFFICULTIES.find(d=>d.id===difficulty);
+  const rs = ratingStyle(debrief?.overall||"okay");
+
+  const reactionCounts = {};
+  (reactions||[]).forEach(r=>{ reactionCounts[r.type]=(reactionCounts[r.type]||0)+1; });
+  const reactionSummary = REACTIONS.map(r=> reactionCounts[r.id] ? `${r.emoji} ${r.label}: ${reactionCounts[r.id]}` : null).filter(Boolean).join(" &nbsp;·&nbsp; ");
+
+  const notesHTML = (notes||[]).length > 0
+    ? `<div style="margin-top:12px"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Session Notes</strong>${(notes||[]).map(n=>`<div style="margin-top:6px;padding:7px 10px;background:#fffbf0;border-left:3px solid #f0c080;font-size:13px;border-radius:4px"><span style="font-size:11px;color:#aaa">${formatTime(n.timestamp)}</span><br/>${n.text}</div>`).join("")}</div>`
+    : "";
+
+  const transcriptHTML = includeTranscript && messages && messages.length > 0
+    ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Full Transcript</strong>${messages.map(m=>`<div style="margin-top:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:${m.role==="counsellor"?"#4a6741":"#888"};margin-bottom:3px">${m.role==="counsellor"?"You (Counsellor)":"Client"}</div><div style="font-size:13px;line-height:1.6;padding:8px 12px;background:${m.role==="counsellor"?"#eef3ed":"#fafaf8"};border-radius:8px">${m.text}</div></div>`).join("")}</div>`
+    : "";
+
+  const debriefHTML = debrief ? `
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee">
+      <strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Supervisor Debrief</strong>
+      <div style="margin-top:8px;padding:12px;background:${rs.bg};border:1px solid ${rs.border};border-radius:8px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:${rs.color};margin-bottom:6px">Overall: ${rs.label}</div>
+        <p style="font-size:13px;line-height:1.6;margin:0 0 10px">${debrief.summary||""}</p>
+        ${debrief.strengths?.length ? `<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#4a6741">Strengths</strong>${debrief.strengths.map(s=>`<p style="font-size:13px;margin:3px 0;color:#4a6741">· ${s}</p>`).join("")}</div>` : ""}
+        ${debrief.areas?.length ? `<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">To develop</strong>${debrief.areas.map(a=>`<p style="font-size:13px;margin:3px 0;color:#b06010">· ${a}</p>`).join("")}</div>` : ""}
+        ${debrief.key_moment ? `<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Key moment</strong><p style="font-size:13px;margin:3px 0;line-height:1.6">${debrief.key_moment}</p></div>` : ""}
+        ${debrief.example_response ? `<div><strong style="font-size:11px;text-transform:uppercase;color:#3c3c8c">Stronger response example</strong><p style="font-size:13px;margin:4px 0;font-style:italic;color:#3c3c8c;line-height:1.6">${debrief.example_response}</p></div>` : ""}
+      </div>
+    </div>` : "";
+
+  const html = `
+    <div style="font-family:'DM Sans',sans-serif;max-width:680px;margin:0 auto;padding:24px;color:#1c1c1a">
+      <div style="border-bottom:2px solid #4a6741;padding-bottom:12px;margin-bottom:20px">
+        <div style="font-size:22px;font-weight:600;color:#4a6741">Counselling Role-Play — Session Summary</div>
+        <div style="font-size:13px;color:#888;margin-top:4px">Generated ${new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"})}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:13px">
+        <div><strong>Student:</strong> ${studentName||"Not provided"}</div>
+        <div><strong>Date:</strong> ${sessionDate||new Date().toLocaleDateString("en-AU")}</div>
+        <div><strong>Scenario:</strong> ${sc_?.label||scenario}</div>
+        <div><strong>Approach:</strong> ${approach}</div>
+        <div><strong>Difficulty:</strong> ${diff_?.label||difficulty}</div>
+        <div><strong>Exchanges:</strong> ${exchanges}</div>
+      </div>
+      ${selfRating ? `<div style="margin-bottom:12px;font-size:13px"><strong>Self-rating:</strong> ${"⭐".repeat(selfRating)} (${selfRating}/5)</div>` : ""}
+      ${reflection ? `<div style="margin-bottom:12px;padding:10px 12px;background:#f7f5f2;border-radius:8px;font-size:13px"><strong>Reflection:</strong><br/>${reflection}</div>` : ""}
+      ${reactionSummary ? `<div style="margin-bottom:12px;font-size:13px"><strong>In-session reactions:</strong> ${reactionSummary}</div>` : ""}
+      ${notesHTML}
+      ${debriefHTML}
+      ${transcriptHTML}
+      <div style="margin-top:24px;padding-top:12px;border-top:1px solid #eee;font-size:11px;color:#aaa;text-align:center">
+        Counselling Role-Play Practice · counselling-roleplay.vercel.app · For training purposes only
+      </div>
+    </div>`;
+
+  const el = document.getElementById("pdf-content");
+  el.innerHTML = html;
+  el.style.display = "block";
+  window.print();
+  setTimeout(()=>{ el.style.display = "none"; }, 1000);
 }
 
 function App(){
@@ -272,9 +466,26 @@ function App(){
   const [progress,setProgress]=useState(loadProg);
   const [showCrisisGuide,setShowCrisisGuide]=useState(false);
   const [exchangeCount,setExchangeCount]=useState(0);
-  const bottomRef=useRef(null);
 
-  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[messages,stepFeedback,finalFeedback,loading]);
+  // New state for testing features
+  const [reactions,setReactions]=useState([]);
+  const [sessionNotes,setSessionNotes]=useState([]);
+  const [showNoteInput,setShowNoteInput]=useState(false);
+  const [noteText,setNoteText]=useState("");
+  const [chatLog,setChatLog]=useState([]); // combined messages + reactions + notes in order
+
+  // End of session form state
+  const [showEosForm,setShowEosForm]=useState(false);
+  const [studentName,setStudentName]=useState("");
+  const [sessionDate,setSessionDate]=useState(new Date().toISOString().split("T")[0]);
+  const [selfRating,setSelfRating]=useState(0);
+  const [reflection,setReflection]=useState("");
+
+  const bottomRef=useRef(null);
+  const noteInputRef=useRef(null);
+
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[chatLog,stepFeedback,finalFeedback,loading]);
+  useEffect(()=>{ if(showNoteInput && noteInputRef.current) noteInputRef.current.focus(); },[showNoteInput]);
 
   const toggleApproach=(id)=>setApproach(prev=>{
     if(id==="any") return prev.includes("any")?[]:["any"];
@@ -325,13 +536,24 @@ Respond ONLY with valid JSON (no markdown):
 {"overall":"good|okay|needs_work","summary":"3-5 sentences giving an honest overall picture of the session, referencing specific moments from the transcript","strengths":["3-4 specific strengths with a brief explanation of why each worked clinically — not just labels but actual reasoning"],"areas":["3-4 specific areas to develop, each with a concrete suggestion for how to improve — practical and actionable"],"technique_use":"2-3 sentences evaluating how well the student used the chosen therapeutic approach, with specific examples from the transcript","relational_quality":"2-3 sentences on the therapeutic relationship — rapport, empathy, pacing, and how the client responded to the counsellor","key_moment":"Identify the single most important moment in the session — describe what happened and what it reveals about the student's current skill level","example_response":"A full, well-crafted example of a stronger counsellor response from a key moment in the session, written in first person as if speaking directly to the client"}`;
   };
 
+  const addToChatLog=(item)=>setChatLog(prev=>[...prev,item]);
+
   const doStart=async(ap,sc,diff,fm,len)=>{
-    setScreen("session"); setLoading(true); setMessages([]); setStepFeedback(null);
-    setFinalFeedback(null); setShowCrisisGuide(false); setExchangeCount(0); setShowingFeedback(false);
+    setScreen("session"); setLoading(true);
+    setMessages([]); setChatLog([]);
+    setStepFeedback(null); setFinalFeedback(null);
+    setShowCrisisGuide(false); setExchangeCount(0);
+    setShowingFeedback(false); setReactions([]); setSessionNotes([]);
+    setShowNoteInput(false); setNoteText("");
     try {
       const text=await callAPI(clientSystem(ap,sc,diff),[{role:"user",content:"Begin the session."}]);
-      setMessages([{role:"client",text}]);
-    } catch(e) { setMessages([{role:"client",text:"Something went wrong. Please try again."}]); }
+      const msg={role:"client",text,id:Date.now()};
+      setMessages([msg]);
+      setChatLog([{type:"msg",...msg}]);
+    } catch(e) {
+      const msg={role:"client",text:"Something went wrong. Please try again.",id:Date.now()};
+      setMessages([msg]); setChatLog([{type:"msg",...msg}]);
+    }
     setLoading(false);
   };
 
@@ -347,11 +569,30 @@ Respond ONLY with valid JSON (no markdown):
     doStart(ap,sc,diff,fm,len);
   };
 
+  const addReaction=(reactionId)=>{
+    const ts=Date.now();
+    const r={type:reactionId,timestamp:ts,exchangeNum:exchangeCount};
+    setReactions(prev=>[...prev,r]);
+    setChatLog(prev=>[...prev,{type:"reaction",...r}]);
+  };
+
+  const saveNote=()=>{
+    if(!noteText.trim()) return;
+    const ts=Date.now();
+    const n={text:noteText.trim(),timestamp:ts,exchangeNum:exchangeCount};
+    setSessionNotes(prev=>[...prev,n]);
+    setChatLog(prev=>[...prev,{type:"note",...n}]);
+    setNoteText(""); setShowNoteInput(false);
+  };
+
   const sendMessage=async()=>{
     if(!input.trim()||loading||showingFeedback) return;
     const userText=input.trim(); setInput("");
-    const newMsgs=[...messages,{role:"counsellor",text:userText}];
-    setMessages(newMsgs); setLoading(true); setStepFeedback(null);
+    const msg={role:"counsellor",text:userText,id:Date.now()};
+    const newMsgs=[...messages,msg];
+    setMessages(newMsgs);
+    setChatLog(prev=>[...prev,{type:"msg",...msg}]);
+    setLoading(true); setStepFeedback(null);
     const newCount=exchangeCount+1; setExchangeCount(newCount);
 
     if(feedbackMode==="step"){
@@ -378,8 +619,14 @@ Respond ONLY with valid JSON (no markdown):
     const history=msgs.map(m=>({role:m.role==="counsellor"?"user":"assistant",content:m.text}));
     try{
       const text=await callAPI(clientSystem(approach,scenario,difficulty),history);
-      setMessages(prev=>[...prev,{role:"client",text}]);
-    }catch{setMessages(prev=>[...prev,{role:"client",text:"Sorry, can you say that again?"}]);}
+      const msg={role:"client",text,id:Date.now()};
+      setMessages(prev=>[...prev,msg]);
+      setChatLog(prev=>[...prev,{type:"msg",...msg}]);
+    }catch{
+      const msg={role:"client",text:"Sorry, can you say that again?",id:Date.now()};
+      setMessages(prev=>[...prev,msg]);
+      setChatLog(prev=>[...prev,{type:"msg",...msg}]);
+    }
     setLoading(false);
   };
 
@@ -389,14 +636,40 @@ Respond ONLY with valid JSON (no markdown):
   };
 
   const getFinalFeedback=async()=>{
-    if(gettingFinal) return; setGettingFinal(true);
+    if(gettingFinal) return;
+    // Show end-of-session form first
+    setShowEosForm(true);
+    setScreen("eos");
+  };
+
+  const submitEosAndGetDebrief=async()=>{
+    setScreen("session"); setShowEosForm(false); setGettingFinal(true);
     const transcript=messages.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
     const sc_=SCENARIOS.find(s=>s.id===scenario);
     try{
       const raw=await callAPI(supervisorSystem("end",approach,scenario,difficulty),
         [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],2500);
       let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",relational_quality:"",key_moment:"",example_response:"Try using more open questions."};}
-      setFinalFeedback(fb); recordSession(fb); setScreen("feedback");
+      setFinalFeedback(fb);
+      recordSession(fb);
+
+      // Save to Supabase
+      await saveToSupabase({
+        student_name: studentName||null,
+        student_email: null,
+        session_date: sessionDate,
+        unit_code: null,
+        scenario: scenario,
+        transcript: messages,
+        debrief: fb,
+        reactions: reactions,
+        notes: sessionNotes,
+        self_rating: selfRating||null,
+        final_reflection: reflection||null,
+        score_data: { overall: fb.overall, exchanges: exchangeCount, approach: getApLabel(approach) },
+      });
+
+      setScreen("feedback");
     }catch{setScreen("feedback");}
     setGettingFinal(false);
   };
@@ -410,17 +683,29 @@ Respond ONLY with valid JSON (no markdown):
     setProgress(updated); saveProg(updated);
   };
 
-  const reset=()=>{setScreen("home");setMessages([]);setInput("");setStepFeedback(null);setFinalFeedback(null);setShowingFeedback(false);setExchangeCount(0);setShowCrisisGuide(false);};
+  const reset=()=>{
+    setScreen("home");setMessages([]);setChatLog([]);setInput("");
+    setStepFeedback(null);setFinalFeedback(null);setShowingFeedback(false);
+    setExchangeCount(0);setShowCrisisGuide(false);
+    setReactions([]);setSessionNotes([]);setShowNoteInput(false);setNoteText("");
+    setStudentName("");setSelfRating(0);setReflection("");
+    setSessionDate(new Date().toISOString().split("T")[0]);
+  };
 
   // ── HOME ──
   if(screen==="home") return(
     <>
     {showDisclaimer&&(
       <div style={{position:"fixed",inset:0,background:"rgba(28,28,26,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:"1.25rem"}}>
-        <div style={{background:"var(--warm)",borderRadius:"var(--r-lg)",padding:"1.5rem 1.25rem",maxWidth:400,width:"100%"}}>
+        <div style={{background:"var(--warm)",borderRadius:"var(--r-lg)",padding:"1.5rem 1.25rem",maxWidth:420,width:"100%"}}>
           <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,marginBottom:"0.75rem"}}>Before you begin</div>
           <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>This is a <strong style={{color:"var(--charcoal)"}}>counselling practice tool for students</strong>. It simulates client sessions using AI and is for skill development only.</p>
-          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"1.25rem"}}>It is <strong style={{color:"var(--charcoal)"}}>not a mental health service</strong>. If you need support, call <strong style={{color:"var(--charcoal)"}}>Lifeline 13 11 14</strong> or <strong style={{color:"var(--charcoal)"}}>Beyond Blue 1300 22 4636</strong>.</p>
+          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>It is <strong style={{color:"var(--charcoal)"}}>not a mental health service</strong>. If you need support, call <strong style={{color:"var(--charcoal)"}}>Lifeline 13 11 14</strong> or <strong style={{color:"var(--charcoal)"}}>Beyond Blue 1300 22 4636</strong>.</p>
+          <div style={{background:"#fffbf0",border:"1px solid var(--amber-mid)",borderRadius:"var(--r)",padding:"10px 12px",marginBottom:"1rem"}}>
+            <p style={{fontSize:13,lineHeight:1.6,color:"var(--amber)",margin:0}}>
+              <strong>🧪 Beta version</strong> — You're using an early release of this app. During sessions you'll see simple feedback buttons to help us improve the experience for counselling students. Your responses are anonymous.
+            </p>
+          </div>
           <button className="btn btn-primary" style={{width:"100%"}} onClick={()=>setShowDisclaimer(false)}>I understand — get started</button>
         </div>
       </div>
@@ -536,6 +821,49 @@ Respond ONLY with valid JSON (no markdown):
     </>
   );
 
+  // ── END OF SESSION FORM ──
+  if(screen==="eos") return(
+    <div className="page">
+      <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:"0.5rem"}}>Before your debrief</div>
+      <p style={{fontSize:14,color:"var(--mid)",marginBottom:"1.5rem",lineHeight:1.6}}>Just a few quick details — these are saved with your session summary.</p>
+
+      <div className="eos-form">
+        <div className="field">
+          <label>Your name <span style={{color:"var(--muted)",fontWeight:400}}>(optional)</span></label>
+          <input type="text" placeholder="e.g. Jane Smith" value={studentName} onChange={e=>setStudentName(e.target.value)}/>
+        </div>
+        <div className="field">
+          <label>Session date</label>
+          <input type="date" value={sessionDate} onChange={e=>setSessionDate(e.target.value)}/>
+        </div>
+        <div className="field">
+          <label>How did you feel the session went overall?</label>
+          <div className="star-row">
+            {[1,2,3,4,5].map(n=>(
+              <button key={n} className={`star-btn ${selfRating>=n?"active":""}`} onClick={()=>setSelfRating(n)}>
+                {selfRating>=n?"⭐":"☆"}
+              </button>
+            ))}
+            {selfRating>0&&<span style={{fontSize:13,color:"var(--amber)",alignSelf:"center",marginLeft:4}}>
+              {["","Needs a lot of work","Below expectations","Getting there","Good effort","Excellent"][selfRating]}
+            </span>}
+          </div>
+        </div>
+        <div className="field" style={{marginBottom:0}}>
+          <label>Brief reflection <span style={{color:"var(--muted)",fontWeight:400}}>(optional)</span></label>
+          <textarea rows={3} placeholder="What did you notice about your practice? What would you do differently?" value={reflection} onChange={e=>setReflection(e.target.value)} style={{resize:"vertical"}}/>
+        </div>
+      </div>
+
+      <button className="btn btn-primary" style={{width:"100%",padding:"13px",fontSize:15,marginBottom:"0.75rem"}} onClick={submitEosAndGetDebrief}>
+        {gettingFinal?"Getting debrief…":"Get supervisor debrief →"}
+      </button>
+      <button className="btn btn-ghost" style={{width:"100%"}} onClick={()=>setScreen("session")}>
+        ← Back to session
+      </button>
+    </div>
+  );
+
   // ── SESSION ──
   if(screen==="session"){
     const diff_=DIFFICULTIES.find(d=>d.id===difficulty);
@@ -567,6 +895,25 @@ Respond ONLY with valid JSON (no markdown):
           </div>
         </div>
 
+        {/* Reaction strip */}
+        <div className="reaction-strip">
+          <span className="reaction-strip-label">How's this going?</span>
+          {REACTIONS.map(r=>(
+            <div key={r.id} className="tooltip-wrap">
+              <button className="reaction-btn" onClick={()=>addReaction(r.id)}>
+                {r.emoji} {r.label}
+              </button>
+              <div className="tooltip">{r.desc}</div>
+            </div>
+          ))}
+          <div className="tooltip-wrap" style={{marginLeft:"auto"}}>
+            <button className="reaction-btn" style={{background:"#fffbf0",borderColor:"var(--amber-mid)",color:"var(--amber)"}} onClick={()=>setShowNoteInput(v=>!v)}>
+              📝 Add note
+            </button>
+            <div className="tooltip">Jot down what you noticed, wanted to try differently, or a question that came up — saved with your session summary.</div>
+          </div>
+        </div>
+
         {isCrisis&&(
           <div className="crisis-banner">
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -583,14 +930,36 @@ Respond ONLY with valid JSON (no markdown):
         )}
 
         <div className="chat-area">
-          {messages.map((m,i)=>(
-            <div key={i} className={`msg-wrap ${m.role}`}>
-              <div className="msg-bubble">
-                <div className="msg-label">{m.role==="counsellor"?"You (Counsellor)":"Client"}</div>
-                {m.text}
+          {chatLog.map((item,i)=>{
+            if(item.type==="msg") return(
+              <div key={i} className={`msg-wrap ${item.role}`}>
+                <div className="msg-bubble">
+                  <div className="msg-label">{item.role==="counsellor"?"You (Counsellor)":"Client"}</div>
+                  {item.text}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+            if(item.type==="reaction"){
+              const r=REACTIONS.find(r=>r.id===item.type_id)||REACTIONS.find(r=>r.id===item.type);
+              return(
+                <div key={i} className="reaction-log-item">
+                  <span>{r?.emoji}</span>
+                  <span>{r?.label}</span>
+                  <span style={{color:"var(--muted)",fontSize:11,marginLeft:4}}>{formatTime(item.timestamp)}</span>
+                </div>
+              );
+            }
+            if(item.type==="note") return(
+              <div key={i} className="note-log-item">
+                <span>📝</span>
+                <div>
+                  <div style={{fontSize:11,color:"var(--muted)",marginBottom:2}}>{formatTime(item.timestamp)}</div>
+                  <div>{item.text}</div>
+                </div>
+              </div>
+            );
+            return null;
+          })}
 
           {loading&&(
             <div className="msg-wrap client">
@@ -633,19 +1002,35 @@ Respond ONLY with valid JSON (no markdown):
           <div ref={bottomRef}/>
         </div>
 
+        {/* Note input popup */}
+        {showNoteInput&&(
+          <div className="note-popup">
+            <div className="note-popup-title">📝 Session note — capture what you're noticing</div>
+            <textarea ref={noteInputRef} className="note-input" rows={3}
+              placeholder="e.g. I wanted to reflect more here but wasn't sure how… / The client seemed to shift when I asked about family…"
+              value={noteText} onChange={e=>setNoteText(e.target.value)}
+              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();saveNote();}}}
+            />
+            <div style={{display:"flex",gap:8,marginTop:8}}>
+              <button className="btn btn-primary" style={{flex:1,padding:"8px"}} onClick={saveNote}>Save note</button>
+              <button className="btn btn-ghost" style={{padding:"8px 14px"}} onClick={()=>{setShowNoteInput(false);setNoteText("");}}>Cancel</button>
+            </div>
+          </div>
+        )}
+
         <div className="input-area">
           <div className="input-row">
             <textarea className="chat-input" rows={1} value={input}
               onChange={e=>{setInput(e.target.value);e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,110)+"px";}}
               onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
-              placeholder="Type your counsellor response…" disabled={loading||showingFeedback}/>
-            <button className="send-btn" disabled={loading||showingFeedback||!input.trim()} onClick={sendMessage}>
+              placeholder="Type your counsellor response…" disabled={loading||showingFeedback||showNoteInput}/>
+            <button className="send-btn" disabled={loading||showingFeedback||showNoteInput||!input.trim()} onClick={sendMessage}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-5 14-2-5-5-3z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="none"/></svg>
             </button>
           </div>
           <div className="action-row">
             <button className={`action-btn ${exchangeCount>=2?"primary":""}`} disabled={exchangeCount<2||gettingFinal||loading} onClick={getFinalFeedback}>
-              {gettingFinal?"Getting summary…":"Finish & get summary"}
+              {gettingFinal?"Getting debrief…":"Finish & get debrief"}
             </button>
           </div>
           <p style={{fontSize:11,color:"var(--muted)",textAlign:"center",marginTop:5}}>Enter to send · Shift+Enter for new line</p>
@@ -660,11 +1045,15 @@ Respond ONLY with valid JSON (no markdown):
     const sc_=SCENARIOS.find(s=>s.id===scenario);
     const earned=finalFeedback?(RP[finalFeedback.overall]||0)*diff_.pts:0;
     const rs=finalFeedback?ratingStyle(finalFeedback.overall):ratingStyle("okay");
+    const reactionCounts={};
+    reactions.forEach(r=>{reactionCounts[r.type]=(reactionCounts[r.type]||0)+1;});
+
     return(
       <div className="page">
         <div style={{marginBottom:"1.5rem"}}>
           <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:4}}>Session Debrief</div>
           <div style={{fontSize:13,color:"var(--mid)"}}>{getApLabel(approach)} · {sc_?.label} · {diff_?.label}{isCrisis?" · Crisis":""} · {exchangeCount} exchanges</div>
+          {studentName&&<div style={{fontSize:13,color:"var(--mid)",marginTop:2}}>{studentName} · {new Date(sessionDate).toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"})}</div>}
         </div>
 
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:"var(--r-lg)",background:"var(--sage-pale)",border:"1px solid var(--sage-mid)",marginBottom:"1rem"}}>
@@ -674,6 +1063,37 @@ Respond ONLY with valid JSON (no markdown):
             <div style={{fontSize:12,color:"var(--sage-light)"}}>{rs.label} × {diff_?.pts} difficulty · Total: {progress.totalPoints} pts</div>
           </div>
         </div>
+
+        {/* In-session feedback summary */}
+        {(reactions.length>0||sessionNotes.length>0)&&(
+          <div className="card" style={{marginBottom:"1rem",background:"#fffbf0",borderColor:"var(--amber-mid)"}}>
+            <div className="fb-label" style={{color:"var(--amber)",marginBottom:8}}>Your in-session feedback</div>
+            {reactions.length>0&&(
+              <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:sessionNotes.length>0?10:0}}>
+                {REACTIONS.map(r=>reactionCounts[r.id]?(
+                  <span key={r.id} style={{fontSize:12,padding:"3px 10px",borderRadius:20,background:"white",border:"1px solid var(--amber-mid)",color:"var(--amber)"}}>
+                    {r.emoji} {r.label} ×{reactionCounts[r.id]}
+                  </span>
+                ):null)}
+              </div>
+            )}
+            {sessionNotes.map((n,i)=>(
+              <div key={i} style={{fontSize:13,padding:"7px 10px",background:"white",borderRadius:"var(--r)",border:"1px solid var(--border-light)",marginBottom:5,lineHeight:1.5}}>
+                <span style={{fontSize:11,color:"var(--muted)",marginRight:6}}>{formatTime(n.timestamp)}</span>{n.text}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {selfRating>0&&(
+          <div className="card" style={{marginBottom:"1rem",display:"flex",alignItems:"center",gap:12}}>
+            <div>
+              <div style={{fontSize:12,color:"var(--muted)",marginBottom:2}}>Your self-rating</div>
+              <div style={{fontSize:18}}>{"⭐".repeat(selfRating)}</div>
+            </div>
+            {reflection&&<div style={{fontSize:13,color:"var(--mid)",lineHeight:1.5,borderLeft:"2px solid var(--border)",paddingLeft:12,flex:1}}>{reflection}</div>}
+          </div>
+        )}
 
         {finalFeedback&&(
           <>
@@ -716,13 +1136,29 @@ Respond ONLY with valid JSON (no markdown):
             )}
 
             {finalFeedback.example_response&&(
-              <div className="card" style={{background:"var(--indigo-pale)",borderColor:"var(--indigo-mid)",marginBottom:"1.5rem"}}>
+              <div className="card" style={{background:"var(--indigo-pale)",borderColor:"var(--indigo-mid)",marginBottom:"1rem"}}>
                 <div className="fb-label" style={{color:"var(--indigo)"}}>Stronger response example</div>
                 <p style={{fontSize:13,color:"var(--indigo)",fontStyle:"italic",lineHeight:1.6,margin:0}}>{finalFeedback.example_response}</p>
               </div>
             )}
           </>
         )}
+
+        {/* Download PDF */}
+        <div className="card" style={{marginBottom:"1rem",background:"var(--teal-pale)",borderColor:"var(--teal-mid)"}}>
+          <div className="fb-label" style={{color:"var(--teal)",marginBottom:8}}>Download your summary</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"8px 16px"}}
+              onClick={()=>generatePDF({includeTranscript:false,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
+              📄 Summary only
+            </button>
+            <button className="btn btn-ghost" style={{fontSize:13,padding:"8px 16px",border:"1px solid var(--teal-mid)",color:"var(--teal)"}}
+              onClick={()=>generatePDF({includeTranscript:true,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
+              📋 With full transcript
+            </button>
+          </div>
+          <p style={{fontSize:11,color:"var(--teal)",marginTop:8,opacity:0.8}}>Opens print dialog — choose "Save as PDF" to download.</p>
+        </div>
 
         <div style={{display:"flex",gap:8}}>
           <button className="btn btn-primary" style={{flex:1,padding:"12px"}} onClick={reset}>New session</button>
