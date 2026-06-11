@@ -71,6 +71,7 @@ button { cursor: pointer; }
 .session-header { background: var(--warm); border-bottom: 1px solid var(--border-light); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
 .chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
 
+/* Messages */
 .msg-wrap { display: flex; flex-direction: column; }
 .msg-wrap.counsellor { align-items: flex-end; }
 .msg-wrap.client { align-items: flex-start; }
@@ -85,13 +86,14 @@ button { cursor: pointer; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes pulse { 0%,80%,100%{opacity:0.3;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
 
-/* Inline message reactions */
-.msg-reactions {
+/* Inline message reactions + note row */
+.msg-actions {
   display: flex;
   gap: 4px;
   margin-top: 5px;
-  max-width: 78%;
+  max-width: 90%;
   flex-wrap: wrap;
+  align-items: center;
 }
 .msg-reaction-btn {
   display: inline-flex;
@@ -108,10 +110,85 @@ button { cursor: pointer; }
   white-space: nowrap;
 }
 .msg-reaction-btn:hover { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); }
-.msg-reaction-btn.selected { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); font-weight: 500; }
+.msg-reaction-btn.selected-good { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); font-weight: 500; }
 .msg-reaction-btn.selected-amber { border-color: var(--amber-mid); background: var(--amber-pale); color: var(--amber); font-weight: 500; }
 
-/* Progress + note strip */
+/* Add note button on message */
+.msg-note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--amber-mid);
+  background: white;
+  font-size: 11px;
+  color: var(--amber);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.msg-note-btn:hover { background: var(--amber-pale); }
+.msg-note-btn.has-note { background: var(--amber-pale); }
+
+/* Divider between reactions and note btn */
+.msg-actions-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 2px;
+}
+
+/* Attached note display */
+.msg-note-display {
+  max-width: 78%;
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: #fffbf0;
+  border: 1px solid var(--amber-mid);
+  border-radius: var(--r);
+  font-size: 12px;
+  color: var(--amber);
+  line-height: 1.5;
+}
+.msg-note-display-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--amber);
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+/* Note input popup */
+.note-popup {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: white;
+  border-top: 2px solid var(--amber-mid);
+  padding: 12px 14px;
+  z-index: 40;
+  max-width: 680px;
+  margin: 0 auto;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+}
+.note-popup-context {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-popup-title { font-size: 12px; font-weight: 600; color: var(--amber); margin-bottom: 6px; }
+.note-input { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; font-size: 13px; resize: none; outline: none; line-height: 1.5; }
+.note-input:focus { border-color: var(--amber-mid); }
+
+/* Progress strip */
 .progress-strip {
   background: #f0ede8;
   border-top: 1px solid var(--border-light);
@@ -119,10 +196,11 @@ button { cursor: pointer; }
   padding: 5px 14px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
+.prog-wrap { height: 6px; background: var(--border-light); border-radius: 3px; flex: 1; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
 
 /* Tooltip */
 .tooltip-wrap { position: relative; display: inline-flex; }
@@ -140,42 +218,11 @@ button { cursor: pointer; }
   pointer-events: none;
   z-index: 50;
   line-height: 1.4;
-  max-width: 220px;
+  max-width: 240px;
   white-space: normal;
   text-align: center;
 }
 .tooltip-wrap:hover .tooltip { display: block; }
-
-/* Note input popup */
-.note-popup {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: white;
-  border-top: 2px solid var(--border);
-  padding: 12px 14px;
-  z-index: 40;
-  max-width: 680px;
-  margin: 0 auto;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-}
-.note-popup-title { font-size: 12px; font-weight: 600; color: var(--mid); margin-bottom: 6px; }
-.note-input { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; font-size: 13px; resize: none; outline: none; line-height: 1.5; }
-.note-input:focus { border-color: var(--sage-mid); }
-
-/* Note in chat */
-.note-log-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 7px 12px;
-  border-radius: var(--r);
-  background: #fffbf0;
-  border: 1px solid var(--amber-mid);
-  font-size: 12px;
-  color: var(--amber);
-  align-self: center;
-  max-width: 90%;
-}
 
 .fb-card { border-radius: var(--r-lg); padding: 14px 16px; border: 1px solid; }
 .fb-section { margin-bottom: 10px; }
@@ -185,9 +232,6 @@ button { cursor: pointer; }
 .example-box { padding: 8px 12px; border-radius: 8px; font-size: 13px; font-style: italic; line-height: 1.6; }
 
 .crisis-banner { background: var(--indigo-pale); border: 1px solid var(--indigo-mid); border-radius: var(--r); padding: 10px 14px; margin: 8px 14px 0; flex-shrink: 0; }
-
-.prog-wrap { height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; flex: 1; }
-.prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
 
 .input-area { background: var(--warm); border-top: 1px solid var(--border-light); padding: 10px 14px; padding-bottom: max(10px, env(safe-area-inset-bottom)); flex-shrink: 0; }
 .input-row { display: flex; gap: 8px; align-items: flex-end; }
@@ -217,14 +261,15 @@ button { cursor: pointer; }
 .stat-label { font-size: 11px; color: var(--muted); }
 
 .debrief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+.exchange-counter { font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
 
-/* End of session form */
+/* EOS form */
 .eos-form { background: var(--warm); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: 1.25rem; margin-bottom: 1rem; }
 .eos-form input, .eos-form textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 9px 12px; font-size: 14px; outline: none; transition: border-color 0.15s; background: var(--cream); }
 .eos-form input:focus, .eos-form textarea:focus { border-color: var(--sage-mid); }
 .eos-form label { font-size: 13px; font-weight: 500; color: var(--mid); display: block; margin-bottom: 5px; }
 .eos-form .field { margin-bottom: 1rem; }
-.star-row { display: flex; gap: 8px; }
+.star-row { display: flex; gap: 8px; align-items: center; }
 .star-btn { width: 40px; height: 40px; border-radius: var(--r); border: 1px solid var(--border); background: var(--cream); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
 .star-btn.active { background: var(--amber-pale); border-color: var(--amber-mid); }
 .star-btn:hover { border-color: var(--amber-mid); }
@@ -248,6 +293,7 @@ button { cursor: pointer; }
   .debrief-grid { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
   .msg-reaction-btn { font-size: 10px; padding: 2px 6px; }
+  .msg-note-btn { font-size: 10px; padding: 2px 7px; }
 }
 </style>
 </head>
@@ -341,17 +387,18 @@ const CATS = ["All","Mood","Life Events","Relationships","Work","Substance Use",
 const RP = {good:3,okay:1,needs_work:0};
 
 const REACTIONS = [
-  { id:"went_well", emoji:"👍", label:"Went well", color:"selected" },
-  { id:"breakthrough", emoji:"💡", label:"Breakthrough", color:"selected" },
-  { id:"unsure", emoji:"🤔", label:"Unsure", color:"selected-amber" },
-  { id:"stuck", emoji:"😟", label:"Stuck", color:"selected-amber" },
+  { id:"went_well", emoji:"👍", label:"Went well", colorClass:"selected-good" },
+  { id:"breakthrough", emoji:"💡", label:"Breakthrough", colorClass:"selected-good" },
+  { id:"unsure", emoji:"🤔", label:"Unsure", colorClass:"selected-amber" },
+  { id:"stuck", emoji:"😟", label:"Stuck", colorClass:"selected-amber" },
 ];
 
 function loadProg() { try { const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):{sessions:[],totalSessions:0,totalPoints:0}; } catch{return{sessions:[],totalSessions:0,totalPoints:0};} }
 function saveProg(d) { try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch{} }
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function formatTime(ts){ const d=new Date(ts); return d.toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"}); }
-function formatDate(ds){ return new Date(ds).toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"}); }
+function formatDate(ds){ try{ return new Date(ds).toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"}); } catch{ return ds; } }
+function truncate(str,n){ return str&&str.length>n ? str.slice(0,n)+"…" : str; }
 
 function ratingStyle(r){
   if(r==="good") return {bg:"var(--sage-pale)",border:"var(--sage-mid)",color:"var(--sage)",label:"Good"};
@@ -370,21 +417,40 @@ async function saveToSupabase(sessionData) {
 }
 
 function generatePDF(opts) {
-  const { includeTranscript, studentName, sessionDate, scenario, approach, difficulty, exchanges, reactions, notes, selfRating, reflection, debrief, messages } = opts;
+  const { includeTranscript, studentName, sessionDate, scenario, approach, difficulty, exchanges, msgReactions, msgNotes, selfRating, reflection, debrief, messages } = opts;
   const sc_ = SCENARIOS.find(s=>s.id===scenario);
   const diff_ = DIFFICULTIES.find(d=>d.id===difficulty);
   const rs = ratingStyle(debrief?.overall||"okay");
 
   const reactionCounts = {};
-  (reactions||[]).forEach(r=>{ reactionCounts[r.type]=(reactionCounts[r.type]||0)+1; });
+  Object.values(msgReactions||{}).forEach(r=>{ reactionCounts[r]=(reactionCounts[r]||0)+1; });
   const reactionSummary = REACTIONS.map(r=> reactionCounts[r.id] ? `${r.emoji} ${r.label}: ${reactionCounts[r.id]}` : null).filter(Boolean).join("  ·  ");
 
-  const notesHTML = (notes||[]).length > 0
-    ? `<div style="margin-top:12px"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Session Notes</strong>${(notes||[]).map(n=>`<div style="margin-top:6px;padding:7px 10px;background:#fffbf0;border-left:3px solid #f0c080;font-size:13px;border-radius:4px"><span style="font-size:11px;color:#aaa">${formatTime(n.timestamp)}</span><br/>${n.text}</div>`).join("")}</div>`
+  const notesHTML = Object.keys(msgNotes||{}).length > 0
+    ? `<div style="margin-top:12px"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Session Notes (per response)</strong>${
+        Object.entries(msgNotes).map(([msgId, note])=>`
+          <div style="margin-top:8px;padding:8px 10px;background:#fffbf0;border-left:3px solid #f0c080;font-size:13px;border-radius:4px">
+            <div style="font-size:11px;color:#aaa;margin-bottom:3px">${formatTime(note.timestamp)} · In response to: "${truncate(note.msgText,80)}"</div>
+            <div>${note.text}</div>
+          </div>`).join("")
+      }</div>`
     : "";
 
   const transcriptHTML = includeTranscript && messages && messages.length > 0
-    ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Full Transcript</strong>${messages.map(m=>`<div style="margin-top:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:${m.role==="counsellor"?"#4a6741":"#888"};margin-bottom:3px">${m.role==="counsellor"?"You (Counsellor)":"Client"}</div><div style="font-size:13px;line-height:1.6;padding:8px 12px;background:${m.role==="counsellor"?"#eef3ed":"#fafaf8"};border-radius:8px">${m.text}</div></div>`).join("")}</div>`
+    ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee">
+        <strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Full Transcript</strong>
+        ${messages.map(m=>{
+          const reaction = msgReactions?.[m.id];
+          const note = msgNotes?.[m.id];
+          const r = reaction ? REACTIONS.find(r=>r.id===reaction) : null;
+          return `<div style="margin-top:10px">
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;color:${m.role==="counsellor"?"#4a6741":"#888"};margin-bottom:3px">${m.role==="counsellor"?"You (Counsellor)":"Client"}</div>
+            <div style="font-size:13px;line-height:1.6;padding:8px 12px;background:${m.role==="counsellor"?"#eef3ed":"#fafaf8"};border-radius:8px">${m.text}</div>
+            ${r ? `<div style="font-size:11px;color:#888;margin-top:3px;padding-left:4px">${r.emoji} ${r.label}</div>` : ""}
+            ${note ? `<div style="font-size:12px;color:#b06010;background:#fffbf0;border-left:2px solid #f0c080;padding:4px 8px;margin-top:4px;border-radius:4px">📝 ${note.text}</div>` : ""}
+          </div>`;
+        }).join("")}
+      </div>`
     : "";
 
   const debriefHTML = debrief ? `
@@ -393,10 +459,10 @@ function generatePDF(opts) {
       <div style="margin-top:8px;padding:12px;background:${rs.bg};border:1px solid ${rs.border};border-radius:8px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:${rs.color};margin-bottom:6px">Overall: ${rs.label}</div>
         <p style="font-size:13px;line-height:1.6;margin:0 0 10px">${debrief.summary||""}</p>
-        ${debrief.strengths?.length ? `<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#4a6741">Strengths</strong>${debrief.strengths.map(s=>`<p style="font-size:13px;margin:3px 0;color:#4a6741">· ${s}</p>`).join("")}</div>` : ""}
-        ${debrief.areas?.length ? `<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">To develop</strong>${debrief.areas.map(a=>`<p style="font-size:13px;margin:3px 0;color:#b06010">· ${a}</p>`).join("")}</div>` : ""}
-        ${debrief.key_moment ? `<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Key moment</strong><p style="font-size:13px;margin:3px 0;line-height:1.6">${debrief.key_moment}</p></div>` : ""}
-        ${debrief.example_response ? `<div><strong style="font-size:11px;text-transform:uppercase;color:#3c3c8c">Stronger response example</strong><p style="font-size:13px;margin:4px 0;font-style:italic;color:#3c3c8c;line-height:1.6">${debrief.example_response}</p></div>` : ""}
+        ${debrief.strengths?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#4a6741">Strengths</strong>${debrief.strengths.map(s=>`<p style="font-size:13px;margin:3px 0;color:#4a6741">· ${s}</p>`).join("")}</div>`:""}
+        ${debrief.areas?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">To develop</strong>${debrief.areas.map(a=>`<p style="font-size:13px;margin:3px 0;color:#b06010">· ${a}</p>`).join("")}</div>`:""}
+        ${debrief.key_moment?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Key moment</strong><p style="font-size:13px;margin:3px 0;line-height:1.6">${debrief.key_moment}</p></div>`:""}
+        ${debrief.example_response?`<div><strong style="font-size:11px;text-transform:uppercase;color:#3c3c8c">Stronger response example</strong><p style="font-size:13px;margin:4px 0;font-style:italic;color:#3c3c8c;line-height:1.6">${debrief.example_response}</p></div>`:""}
       </div>
     </div>` : "";
 
@@ -408,20 +474,20 @@ function generatePDF(opts) {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:13px">
         <div><strong>Student:</strong> ${studentName||"Not provided"}</div>
-        <div><strong>Date:</strong> ${sessionDate ? formatDate(sessionDate) : new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"})}</div>
+        <div><strong>Date:</strong> ${sessionDate?formatDate(sessionDate):new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"})}</div>
         <div><strong>Scenario:</strong> ${sc_?.label||scenario}</div>
         <div><strong>Approach:</strong> ${approach}</div>
         <div><strong>Difficulty:</strong> ${diff_?.label||difficulty}</div>
         <div><strong>Exchanges:</strong> ${exchanges}</div>
       </div>
-      ${selfRating ? `<div style="margin-bottom:12px;font-size:13px"><strong>Self-rating:</strong> ${"⭐".repeat(selfRating)} (${selfRating}/5)</div>` : ""}
-      ${reflection ? `<div style="margin-bottom:12px;padding:10px 12px;background:#f7f5f2;border-radius:8px;font-size:13px"><strong>Reflection:</strong><br/>${reflection}</div>` : ""}
-      ${reactionSummary ? `<div style="margin-bottom:12px;font-size:13px"><strong>In-session reactions:</strong> ${reactionSummary}</div>` : ""}
+      ${selfRating?`<div style="margin-bottom:12px;font-size:13px"><strong>Self-rating:</strong> ${"⭐".repeat(selfRating)} (${selfRating}/5)</div>`:""}
+      ${reflection?`<div style="margin-bottom:12px;padding:10px 12px;background:#f7f5f2;border-radius:8px;font-size:13px"><strong>Reflection:</strong><br/>${reflection}</div>`:""}
+      ${reactionSummary?`<div style="margin-bottom:12px;font-size:13px"><strong>In-session reactions:</strong> ${reactionSummary}</div>`:""}
       ${notesHTML}
       ${debriefHTML}
       ${transcriptHTML}
       <div style="margin-top:24px;padding-top:12px;border-top:1px solid #eee;font-size:11px;color:#aaa;text-align:center">
-        Counselling Role-Play Practice · counselling-roleplay.vercel.app · For training purposes only
+        Counselling Role-Play Practice · counselling-roleplay.vercel.app · For training purposes only · This app is designed to support counselling students in developing ethical, evidence-based practice skills aligned with Australian professional counselling standards.
       </div>
     </div>`;
 
@@ -443,6 +509,9 @@ function App(){
   const [filterCat,setFilterCat]=useState("All");
   const [messages,setMessages]=useState([]);
   const [msgReactions,setMsgReactions]=useState({}); // { msgId: reactionId }
+  const [msgNotes,setMsgNotes]=useState({});          // { msgId: {text, timestamp, msgText} }
+  const [activeNoteFor,setActiveNoteFor]=useState(null); // msgId currently being noted
+  const [noteText,setNoteText]=useState("");
   const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
   const [stepFeedback,setStepFeedback]=useState(null);
@@ -452,10 +521,6 @@ function App(){
   const [progress,setProgress]=useState(loadProg);
   const [showCrisisGuide,setShowCrisisGuide]=useState(false);
   const [exchangeCount,setExchangeCount]=useState(0);
-  const [sessionNotes,setSessionNotes]=useState([]);
-  const [showNoteInput,setShowNoteInput]=useState(false);
-  const [noteText,setNoteText]=useState("");
-  const [chatLog,setChatLog]=useState([]);
   const [studentName,setStudentName]=useState("");
   const [sessionDate,setSessionDate]=useState(new Date().toISOString().split("T")[0]);
   const [selfRating,setSelfRating]=useState(0);
@@ -464,8 +529,8 @@ function App(){
   const bottomRef=useRef(null);
   const noteInputRef=useRef(null);
 
-  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[chatLog,stepFeedback,finalFeedback,loading]);
-  useEffect(()=>{ if(showNoteInput && noteInputRef.current) noteInputRef.current.focus(); },[showNoteInput]);
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[messages,stepFeedback,finalFeedback,loading]);
+  useEffect(()=>{ if(activeNoteFor && noteInputRef.current) noteInputRef.current.focus(); },[activeNoteFor]);
 
   const toggleApproach=(id)=>setApproach(prev=>{
     if(id==="any") return prev.includes("any")?[]:["any"];
@@ -505,34 +570,31 @@ function App(){
 
     if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST — do NOT reframe poor responses positively. If the response is vague, advice-giving, or not good counselling practice, say so clearly and specifically.
 
-IMPORTANT for crisis scenarios involving suicidal ideation or self-harm: The stronger example response must follow a GRADUATED assessment approach. Do not suggest jumping straight to asking about method or plan unless the client has already clearly confirmed suicidal intent in the transcript. The clinically appropriate sequence is: (1) reflect and validate the feeling, (2) gently clarify the ideation — what do they mean by that?, (3) explore frequency and intensity, (4) only then explore intent — do they want to act on it?, (5) then plan and means. When suggesting a stronger response, identify where the student is in this sequence and suggest the NEXT appropriate step only.
+IMPORTANT for crisis scenarios involving suicidal ideation or self-harm: follow a GRADUATED assessment approach. Do not suggest jumping straight to asking about method or plan unless the client has already clearly confirmed suicidal intent. Sequence: (1) reflect and validate, (2) clarify ideation, (3) explore frequency and intensity, (4) explore intent, (5) plan and means. Suggest only the NEXT appropriate step.
 
 Respond ONLY with valid JSON (no markdown):
 {"rating":"good|okay|needs_work","strength":"1-2 honest sentences","improve":"1-2 clear sentences on the key issue","example":"a stronger alternative response in quotes","technique":"one technique name"}`;
 
-    return `You are a counselling supervisor writing a detailed, substantive session debrief. ${approachGuide} ${crisisNote} Use Australian English. Be honest and specific — do not sugarcoat poor performance. Reference specific things the student said in your feedback. Write enough detail to be genuinely useful for a student's learning and development.
+    return `You are a counselling supervisor writing a detailed, substantive session debrief. ${approachGuide} ${crisisNote} Use Australian English. Be honest and specific — do not sugarcoat poor performance. Reference specific things the student said. Write enough detail to be genuinely useful for a student's learning.
 
 Respond ONLY with valid JSON (no markdown):
-{"overall":"good|okay|needs_work","summary":"3-5 sentences giving an honest overall picture of the session, referencing specific moments from the transcript","strengths":["3-4 specific strengths with a brief explanation of why each worked clinically — not just labels but actual reasoning"],"areas":["3-4 specific areas to develop, each with a concrete suggestion for how to improve — practical and actionable"],"technique_use":"2-3 sentences evaluating how well the student used the chosen therapeutic approach, with specific examples from the transcript","relational_quality":"2-3 sentences on the therapeutic relationship — rapport, empathy, pacing, and how the client responded to the counsellor","key_moment":"Identify the single most important moment in the session — describe what happened and what it reveals about the student's current skill level","example_response":"A full, well-crafted example of a stronger counsellor response from a key moment in the session, written in first person as if speaking directly to the client"}`;
+{"overall":"good|okay|needs_work","summary":"3-5 sentences giving an honest overall picture, referencing specific moments","strengths":["3-4 specific strengths with clinical reasoning"],"areas":["3-4 specific areas to develop, each with a concrete suggestion"],"technique_use":"2-3 sentences on use of the chosen approach with examples","relational_quality":"2-3 sentences on rapport, empathy, pacing","key_moment":"The single most important moment and what it reveals","example_response":"A full example of a stronger counsellor response, in first person"}`;
   };
 
   const doStart=async(ap,sc,diff,fm,len)=>{
     setScreen("session"); setLoading(true);
-    setMessages([]); setChatLog([]); setMsgReactions({});
+    setMessages([]); setMsgReactions({}); setMsgNotes({});
+    setActiveNoteFor(null); setNoteText("");
     setStepFeedback(null); setFinalFeedback(null);
-    setShowCrisisGuide(false); setExchangeCount(0);
-    setShowingFeedback(false); setSessionNotes([]);
-    setShowNoteInput(false); setNoteText("");
+    setShowCrisisGuide(false); setExchangeCount(0); setShowingFeedback(false);
     setStudentName(""); setSelfRating(0); setReflection("");
     setSessionDate(new Date().toISOString().split("T")[0]);
     try {
       const text=await callAPI(clientSystem(ap,sc,diff),[{role:"user",content:"Begin the session."}]);
       const msg={role:"client",text,id:"msg_"+Date.now()};
       setMessages([msg]);
-      setChatLog([{type:"msg",...msg}]);
     } catch(e) {
-      const msg={role:"client",text:"Something went wrong. Please try again.",id:"msg_"+Date.now()};
-      setMessages([msg]); setChatLog([{type:"msg",...msg}]);
+      setMessages([{role:"client",text:"Something went wrong. Please try again.",id:"msg_"+Date.now()}]);
     }
     setLoading(false);
   };
@@ -543,40 +605,52 @@ Respond ONLY with valid JSON (no markdown):
     const nonAny=APPROACHES.filter(a=>a.id!=="any");
     let sc,ap=[pick(nonAny).id],diff,fm=pick(FEEDBACK_MODES).id,len="standard";
     if(type==="random"){sc=pick(nonC).id;diff=pick(DIFFICULTIES).id;}
-    else if(type==="challenge"){sc=pick(nonC).id;ap=[pick(nonAny).id];diff="advanced";}
+    else if(type==="challenge"){sc=pick(nonC).id;diff="advanced";}
     else{sc=pick(crC).id;diff=pick([DIFFICULTIES[0],DIFFICULTIES[1]]).id;}
     setApproach(ap);setScenario(sc);setDifficulty(diff);setFeedbackMode(fm);setSessionLength(len);
     doStart(ap,sc,diff,fm,len);
   };
 
-  const setMsgReaction=(msgId, reactionId)=>{
+  const setMsgReaction=(msgId,reactionId)=>{
     setMsgReactions(prev=>{
-      // toggle off if same reaction clicked again
-      if(prev[msgId]===reactionId) {
-        const next={...prev}; delete next[msgId]; return next;
-      }
+      if(prev[msgId]===reactionId){ const n={...prev}; delete n[msgId]; return n; }
       return {...prev,[msgId]:reactionId};
     });
   };
 
+  const openNoteFor=(msgId)=>{
+    if(activeNoteFor===msgId){ setActiveNoteFor(null); setNoteText(""); return; }
+    // Pre-fill with existing note if any
+    setNoteText(msgNotes[msgId]?.text||"");
+    setActiveNoteFor(msgId);
+  };
+
   const saveNote=()=>{
-    if(!noteText.trim()) return;
-    const ts=Date.now();
-    const n={text:noteText.trim(),timestamp:ts,exchangeNum:exchangeCount};
-    setSessionNotes(prev=>[...prev,n]);
-    setChatLog(prev=>[...prev,{type:"note",...n}]);
-    setNoteText(""); setShowNoteInput(false);
+    if(!noteText.trim()||!activeNoteFor) return;
+    const msg=messages.find(m=>m.id===activeNoteFor);
+    setMsgNotes(prev=>({
+      ...prev,
+      [activeNoteFor]: {
+        text: noteText.trim(),
+        timestamp: Date.now(),
+        msgText: msg?.text||"",
+        exchangeNum: exchangeCount,
+      }
+    }));
+    setActiveNoteFor(null); setNoteText("");
+  };
+
+  const deleteNote=(msgId)=>{
+    setMsgNotes(prev=>{ const n={...prev}; delete n[msgId]; return n; });
   };
 
   const sendMessage=async()=>{
-    if(!input.trim()||loading||showingFeedback) return;
+    if(!input.trim()||loading||showingFeedback||activeNoteFor) return;
     const userText=input.trim(); setInput("");
     const msgId="msg_"+Date.now();
     const msg={role:"counsellor",text:userText,id:msgId};
     const newMsgs=[...messages,msg];
-    setMessages(newMsgs);
-    setChatLog(prev=>[...prev,{type:"msg",...msg}]);
-    setLoading(true); setStepFeedback(null);
+    setMessages(newMsgs); setLoading(true); setStepFeedback(null);
     const newCount=exchangeCount+1; setExchangeCount(newCount);
 
     if(feedbackMode==="step"){
@@ -589,7 +663,7 @@ Respond ONLY with valid JSON (no markdown):
         try{const m=raw.match(/\{[\s\S]*\}/);parsed=JSON.parse(m?m[0]:raw.trim());}
         catch{parsed={rating:"okay",strength:"Attempted response.",improve:"Focus on the client's emotional experience.",example:"Try reflecting what the client is feeling.",technique:"Reflection"};}
         setStepFeedback(parsed); setShowingFeedback(true);
-      }catch(e){
+      }catch{
         setStepFeedback({rating:"okay",strength:"Could not load feedback.",improve:"Check your connection.",example:"Try again.",technique:"—"});
         setShowingFeedback(true);
       }
@@ -603,13 +677,9 @@ Respond ONLY with valid JSON (no markdown):
     const history=msgs.map(m=>({role:m.role==="counsellor"?"user":"assistant",content:m.text}));
     try{
       const text=await callAPI(clientSystem(approach,scenario,difficulty),history);
-      const msg={role:"client",text,id:"msg_"+Date.now()};
-      setMessages(prev=>[...prev,msg]);
-      setChatLog(prev=>[...prev,{type:"msg",...msg}]);
+      setMessages(prev=>[...prev,{role:"client",text,id:"msg_"+Date.now()}]);
     }catch{
-      const msg={role:"client",text:"Sorry, can you say that again?",id:"msg_"+Date.now()};
-      setMessages(prev=>[...prev,msg]);
-      setChatLog(prev=>[...prev,{type:"msg",...msg}]);
+      setMessages(prev=>[...prev,{role:"client",text:"Sorry, can you say that again?",id:"msg_"+Date.now()}]);
     }
     setLoading(false);
   };
@@ -619,41 +689,29 @@ Respond ONLY with valid JSON (no markdown):
     await getClientReply(messages); setStepFeedback(null);
   };
 
-  const getFinalFeedback=()=>{
-    if(gettingFinal) return;
-    setScreen("eos");
-  };
+  const getFinalFeedback=()=>{ if(!gettingFinal) setScreen("eos"); };
 
   const submitEosAndGetDebrief=async()=>{
     setScreen("session"); setGettingFinal(true);
     const transcript=messages.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
     const sc_=SCENARIOS.find(s=>s.id===scenario);
-
-    // Build reactions array from msgReactions
-    const reactionsArray = Object.entries(msgReactions).map(([msgId, reactionId])=>({
-      type: reactionId,
-      msgId,
-      timestamp: Date.now(),
-    }));
-
     try{
       const raw=await callAPI(supervisorSystem("end",approach,scenario,difficulty),
         [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],2500);
-      let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",relational_quality:"",key_moment:"",example_response:"Try using more open questions."};}
-      setFinalFeedback(fb);
-      recordSession(fb);
+      let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}
+      catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",relational_quality:"",key_moment:"",example_response:"Try using more open questions."};}
+      setFinalFeedback(fb); recordSession(fb);
       await saveToSupabase({
-        student_name: studentName||null,
-        session_date: sessionDate,
-        unit_code: null,
+        student_name:studentName||null,
+        session_date:sessionDate,
         scenario,
-        transcript: messages,
-        debrief: fb,
-        reactions: reactionsArray,
-        notes: sessionNotes,
-        self_rating: selfRating||null,
-        final_reflection: reflection||null,
-        score_data: { overall: fb.overall, exchanges: exchangeCount, approach: getApLabel(approach) },
+        transcript:messages,
+        debrief:fb,
+        reactions:Object.entries(msgReactions).map(([msgId,type])=>({msgId,type,msgText:messages.find(m=>m.id===msgId)?.text||""})),
+        notes:Object.entries(msgNotes).map(([msgId,n])=>({msgId,...n})),
+        self_rating:selfRating||null,
+        final_reflection:reflection||null,
+        score_data:{overall:fb.overall,exchanges:exchangeCount,approach:getApLabel(approach)},
       });
       setScreen("feedback");
     }catch{setScreen("feedback");}
@@ -670,16 +728,15 @@ Respond ONLY with valid JSON (no markdown):
   };
 
   const reset=()=>{
-    setScreen("home");setMessages([]);setChatLog([]);setMsgReactions({});setInput("");
+    setScreen("home");setMessages([]);setMsgReactions({});setMsgNotes({});
+    setActiveNoteFor(null);setNoteText("");setInput("");
     setStepFeedback(null);setFinalFeedback(null);setShowingFeedback(false);
     setExchangeCount(0);setShowCrisisGuide(false);
-    setSessionNotes([]);setShowNoteInput(false);setNoteText("");
     setStudentName("");setSelfRating(0);setReflection("");
     setSessionDate(new Date().toISOString().split("T")[0]);
   };
 
-  // Find the id of the most recent counsellor message
-  const lastCounsellorMsgId = [...messages].reverse().find(m=>m.role==="counsellor")?.id;
+  const lastCounsellorMsgId=[...messages].reverse().find(m=>m.role==="counsellor")?.id;
 
   // ── HOME ──
   if(screen==="home") return(
@@ -688,21 +745,17 @@ Respond ONLY with valid JSON (no markdown):
       <div style={{position:"fixed",inset:0,background:"rgba(28,28,26,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:"1.25rem"}}>
         <div style={{background:"var(--warm)",borderRadius:"var(--r-lg)",padding:"1.5rem 1.25rem",maxWidth:420,width:"100%"}}>
           <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,marginBottom:"0.75rem"}}>Before you begin</div>
-
           <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>
             This is a <strong style={{color:"var(--charcoal)"}}>counselling practice tool for students</strong> — it simulates real client sessions using AI and is designed for skill development only.
           </p>
-
           <div style={{background:"#f0f7f4",border:"1px solid var(--sage-mid)",borderRadius:"var(--r)",padding:"10px 12px",marginBottom:"0.75rem"}}>
             <p style={{fontSize:13,lineHeight:1.7,color:"var(--sage)",margin:0}}>
-              <strong>🧪 This is a beta version</strong> — and your feedback genuinely shapes how it develops. During sessions you'll see simple reaction buttons and a notes field. Please use them honestly — it helps us understand what works for counselling students and directly improves the app.
+              <strong>🧪 This is a beta version</strong> — and your feedback genuinely shapes how it develops. During sessions you'll see reaction buttons and a notes field on each response. Please use them honestly — it helps us understand what works for counselling students and directly improves the app.
             </p>
           </div>
-
           <p style={{fontSize:13,lineHeight:1.6,color:"var(--muted)",marginBottom:"1.25rem"}}>
             This is <strong style={{color:"var(--charcoal)"}}>not a mental health service</strong>. If you need support: <strong style={{color:"var(--charcoal)"}}>Lifeline 13 11 14</strong> · <strong style={{color:"var(--charcoal)"}}>Beyond Blue 1300 22 4636</strong>
           </p>
-
           <button className="btn btn-primary" style={{width:"100%"}} onClick={()=>setShowDisclaimer(false)}>I understand — get started</button>
         </div>
       </div>
@@ -740,12 +793,10 @@ Respond ONLY with valid JSON (no markdown):
         {APPROACHES.map(a=>{
           const isSel=approach.includes(a.id);
           const cls=isSel?(a.id==="any"?"sel-card active-teal":"sel-card active"):"sel-card";
-          return(
-            <div key={a.id} className={cls} onClick={()=>toggleApproach(a.id)}>
-              <div className="sel-card-title" style={{color:isSel?(a.id==="any"?"var(--teal)":"var(--sage)"):"var(--charcoal)"}}>{a.label}</div>
-              <div className="sel-card-desc">{a.desc}</div>
-            </div>
-          );
+          return(<div key={a.id} className={cls} onClick={()=>toggleApproach(a.id)}>
+            <div className="sel-card-title" style={{color:isSel?(a.id==="any"?"var(--teal)":"var(--sage)"):"var(--charcoal)"}}>{a.label}</div>
+            <div className="sel-card-desc">{a.desc}</div>
+          </div>);
         })}
       </div>
 
@@ -762,13 +813,11 @@ Respond ONLY with valid JSON (no markdown):
           const isCrisisSc=CRISIS_IDS.includes(s.id);
           const isSel=scenario===s.id;
           const cls=`sel-card ${isSel?(isCrisisSc?"active-indigo":"active"):(isCrisisSc?"crisis-base":"")}`;
-          return(
-            <div key={s.id} className={cls} onClick={()=>setScenario(s.id)}>
-              <div className="sel-card-title" style={{color:isSel?(isCrisisSc?"var(--indigo)":"var(--sage)"):"var(--charcoal)"}}>{s.label}</div>
-              <div className="sel-card-desc">{s.desc}</div>
-              <span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:isCrisisSc?"var(--indigo-pale)":"var(--border-light)",color:isCrisisSc?"var(--indigo)":"var(--muted)",display:"inline-block",marginTop:5}}>{s.cat}</span>
-            </div>
-          );
+          return(<div key={s.id} className={cls} onClick={()=>setScenario(s.id)}>
+            <div className="sel-card-title" style={{color:isSel?(isCrisisSc?"var(--indigo)":"var(--sage)"):"var(--charcoal)"}}>{s.label}</div>
+            <div className="sel-card-desc">{s.desc}</div>
+            <span style={{fontSize:10,padding:"1px 7px",borderRadius:10,background:isCrisisSc?"var(--indigo-pale)":"var(--border-light)",color:isCrisisSc?"var(--indigo)":"var(--muted)",display:"inline-block",marginTop:5}}>{s.cat}</span>
+          </div>);
         })}
       </div>
 
@@ -776,12 +825,10 @@ Respond ONLY with valid JSON (no markdown):
       <div className="option-row option-row-3">
         {DIFFICULTIES.map(d=>{
           const isSel=difficulty===d.id;
-          return(
-            <div key={d.id} className="sel-card" style={isSel?{border:`2px solid ${d.border}`,background:d.pale}:{}} onClick={()=>setDifficulty(d.id)}>
-              <div className="sel-card-title" style={{color:isSel?d.color:"var(--charcoal)"}}>{d.label} <span style={{fontWeight:400,fontSize:11,color:isSel?d.color:"var(--muted)"}}>×{d.pts}pts</span></div>
-              <div className="sel-card-desc">{d.desc}</div>
-            </div>
-          );
+          return(<div key={d.id} className="sel-card" style={isSel?{border:`2px solid ${d.border}`,background:d.pale}:{}} onClick={()=>setDifficulty(d.id)}>
+            <div className="sel-card-title" style={{color:isSel?d.color:"var(--charcoal)"}}>{d.label} <span style={{fontWeight:400,fontSize:11,color:isSel?d.color:"var(--muted)"}}>×{d.pts}pts</span></div>
+            <div className="sel-card-desc">{d.desc}</div>
+          </div>);
         })}
       </div>
 
@@ -789,12 +836,10 @@ Respond ONLY with valid JSON (no markdown):
       <div className="option-row option-row-2">
         {FEEDBACK_MODES.map(f=>{
           const isSel=feedbackMode===f.id;
-          return(
-            <div key={f.id} className="sel-card" style={isSel?{border:"2px solid var(--sage-mid)",background:"var(--sage-pale)"}:{}} onClick={()=>setFeedbackMode(f.id)}>
-              <div className="sel-card-title" style={{color:isSel?"var(--sage)":"var(--charcoal)"}}>{f.label}</div>
-              <div className="sel-card-desc">{f.desc}</div>
-            </div>
-          );
+          return(<div key={f.id} className="sel-card" style={isSel?{border:"2px solid var(--sage-mid)",background:"var(--sage-pale)"}:{}} onClick={()=>setFeedbackMode(f.id)}>
+            <div className="sel-card-title" style={{color:isSel?"var(--sage)":"var(--charcoal)"}}>{f.label}</div>
+            <div className="sel-card-desc">{f.desc}</div>
+          </div>);
         })}
       </div>
 
@@ -802,12 +847,10 @@ Respond ONLY with valid JSON (no markdown):
       <div className="option-row option-row-3" style={{marginBottom:"2rem"}}>
         {SESSION_LENGTHS.map(l=>{
           const isSel=sessionLength===l.id;
-          return(
-            <div key={l.id} className="sel-card" style={isSel?{border:"2px solid var(--sage-mid)",background:"var(--sage-pale)"}:{}} onClick={()=>setSessionLength(l.id)}>
-              <div className="sel-card-title" style={{color:isSel?"var(--sage)":"var(--charcoal)"}}>{l.label}</div>
-              <div className="sel-card-desc">{l.desc}</div>
-            </div>
-          );
+          return(<div key={l.id} className="sel-card" style={isSel?{border:"2px solid var(--sage-mid)",background:"var(--sage-pale)"}:{}} onClick={()=>setSessionLength(l.id)}>
+            <div className="sel-card-title" style={{color:isSel?"var(--sage)":"var(--charcoal)"}}>{l.label}</div>
+            <div className="sel-card-desc">{l.desc}</div>
+          </div>);
         })}
       </div>
 
@@ -818,7 +861,7 @@ Respond ONLY with valid JSON (no markdown):
     </>
   );
 
-  // ── END OF SESSION FORM ──
+  // ── EOS FORM ──
   if(screen==="eos") return(
     <div className="page">
       <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:"0.5rem"}}>Before your debrief</div>
@@ -840,7 +883,7 @@ Respond ONLY with valid JSON (no markdown):
                 {selfRating>=n?"⭐":"☆"}
               </button>
             ))}
-            {selfRating>0&&<span style={{fontSize:13,color:"var(--amber)",alignSelf:"center",marginLeft:4}}>
+            {selfRating>0&&<span style={{fontSize:13,color:"var(--amber)",marginLeft:4}}>
               {["","Needs a lot of work","Below expectations","Getting there","Good effort","Excellent"][selfRating]}
             </span>}
           </div>
@@ -850,7 +893,7 @@ Respond ONLY with valid JSON (no markdown):
           <textarea rows={3} placeholder="What did you notice about your practice? What would you do differently?" value={reflection} onChange={e=>setReflection(e.target.value)} style={{resize:"vertical"}}/>
         </div>
       </div>
-      <button className="btn btn-primary" style={{width:"100%",padding:"13px",fontSize:15,marginBottom:"0.75rem"}} onClick={submitEosAndGetDebrief}>
+      <button className="btn btn-primary" style={{width:"100%",padding:"13px",fontSize:15,marginBottom:"0.75rem"}} onClick={submitEosAndGetDebrief} disabled={gettingFinal}>
         {gettingFinal?"Getting debrief…":"Get supervisor debrief →"}
       </button>
       <button className="btn btn-ghost" style={{width:"100%"}} onClick={()=>setScreen("session")}>← Back to session</button>
@@ -877,22 +920,14 @@ Respond ONLY with valid JSON (no markdown):
           <button className="btn btn-ghost" style={{padding:"5px 12px",fontSize:13}} onClick={reset}>End</button>
         </div>
 
-        {/* Progress + note strip */}
+        {/* Progress strip — bar only */}
         <div className="progress-strip">
           <div className="prog-wrap">
             <div className="prog-fill" style={{width:`${progPct}%`,background:nearEnd?"var(--amber)":"var(--sage)"}}/>
           </div>
-          <span style={{fontSize:11,color:nearEnd?"var(--amber)":"var(--muted)",whiteSpace:"nowrap",flexShrink:0}}>
-            {nearEnd?"Consider finishing":exchangeCount+" / "+maxEx}
+          <span className="exchange-counter" style={{color:nearEnd?"var(--amber)":"var(--muted)"}}>
+            {nearEnd?"Consider finishing":exchangeCount+" / "+maxEx+" exchanges"}
           </span>
-          <div className="tooltip-wrap" style={{flexShrink:0}}>
-            <button
-              style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 10px",borderRadius:20,border:"1px solid var(--amber-mid)",background:showNoteInput?"var(--amber-pale)":"white",fontSize:12,color:"var(--amber)",cursor:"pointer",fontWeight:500}}
-              onClick={()=>setShowNoteInput(v=>!v)}>
-              📝 Note
-            </button>
-            <div className="tooltip">Jot down what you noticed or wanted to try differently — saved with your session summary.</div>
-          </div>
         </div>
 
         {isCrisis&&(
@@ -911,63 +946,83 @@ Respond ONLY with valid JSON (no markdown):
         )}
 
         <div className="chat-area">
-          {chatLog.map((item,i)=>{
-            if(item.type==="msg"){
-              const isCounsellor=item.role==="counsellor";
-              const isLastCounsellor=item.id===lastCounsellorMsgId;
-              const selectedReaction=msgReactions[item.id];
-              return(
-                <div key={i} className={`msg-wrap ${item.role}`}>
-                  <div className="msg-bubble">
-                    <div className="msg-label">{isCounsellor?"You (Counsellor)":"Client"}</div>
-                    {item.text}
-                  </div>
-                  {/* Reaction buttons — only on counsellor messages */}
-                  {isCounsellor&&(
-                    <div className="msg-reactions">
-                      {isLastCounsellor&&!selectedReaction
-                        ? REACTIONS.map(r=>(
-                            <button key={r.id} className="msg-reaction-btn" onClick={()=>setMsgReaction(item.id,r.id)}
-                              title={r.id==="went_well"?"This exchange felt effective"
-                                :r.id==="breakthrough"?"Something clicked — an insight or shift"
-                                :r.id==="unsure"?"Not sure if that was right — worth reflecting on"
-                                :"Felt stuck or uncertain how to proceed"}>
+          {messages.map((m,i)=>{
+            const isCounsellor=m.role==="counsellor";
+            const isLastCounsellor=m.id===lastCounsellorMsgId;
+            const selectedReaction=msgReactions[m.id];
+            const attachedNote=msgNotes[m.id];
+            const isNotingThis=activeNoteFor===m.id;
+
+            return(
+              <div key={i} className={`msg-wrap ${m.role}`}>
+                <div className="msg-bubble">
+                  <div className="msg-label">{isCounsellor?"You (Counsellor)":"Client"}</div>
+                  {m.text}
+                </div>
+
+                {/* Actions row — only on counsellor messages */}
+                {isCounsellor&&(
+                  <div className="msg-actions">
+                    {/* Reactions — show all on latest, show selected on older */}
+                    {isLastCounsellor&&!selectedReaction
+                      ? REACTIONS.map(r=>(
+                          <div className="tooltip-wrap" key={r.id}>
+                            <button className="msg-reaction-btn" onClick={()=>setMsgReaction(m.id,r.id)}>
                               {r.emoji} {r.label}
                             </button>
-                          ))
-                        : selectedReaction&&(()=>{
-                            const r=REACTIONS.find(r=>r.id===selectedReaction);
-                            return(
-                              <button className={`msg-reaction-btn ${r?.color||"selected"}`}
-                                onClick={()=>setMsgReaction(item.id,selectedReaction)}
-                                title="Click to remove">
+                            <div className="tooltip">
+                              {r.id==="went_well"?"This exchange felt effective — good technique or connection"
+                               :r.id==="breakthrough"?"Something clicked — an insight or meaningful shift"
+                               :r.id==="unsure"?"Not sure if that was right — worth reflecting on"
+                               :"Felt stuck or uncertain how to proceed"}
+                            </div>
+                          </div>
+                        ))
+                      : selectedReaction&&(()=>{
+                          const r=REACTIONS.find(r=>r.id===selectedReaction);
+                          return(
+                            <div className="tooltip-wrap">
+                              <button className={`msg-reaction-btn ${r?.colorClass}`} onClick={()=>setMsgReaction(m.id,selectedReaction)} title="Click to remove">
                                 {r?.emoji} {r?.label}
                               </button>
-                            );
-                          })()
-                      }
+                              <div className="tooltip">Click to remove this reaction</div>
+                            </div>
+                          );
+                        })()
+                    }
+
+                    {/* Divider */}
+                    {(isLastCounsellor||selectedReaction)&&<div className="msg-actions-divider"/>}
+
+                    {/* Add note button */}
+                    <div className="tooltip-wrap">
+                      <button
+                        className={`msg-note-btn ${attachedNote?"has-note":""} ${isNotingThis?"has-note":""}`}
+                        onClick={()=>openNoteFor(m.id)}>
+                        📝 {attachedNote?"Edit note":"Add note"}
+                      </button>
+                      <div className="tooltip">Capture what you noticed or wanted to try differently at this moment — saved with your summary</div>
                     </div>
-                  )}
-                </div>
-              );
-            }
-            if(item.type==="note") return(
-              <div key={i} className="note-log-item">
-                <span>📝</span>
-                <div>
-                  <div style={{fontSize:11,color:"var(--muted)",marginBottom:2}}>{formatTime(item.timestamp)}</div>
-                  <div>{item.text}</div>
-                </div>
+                  </div>
+                )}
+
+                {/* Attached note display */}
+                {isCounsellor&&attachedNote&&!isNotingThis&&(
+                  <div className="msg-note-display">
+                    <div className="msg-note-display-header">📝 Your note · {formatTime(attachedNote.timestamp)}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
+                      <span>{attachedNote.text}</span>
+                      <button onClick={()=>deleteNote(m.id)} style={{background:"none",border:"none",color:"var(--amber)",fontSize:11,cursor:"pointer",opacity:0.6,flexShrink:0,padding:0}}>✕</button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
-            return null;
           })}
 
           {loading&&(
             <div className="msg-wrap client">
-              <div className="typing-bubble">
-                <div className="dot"/><div className="dot"/><div className="dot"/>
-              </div>
+              <div className="typing-bubble"><div className="dot"/><div className="dot"/><div className="dot"/></div>
             </div>
           )}
 
@@ -1004,29 +1059,33 @@ Respond ONLY with valid JSON (no markdown):
           <div ref={bottomRef}/>
         </div>
 
-        {/* Note input popup */}
-        {showNoteInput&&(
-          <div className="note-popup">
-            <div className="note-popup-title">📝 Session note</div>
-            <textarea ref={noteInputRef} className="note-input" rows={3}
-              placeholder="e.g. I wanted to reflect more here but wasn't sure how… / The client seemed to shift when I asked about family…"
-              value={noteText} onChange={e=>setNoteText(e.target.value)}
-              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();saveNote();}}}
-            />
-            <div style={{display:"flex",gap:8,marginTop:8}}>
-              <button className="btn btn-primary" style={{flex:1,padding:"8px"}} onClick={saveNote}>Save note</button>
-              <button className="btn btn-ghost" style={{padding:"8px 14px"}} onClick={()=>{setShowNoteInput(false);setNoteText("");}}>Cancel</button>
+        {/* Note input popup — anchored to specific message */}
+        {activeNoteFor&&(()=>{
+          const msg=messages.find(m=>m.id===activeNoteFor);
+          return(
+            <div className="note-popup">
+              <div className="note-popup-context">Noting: "{truncate(msg?.text,70)}"</div>
+              <div className="note-popup-title">📝 What did you notice about this response?</div>
+              <textarea ref={noteInputRef} className="note-input" rows={3}
+                placeholder="e.g. I wasn't sure whether to reflect or ask a question here… / I felt I moved too quickly past their emotion…"
+                value={noteText} onChange={e=>setNoteText(e.target.value)}
+                onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();saveNote();}}}
+              />
+              <div style={{display:"flex",gap:8,marginTop:8}}>
+                <button className="btn btn-primary" style={{flex:1,padding:"8px",background:"var(--amber)",border:"none"}} onClick={saveNote}>Save note</button>
+                <button className="btn btn-ghost" style={{padding:"8px 14px"}} onClick={()=>{setActiveNoteFor(null);setNoteText("");}}>Cancel</button>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         <div className="input-area">
           <div className="input-row">
             <textarea className="chat-input" rows={1} value={input}
               onChange={e=>{setInput(e.target.value);e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,110)+"px";}}
               onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
-              placeholder="Type your counsellor response…" disabled={loading||showingFeedback||showNoteInput}/>
-            <button className="send-btn" disabled={loading||showingFeedback||showNoteInput||!input.trim()} onClick={sendMessage}>
+              placeholder="Type your counsellor response…" disabled={loading||showingFeedback||!!activeNoteFor}/>
+            <button className="send-btn" disabled={loading||showingFeedback||!!activeNoteFor||!input.trim()} onClick={sendMessage}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-5 14-2-5-5-3z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="none"/></svg>
             </button>
           </div>
@@ -1049,7 +1108,8 @@ Respond ONLY with valid JSON (no markdown):
     const rs=finalFeedback?ratingStyle(finalFeedback.overall):ratingStyle("okay");
     const reactionCounts={};
     Object.values(msgReactions).forEach(r=>{reactionCounts[r]=(reactionCounts[r]||0)+1;});
-    const reactionsArray=Object.entries(msgReactions).map(([msgId,reactionId])=>({type:reactionId,msgId}));
+    const notesArray=Object.entries(msgNotes).map(([msgId,n])=>({msgId,...n}));
+    const reactionsArray=Object.entries(msgReactions).map(([msgId,type])=>({msgId,type,msgText:messages.find(m=>m.id===msgId)?.text||""}));
 
     return(
       <div className="page">
@@ -1067,11 +1127,11 @@ Respond ONLY with valid JSON (no markdown):
           </div>
         </div>
 
-        {(Object.keys(msgReactions).length>0||sessionNotes.length>0)&&(
+        {(Object.keys(msgReactions).length>0||notesArray.length>0)&&(
           <div className="card" style={{marginBottom:"1rem",background:"#fffbf0",borderColor:"var(--amber-mid)"}}>
             <div className="fb-label" style={{color:"var(--amber)",marginBottom:8}}>Your in-session feedback</div>
             {Object.keys(msgReactions).length>0&&(
-              <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:sessionNotes.length>0?10:0}}>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:notesArray.length>0?10:0}}>
                 {REACTIONS.map(r=>reactionCounts[r.id]?(
                   <span key={r.id} style={{fontSize:12,padding:"3px 10px",borderRadius:20,background:"white",border:"1px solid var(--amber-mid)",color:"var(--amber)"}}>
                     {r.emoji} {r.label} ×{reactionCounts[r.id]}
@@ -1079,9 +1139,10 @@ Respond ONLY with valid JSON (no markdown):
                 ):null)}
               </div>
             )}
-            {sessionNotes.map((n,i)=>(
+            {notesArray.map((n,i)=>(
               <div key={i} style={{fontSize:13,padding:"7px 10px",background:"white",borderRadius:"var(--r)",border:"1px solid var(--border-light)",marginBottom:5,lineHeight:1.5}}>
-                <span style={{fontSize:11,color:"var(--muted)",marginRight:6}}>{formatTime(n.timestamp)}</span>{n.text}
+                <div style={{fontSize:11,color:"var(--muted)",marginBottom:2}}>{formatTime(n.timestamp)} · On: "{truncate(n.msgText,60)}"</div>
+                {n.text}
               </div>
             ))}
           </div>
@@ -1106,7 +1167,6 @@ Respond ONLY with valid JSON (no markdown):
               </div>
               <p style={{fontSize:14,lineHeight:1.6,color:"var(--charcoal)"}}>{finalFeedback.summary}</p>
             </div>
-
             <div className="debrief-grid">
               <div className="card" style={{background:"var(--sage-pale)",borderColor:"var(--sage-mid)"}}>
                 <div className="fb-label" style={{color:"var(--sage)"}}>Strengths</div>
@@ -1117,26 +1177,22 @@ Respond ONLY with valid JSON (no markdown):
                 {(finalFeedback.areas||[]).map((a,i)=><p key={i} style={{fontSize:13,color:"var(--amber)",margin:"0 0 4px",lineHeight:1.5}}>· {a}</p>)}
               </div>
             </div>
-
             <div className="card" style={{marginBottom:"0.75rem",marginTop:"0.5rem"}}>
               <div className="fb-label">Use of {getApLabel(approach)}</div>
               <p style={{fontSize:13,color:"var(--mid)",lineHeight:1.6,margin:0}}>{finalFeedback.technique_use}</p>
             </div>
-
             {finalFeedback.relational_quality&&(
               <div className="card" style={{marginBottom:"0.75rem"}}>
                 <div className="fb-label">Therapeutic relationship</div>
                 <p style={{fontSize:13,color:"var(--mid)",lineHeight:1.6,margin:0}}>{finalFeedback.relational_quality}</p>
               </div>
             )}
-
             {finalFeedback.key_moment&&(
               <div className="card" style={{marginBottom:"0.75rem",background:"var(--amber-pale)",borderColor:"var(--amber-mid)"}}>
                 <div className="fb-label" style={{color:"var(--amber)"}}>⭐ Key moment</div>
                 <p style={{fontSize:13,color:"var(--amber)",lineHeight:1.6,margin:0}}>{finalFeedback.key_moment}</p>
               </div>
             )}
-
             {finalFeedback.example_response&&(
               <div className="card" style={{background:"var(--indigo-pale)",borderColor:"var(--indigo-mid)",marginBottom:"1rem"}}>
                 <div className="fb-label" style={{color:"var(--indigo)"}}>Stronger response example</div>
@@ -1150,11 +1206,11 @@ Respond ONLY with valid JSON (no markdown):
           <div className="fb-label" style={{color:"var(--teal)",marginBottom:8}}>Download your summary</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"8px 16px"}}
-              onClick={()=>generatePDF({includeTranscript:false,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions:reactionsArray,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
+              onClick={()=>generatePDF({includeTranscript:false,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,msgReactions,msgNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
               📄 Summary only
             </button>
             <button className="btn btn-ghost" style={{fontSize:13,padding:"8px 16px",border:"1px solid var(--teal-mid)",color:"var(--teal)"}}
-              onClick={()=>generatePDF({includeTranscript:true,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions:reactionsArray,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
+              onClick={()=>generatePDF({includeTranscript:true,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,msgReactions,msgNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
               📋 With full transcript
             </button>
           </div>
@@ -1194,7 +1250,6 @@ Respond ONLY with valid JSON (no markdown):
           <div style={{fontFamily:"Instrument Serif, serif",fontSize:24}}>Progress Tracker</div>
           <button className="btn btn-ghost" style={{fontSize:13}} onClick={()=>setScreen("home")}>← Back</button>
         </div>
-
         <div className="card" style={{marginBottom:"1rem"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
             <div>
@@ -1206,34 +1261,25 @@ Respond ONLY with valid JSON (no markdown):
               <div style={{fontSize:22,fontWeight:600}}>{totalPoints}</div>
             </div>
           </div>
-          <div className="prog-wrap" style={{flex:"unset",height:6}}>
-            <div className="prog-fill" style={{width:`${pct}%`,background:level.color}}/>
+          <div style={{height:6,background:"var(--border-light)",borderRadius:3,overflow:"hidden",margin:"6px 0"}}>
+            <div style={{height:"100%",borderRadius:3,transition:"width 0.4s ease",width:`${pct}%`,background:level.color}}/>
           </div>
           <p style={{fontSize:12,color:"var(--muted)",margin:"5px 0 0"}}>{level.max?`${totalPoints} / ${level.max} pts`:"Maximum level reached"}</p>
         </div>
-
         <div className="stat-grid" style={{marginBottom:"1rem"}}>
-          {[
-            {label:"Sessions",val:totalSessions,color:"var(--charcoal)"},
-            {label:"Good",val:good,color:"var(--sage)"},
-            {label:"Okay",val:okay,color:"var(--amber)"},
-            {label:"Needs work",val:nw,color:"var(--red)"},
-            {label:"Crisis",val:crisis,color:"var(--indigo)"},
-          ].map(({label,val,color})=>(
+          {[{label:"Sessions",val:totalSessions,color:"var(--charcoal)"},{label:"Good",val:good,color:"var(--sage)"},{label:"Okay",val:okay,color:"var(--amber)"},{label:"Needs work",val:nw,color:"var(--red)"},{label:"Crisis",val:crisis,color:"var(--indigo)"}].map(({label,val,color})=>(
             <div key={label} className="stat-card">
               <div className="stat-num" style={{color}}>{val}</div>
               <div className="stat-label">{label}</div>
             </div>
           ))}
         </div>
-
         {topAp&&(
           <div className="card" style={{marginBottom:"1rem"}}>
             <div style={{fontSize:12,color:"var(--muted)",marginBottom:2}}>Most practised</div>
             <div style={{fontSize:15,fontWeight:500}}>{topAp[0]} <span style={{color:"var(--muted)",fontWeight:400,fontSize:13}}>({topAp[1]} sessions)</span></div>
           </div>
         )}
-
         <div style={{fontWeight:600,fontSize:14,margin:"0 0 0.6rem"}}>Session history</div>
         {sessions.length===0
           ?<p style={{color:"var(--muted)",fontSize:14}}>No sessions yet — complete a role-play to see your history.</p>
