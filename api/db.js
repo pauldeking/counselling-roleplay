@@ -1,3 +1,5 @@
+const SHEETS_WEBHOOK = "https://script.google.com/macros/s/AKfycbyPpyRvRfuvBBSvRHg3a-N5MMrsgT6Z0y8eCY-A1kFn4NHonvR3gTv6XR5RjPDKRxSSeg/exec";
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -21,13 +23,28 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
       const body = req.body;
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/sessions`, {
+
+      // 1. Save to Supabase
+      const supabaseRes = await fetch(`${SUPABASE_URL}/rest/v1/sessions`, {
         method: "POST",
         headers: { ...headers, "Prefer": "return=representation" },
         body: JSON.stringify(body),
       });
-      const data = await response.json();
-      return res.status(response.ok ? 200 : 500).json(data);
+      const supabaseData = await supabaseRes.json();
+
+      // 2. Send to Google Sheets (fire and forget — don't block on failure)
+      try {
+        await fetch(SHEETS_WEBHOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } catch(sheetErr) {
+        console.warn("Google Sheets sync failed (non-fatal):", sheetErr.message);
+      }
+
+      return res.status(supabaseRes.ok ? 200 : 500).json(supabaseData);
+
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
