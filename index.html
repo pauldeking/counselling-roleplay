@@ -71,8 +71,9 @@ button { cursor: pointer; }
 .session-header { background: var(--warm); border-bottom: 1px solid var(--border-light); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
 .chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
 
-.msg-wrap { display: flex; }
-.msg-wrap.counsellor { justify-content: flex-end; }
+.msg-wrap { display: flex; flex-direction: column; }
+.msg-wrap.counsellor { align-items: flex-end; }
+.msg-wrap.client { align-items: flex-start; }
 .msg-bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; }
 .msg-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.6; margin-bottom: 3px; }
 .msg-wrap.client .msg-bubble { background: var(--warm); border: 1px solid var(--border-light); border-radius: 4px 16px 16px 16px; }
@@ -84,45 +85,44 @@ button { cursor: pointer; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes pulse { 0%,80%,100%{opacity:0.3;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
 
-/* Reaction strip */
-.reaction-strip {
-  background: #f0ede8;
-  border-top: 1px solid var(--border-light);
-  border-bottom: 1px solid var(--border-light);
-  padding: 6px 14px;
+/* Inline message reactions */
+.msg-reactions {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
+  gap: 4px;
+  margin-top: 5px;
+  max-width: 78%;
   flex-wrap: wrap;
 }
-.reaction-strip-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin-right: 2px;
-  white-space: nowrap;
-}
-.reaction-btn {
+.msg-reaction-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 3px;
+  padding: 3px 8px;
   border-radius: 20px;
   border: 1px solid var(--border);
-  background: var(--warm);
-  font-size: 12px;
-  font-weight: 500;
+  background: white;
+  font-size: 11px;
   color: var(--mid);
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
-  position: relative;
 }
-.reaction-btn:hover { border-color: var(--charcoal); color: var(--charcoal); background: white; }
-.reaction-btn.reacted { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); }
+.msg-reaction-btn:hover { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); }
+.msg-reaction-btn.selected { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); font-weight: 500; }
+.msg-reaction-btn.selected-amber { border-color: var(--amber-mid); background: var(--amber-pale); color: var(--amber); font-weight: 500; }
+
+/* Progress + note strip */
+.progress-strip {
+  background: #f0ede8;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 5px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
 /* Tooltip */
 .tooltip-wrap { position: relative; display: inline-flex; }
@@ -137,7 +137,6 @@ button { cursor: pointer; }
   font-size: 11px;
   padding: 5px 9px;
   border-radius: 6px;
-  white-space: nowrap;
   pointer-events: none;
   z-index: 50;
   line-height: 1.4;
@@ -163,19 +162,7 @@ button { cursor: pointer; }
 .note-input { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; font-size: 13px; resize: none; outline: none; line-height: 1.5; }
 .note-input:focus { border-color: var(--sage-mid); }
 
-/* Reaction log in chat */
-.reaction-log-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 10px;
-  border-radius: 20px;
-  background: var(--border-light);
-  font-size: 12px;
-  color: var(--mid);
-  align-self: center;
-  max-width: 90%;
-}
+/* Note in chat */
 .note-log-item {
   display: flex;
   align-items: flex-start;
@@ -199,7 +186,7 @@ button { cursor: pointer; }
 
 .crisis-banner { background: var(--indigo-pale); border: 1px solid var(--indigo-mid); border-radius: var(--r); padding: 10px 14px; margin: 8px 14px 0; flex-shrink: 0; }
 
-.prog-wrap { height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; margin: 6px 0; }
+.prog-wrap { height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; flex: 1; }
 .prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
 
 .input-area { background: var(--warm); border-top: 1px solid var(--border-light); padding: 10px 14px; padding-bottom: max(10px, env(safe-area-inset-bottom)); flex-shrink: 0; }
@@ -230,7 +217,6 @@ button { cursor: pointer; }
 .stat-label { font-size: 11px; color: var(--muted); }
 
 .debrief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-.exchange-counter { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; }
 
 /* End of session form */
 .eos-form { background: var(--warm); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: 1.25rem; margin-bottom: 1rem; }
@@ -243,7 +229,6 @@ button { cursor: pointer; }
 .star-btn.active { background: var(--amber-pale); border-color: var(--amber-mid); }
 .star-btn:hover { border-color: var(--amber-mid); }
 
-/* PDF styles (hidden, used for print) */
 @media print {
   body * { visibility: hidden; }
   #pdf-content, #pdf-content * { visibility: visible; }
@@ -262,8 +247,7 @@ button { cursor: pointer; }
   .option-row-3 { grid-template-columns: 1fr 1fr; }
   .debrief-grid { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
-  .reaction-strip { gap: 4px; }
-  .reaction-btn { font-size: 11px; padding: 3px 8px; }
+  .msg-reaction-btn { font-size: 10px; padding: 2px 6px; }
 }
 </style>
 </head>
@@ -271,7 +255,7 @@ button { cursor: pointer; }
 <div id="root"></div>
 <div id="pdf-content"></div>
 <script type="text/babel">
-const { useState, useRef, useEffect, useCallback } = React;
+const { useState, useRef, useEffect } = React;
 const API = "/api/chat";
 const STORAGE_KEY = "counselling_v3";
 
@@ -357,16 +341,17 @@ const CATS = ["All","Mood","Life Events","Relationships","Work","Substance Use",
 const RP = {good:3,okay:1,needs_work:0};
 
 const REACTIONS = [
-  { id:"went_well", emoji:"👍", label:"Went well", desc:"This exchange felt effective — good technique or connection" },
-  { id:"breakthrough", emoji:"💡", label:"Breakthrough", desc:"Something clicked — an insight, shift, or meaningful moment" },
-  { id:"unsure", emoji:"🤔", label:"Unsure", desc:"Not sure if that was the right response — worth reflecting on" },
-  { id:"stuck", emoji:"😟", label:"Stuck", desc:"Felt stuck or uncertain about how to proceed" },
+  { id:"went_well", emoji:"👍", label:"Went well", color:"selected" },
+  { id:"breakthrough", emoji:"💡", label:"Breakthrough", color:"selected" },
+  { id:"unsure", emoji:"🤔", label:"Unsure", color:"selected-amber" },
+  { id:"stuck", emoji:"😟", label:"Stuck", color:"selected-amber" },
 ];
 
 function loadProg() { try { const r=localStorage.getItem(STORAGE_KEY); return r?JSON.parse(r):{sessions:[],totalSessions:0,totalPoints:0}; } catch{return{sessions:[],totalSessions:0,totalPoints:0};} }
 function saveProg(d) { try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch{} }
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function formatTime(ts){ const d=new Date(ts); return d.toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"}); }
+function formatDate(ds){ return new Date(ds).toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"}); }
 
 function ratingStyle(r){
   if(r==="good") return {bg:"var(--sage-pale)",border:"var(--sage-mid)",color:"var(--sage)",label:"Good"};
@@ -392,7 +377,7 @@ function generatePDF(opts) {
 
   const reactionCounts = {};
   (reactions||[]).forEach(r=>{ reactionCounts[r.type]=(reactionCounts[r.type]||0)+1; });
-  const reactionSummary = REACTIONS.map(r=> reactionCounts[r.id] ? `${r.emoji} ${r.label}: ${reactionCounts[r.id]}` : null).filter(Boolean).join(" &nbsp;·&nbsp; ");
+  const reactionSummary = REACTIONS.map(r=> reactionCounts[r.id] ? `${r.emoji} ${r.label}: ${reactionCounts[r.id]}` : null).filter(Boolean).join("  ·  ");
 
   const notesHTML = (notes||[]).length > 0
     ? `<div style="margin-top:12px"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Session Notes</strong>${(notes||[]).map(n=>`<div style="margin-top:6px;padding:7px 10px;background:#fffbf0;border-left:3px solid #f0c080;font-size:13px;border-radius:4px"><span style="font-size:11px;color:#aaa">${formatTime(n.timestamp)}</span><br/>${n.text}</div>`).join("")}</div>`
@@ -423,7 +408,7 @@ function generatePDF(opts) {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:13px">
         <div><strong>Student:</strong> ${studentName||"Not provided"}</div>
-        <div><strong>Date:</strong> ${sessionDate||new Date().toLocaleDateString("en-AU")}</div>
+        <div><strong>Date:</strong> ${sessionDate ? formatDate(sessionDate) : new Date().toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"})}</div>
         <div><strong>Scenario:</strong> ${sc_?.label||scenario}</div>
         <div><strong>Approach:</strong> ${approach}</div>
         <div><strong>Difficulty:</strong> ${diff_?.label||difficulty}</div>
@@ -457,6 +442,7 @@ function App(){
   const [sessionLength,setSessionLength]=useState(null);
   const [filterCat,setFilterCat]=useState("All");
   const [messages,setMessages]=useState([]);
+  const [msgReactions,setMsgReactions]=useState({}); // { msgId: reactionId }
   const [input,setInput]=useState("");
   const [loading,setLoading]=useState(false);
   const [stepFeedback,setStepFeedback]=useState(null);
@@ -466,16 +452,10 @@ function App(){
   const [progress,setProgress]=useState(loadProg);
   const [showCrisisGuide,setShowCrisisGuide]=useState(false);
   const [exchangeCount,setExchangeCount]=useState(0);
-
-  // New state for testing features
-  const [reactions,setReactions]=useState([]);
   const [sessionNotes,setSessionNotes]=useState([]);
   const [showNoteInput,setShowNoteInput]=useState(false);
   const [noteText,setNoteText]=useState("");
-  const [chatLog,setChatLog]=useState([]); // combined messages + reactions + notes in order
-
-  // End of session form state
-  const [showEosForm,setShowEosForm]=useState(false);
+  const [chatLog,setChatLog]=useState([]);
   const [studentName,setStudentName]=useState("");
   const [sessionDate,setSessionDate]=useState(new Date().toISOString().split("T")[0]);
   const [selfRating,setSelfRating]=useState(0);
@@ -525,7 +505,7 @@ function App(){
 
     if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST — do NOT reframe poor responses positively. If the response is vague, advice-giving, or not good counselling practice, say so clearly and specifically.
 
-IMPORTANT for crisis scenarios involving suicidal ideation or self-harm: The stronger example response must follow a GRADUATED assessment approach. Do not suggest jumping straight to asking about method or plan unless the client has already clearly confirmed suicidal intent in the transcript. The clinically appropriate sequence is: (1) reflect and validate the feeling, (2) gently clarify the ideation — what do they mean by that?, (3) explore frequency and intensity, (4) only then explore intent — do they want to act on it?, (5) then plan and means. When suggesting a stronger response, identify where the student is in this sequence and suggest the NEXT appropriate step only — not steps further ahead than the conversation warrants.
+IMPORTANT for crisis scenarios involving suicidal ideation or self-harm: The stronger example response must follow a GRADUATED assessment approach. Do not suggest jumping straight to asking about method or plan unless the client has already clearly confirmed suicidal intent in the transcript. The clinically appropriate sequence is: (1) reflect and validate the feeling, (2) gently clarify the ideation — what do they mean by that?, (3) explore frequency and intensity, (4) only then explore intent — do they want to act on it?, (5) then plan and means. When suggesting a stronger response, identify where the student is in this sequence and suggest the NEXT appropriate step only.
 
 Respond ONLY with valid JSON (no markdown):
 {"rating":"good|okay|needs_work","strength":"1-2 honest sentences","improve":"1-2 clear sentences on the key issue","example":"a stronger alternative response in quotes","technique":"one technique name"}`;
@@ -536,22 +516,22 @@ Respond ONLY with valid JSON (no markdown):
 {"overall":"good|okay|needs_work","summary":"3-5 sentences giving an honest overall picture of the session, referencing specific moments from the transcript","strengths":["3-4 specific strengths with a brief explanation of why each worked clinically — not just labels but actual reasoning"],"areas":["3-4 specific areas to develop, each with a concrete suggestion for how to improve — practical and actionable"],"technique_use":"2-3 sentences evaluating how well the student used the chosen therapeutic approach, with specific examples from the transcript","relational_quality":"2-3 sentences on the therapeutic relationship — rapport, empathy, pacing, and how the client responded to the counsellor","key_moment":"Identify the single most important moment in the session — describe what happened and what it reveals about the student's current skill level","example_response":"A full, well-crafted example of a stronger counsellor response from a key moment in the session, written in first person as if speaking directly to the client"}`;
   };
 
-  const addToChatLog=(item)=>setChatLog(prev=>[...prev,item]);
-
   const doStart=async(ap,sc,diff,fm,len)=>{
     setScreen("session"); setLoading(true);
-    setMessages([]); setChatLog([]);
+    setMessages([]); setChatLog([]); setMsgReactions({});
     setStepFeedback(null); setFinalFeedback(null);
     setShowCrisisGuide(false); setExchangeCount(0);
-    setShowingFeedback(false); setReactions([]); setSessionNotes([]);
+    setShowingFeedback(false); setSessionNotes([]);
     setShowNoteInput(false); setNoteText("");
+    setStudentName(""); setSelfRating(0); setReflection("");
+    setSessionDate(new Date().toISOString().split("T")[0]);
     try {
       const text=await callAPI(clientSystem(ap,sc,diff),[{role:"user",content:"Begin the session."}]);
-      const msg={role:"client",text,id:Date.now()};
+      const msg={role:"client",text,id:"msg_"+Date.now()};
       setMessages([msg]);
       setChatLog([{type:"msg",...msg}]);
     } catch(e) {
-      const msg={role:"client",text:"Something went wrong. Please try again.",id:Date.now()};
+      const msg={role:"client",text:"Something went wrong. Please try again.",id:"msg_"+Date.now()};
       setMessages([msg]); setChatLog([{type:"msg",...msg}]);
     }
     setLoading(false);
@@ -569,11 +549,14 @@ Respond ONLY with valid JSON (no markdown):
     doStart(ap,sc,diff,fm,len);
   };
 
-  const addReaction=(reactionId)=>{
-    const ts=Date.now();
-    const r={type:reactionId,timestamp:ts,exchangeNum:exchangeCount};
-    setReactions(prev=>[...prev,r]);
-    setChatLog(prev=>[...prev,{type:"reaction",...r}]);
+  const setMsgReaction=(msgId, reactionId)=>{
+    setMsgReactions(prev=>{
+      // toggle off if same reaction clicked again
+      if(prev[msgId]===reactionId) {
+        const next={...prev}; delete next[msgId]; return next;
+      }
+      return {...prev,[msgId]:reactionId};
+    });
   };
 
   const saveNote=()=>{
@@ -588,7 +571,8 @@ Respond ONLY with valid JSON (no markdown):
   const sendMessage=async()=>{
     if(!input.trim()||loading||showingFeedback) return;
     const userText=input.trim(); setInput("");
-    const msg={role:"counsellor",text:userText,id:Date.now()};
+    const msgId="msg_"+Date.now();
+    const msg={role:"counsellor",text:userText,id:msgId};
     const newMsgs=[...messages,msg];
     setMessages(newMsgs);
     setChatLog(prev=>[...prev,{type:"msg",...msg}]);
@@ -619,11 +603,11 @@ Respond ONLY with valid JSON (no markdown):
     const history=msgs.map(m=>({role:m.role==="counsellor"?"user":"assistant",content:m.text}));
     try{
       const text=await callAPI(clientSystem(approach,scenario,difficulty),history);
-      const msg={role:"client",text,id:Date.now()};
+      const msg={role:"client",text,id:"msg_"+Date.now()};
       setMessages(prev=>[...prev,msg]);
       setChatLog(prev=>[...prev,{type:"msg",...msg}]);
     }catch{
-      const msg={role:"client",text:"Sorry, can you say that again?",id:Date.now()};
+      const msg={role:"client",text:"Sorry, can you say that again?",id:"msg_"+Date.now()};
       setMessages(prev=>[...prev,msg]);
       setChatLog(prev=>[...prev,{type:"msg",...msg}]);
     }
@@ -635,40 +619,42 @@ Respond ONLY with valid JSON (no markdown):
     await getClientReply(messages); setStepFeedback(null);
   };
 
-  const getFinalFeedback=async()=>{
+  const getFinalFeedback=()=>{
     if(gettingFinal) return;
-    // Show end-of-session form first
-    setShowEosForm(true);
     setScreen("eos");
   };
 
   const submitEosAndGetDebrief=async()=>{
-    setScreen("session"); setShowEosForm(false); setGettingFinal(true);
+    setScreen("session"); setGettingFinal(true);
     const transcript=messages.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
     const sc_=SCENARIOS.find(s=>s.id===scenario);
+
+    // Build reactions array from msgReactions
+    const reactionsArray = Object.entries(msgReactions).map(([msgId, reactionId])=>({
+      type: reactionId,
+      msgId,
+      timestamp: Date.now(),
+    }));
+
     try{
       const raw=await callAPI(supervisorSystem("end",approach,scenario,difficulty),
         [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],2500);
       let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",relational_quality:"",key_moment:"",example_response:"Try using more open questions."};}
       setFinalFeedback(fb);
       recordSession(fb);
-
-      // Save to Supabase
       await saveToSupabase({
         student_name: studentName||null,
-        student_email: null,
         session_date: sessionDate,
         unit_code: null,
-        scenario: scenario,
+        scenario,
         transcript: messages,
         debrief: fb,
-        reactions: reactions,
+        reactions: reactionsArray,
         notes: sessionNotes,
         self_rating: selfRating||null,
         final_reflection: reflection||null,
         score_data: { overall: fb.overall, exchanges: exchangeCount, approach: getApLabel(approach) },
       });
-
       setScreen("feedback");
     }catch{setScreen("feedback");}
     setGettingFinal(false);
@@ -684,13 +670,16 @@ Respond ONLY with valid JSON (no markdown):
   };
 
   const reset=()=>{
-    setScreen("home");setMessages([]);setChatLog([]);setInput("");
+    setScreen("home");setMessages([]);setChatLog([]);setMsgReactions({});setInput("");
     setStepFeedback(null);setFinalFeedback(null);setShowingFeedback(false);
     setExchangeCount(0);setShowCrisisGuide(false);
-    setReactions([]);setSessionNotes([]);setShowNoteInput(false);setNoteText("");
+    setSessionNotes([]);setShowNoteInput(false);setNoteText("");
     setStudentName("");setSelfRating(0);setReflection("");
     setSessionDate(new Date().toISOString().split("T")[0]);
   };
+
+  // Find the id of the most recent counsellor message
+  const lastCounsellorMsgId = [...messages].reverse().find(m=>m.role==="counsellor")?.id;
 
   // ── HOME ──
   if(screen==="home") return(
@@ -699,13 +688,21 @@ Respond ONLY with valid JSON (no markdown):
       <div style={{position:"fixed",inset:0,background:"rgba(28,28,26,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:"1.25rem"}}>
         <div style={{background:"var(--warm)",borderRadius:"var(--r-lg)",padding:"1.5rem 1.25rem",maxWidth:420,width:"100%"}}>
           <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,marginBottom:"0.75rem"}}>Before you begin</div>
-          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>This is a <strong style={{color:"var(--charcoal)"}}>counselling practice tool for students</strong>. It simulates client sessions using AI and is for skill development only.</p>
-          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>It is <strong style={{color:"var(--charcoal)"}}>not a mental health service</strong>. If you need support, call <strong style={{color:"var(--charcoal)"}}>Lifeline 13 11 14</strong> or <strong style={{color:"var(--charcoal)"}}>Beyond Blue 1300 22 4636</strong>.</p>
-          <div style={{background:"#fffbf0",border:"1px solid var(--amber-mid)",borderRadius:"var(--r)",padding:"10px 12px",marginBottom:"1rem"}}>
-            <p style={{fontSize:13,lineHeight:1.6,color:"var(--amber)",margin:0}}>
-              <strong>🧪 Beta version</strong> — You're using an early release of this app. During sessions you'll see simple feedback buttons to help us improve the experience for counselling students. Your responses are anonymous.
+
+          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>
+            This is a <strong style={{color:"var(--charcoal)"}}>counselling practice tool for students</strong> — it simulates real client sessions using AI and is designed for skill development only.
+          </p>
+
+          <div style={{background:"#f0f7f4",border:"1px solid var(--sage-mid)",borderRadius:"var(--r)",padding:"10px 12px",marginBottom:"0.75rem"}}>
+            <p style={{fontSize:13,lineHeight:1.7,color:"var(--sage)",margin:0}}>
+              <strong>🧪 This is a beta version</strong> — and your feedback genuinely shapes how it develops. During sessions you'll see simple reaction buttons and a notes field. Please use them honestly — it helps us understand what works for counselling students and directly improves the app.
             </p>
           </div>
+
+          <p style={{fontSize:13,lineHeight:1.6,color:"var(--muted)",marginBottom:"1.25rem"}}>
+            This is <strong style={{color:"var(--charcoal)"}}>not a mental health service</strong>. If you need support: <strong style={{color:"var(--charcoal)"}}>Lifeline 13 11 14</strong> · <strong style={{color:"var(--charcoal)"}}>Beyond Blue 1300 22 4636</strong>
+          </p>
+
           <button className="btn btn-primary" style={{width:"100%"}} onClick={()=>setShowDisclaimer(false)}>I understand — get started</button>
         </div>
       </div>
@@ -825,8 +822,7 @@ Respond ONLY with valid JSON (no markdown):
   if(screen==="eos") return(
     <div className="page">
       <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:"0.5rem"}}>Before your debrief</div>
-      <p style={{fontSize:14,color:"var(--mid)",marginBottom:"1.5rem",lineHeight:1.6}}>Just a few quick details — these are saved with your session summary.</p>
-
+      <p style={{fontSize:14,color:"var(--mid)",marginBottom:"1.5rem",lineHeight:1.6}}>Just a few quick details — saved with your session summary.</p>
       <div className="eos-form">
         <div className="field">
           <label>Your name <span style={{color:"var(--muted)",fontWeight:400}}>(optional)</span></label>
@@ -837,10 +833,10 @@ Respond ONLY with valid JSON (no markdown):
           <input type="date" value={sessionDate} onChange={e=>setSessionDate(e.target.value)}/>
         </div>
         <div className="field">
-          <label>How did you feel the session went overall?</label>
+          <label>How did the session go overall?</label>
           <div className="star-row">
             {[1,2,3,4,5].map(n=>(
-              <button key={n} className={`star-btn ${selfRating>=n?"active":""}`} onClick={()=>setSelfRating(n)}>
+              <button key={n} className={`star-btn ${selfRating>=n?"active":""}`} onClick={()=>setSelfRating(selfRating===n?0:n)}>
                 {selfRating>=n?"⭐":"☆"}
               </button>
             ))}
@@ -854,13 +850,10 @@ Respond ONLY with valid JSON (no markdown):
           <textarea rows={3} placeholder="What did you notice about your practice? What would you do differently?" value={reflection} onChange={e=>setReflection(e.target.value)} style={{resize:"vertical"}}/>
         </div>
       </div>
-
       <button className="btn btn-primary" style={{width:"100%",padding:"13px",fontSize:15,marginBottom:"0.75rem"}} onClick={submitEosAndGetDebrief}>
         {gettingFinal?"Getting debrief…":"Get supervisor debrief →"}
       </button>
-      <button className="btn btn-ghost" style={{width:"100%"}} onClick={()=>setScreen("session")}>
-        ← Back to session
-      </button>
+      <button className="btn btn-ghost" style={{width:"100%"}} onClick={()=>setScreen("session")}>← Back to session</button>
     </div>
   );
 
@@ -884,33 +877,21 @@ Respond ONLY with valid JSON (no markdown):
           <button className="btn btn-ghost" style={{padding:"5px 12px",fontSize:13}} onClick={reset}>End</button>
         </div>
 
-        <div style={{padding:"6px 14px 0",flexShrink:0}}>
+        {/* Progress + note strip */}
+        <div className="progress-strip">
           <div className="prog-wrap">
             <div className="prog-fill" style={{width:`${progPct}%`,background:nearEnd?"var(--amber)":"var(--sage)"}}/>
           </div>
-          <div className="exchange-counter">
-            {nearEnd
-              ?<span style={{color:"var(--amber)"}}>Session length reached — consider finishing</span>
-              :<>{exchangeCount} / {maxEx} exchanges</>}
-          </div>
-        </div>
-
-        {/* Reaction strip */}
-        <div className="reaction-strip">
-          <span className="reaction-strip-label">How's this going?</span>
-          {REACTIONS.map(r=>(
-            <div key={r.id} className="tooltip-wrap">
-              <button className="reaction-btn" onClick={()=>addReaction(r.id)}>
-                {r.emoji} {r.label}
-              </button>
-              <div className="tooltip">{r.desc}</div>
-            </div>
-          ))}
-          <div className="tooltip-wrap" style={{marginLeft:"auto"}}>
-            <button className="reaction-btn" style={{background:"#fffbf0",borderColor:"var(--amber-mid)",color:"var(--amber)"}} onClick={()=>setShowNoteInput(v=>!v)}>
-              📝 Add note
+          <span style={{fontSize:11,color:nearEnd?"var(--amber)":"var(--muted)",whiteSpace:"nowrap",flexShrink:0}}>
+            {nearEnd?"Consider finishing":exchangeCount+" / "+maxEx}
+          </span>
+          <div className="tooltip-wrap" style={{flexShrink:0}}>
+            <button
+              style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 10px",borderRadius:20,border:"1px solid var(--amber-mid)",background:showNoteInput?"var(--amber-pale)":"white",fontSize:12,color:"var(--amber)",cursor:"pointer",fontWeight:500}}
+              onClick={()=>setShowNoteInput(v=>!v)}>
+              📝 Note
             </button>
-            <div className="tooltip">Jot down what you noticed, wanted to try differently, or a question that came up — saved with your session summary.</div>
+            <div className="tooltip">Jot down what you noticed or wanted to try differently — saved with your session summary.</div>
           </div>
         </div>
 
@@ -931,21 +912,42 @@ Respond ONLY with valid JSON (no markdown):
 
         <div className="chat-area">
           {chatLog.map((item,i)=>{
-            if(item.type==="msg") return(
-              <div key={i} className={`msg-wrap ${item.role}`}>
-                <div className="msg-bubble">
-                  <div className="msg-label">{item.role==="counsellor"?"You (Counsellor)":"Client"}</div>
-                  {item.text}
-                </div>
-              </div>
-            );
-            if(item.type==="reaction"){
-              const r=REACTIONS.find(r=>r.id===item.type_id)||REACTIONS.find(r=>r.id===item.type);
+            if(item.type==="msg"){
+              const isCounsellor=item.role==="counsellor";
+              const isLastCounsellor=item.id===lastCounsellorMsgId;
+              const selectedReaction=msgReactions[item.id];
               return(
-                <div key={i} className="reaction-log-item">
-                  <span>{r?.emoji}</span>
-                  <span>{r?.label}</span>
-                  <span style={{color:"var(--muted)",fontSize:11,marginLeft:4}}>{formatTime(item.timestamp)}</span>
+                <div key={i} className={`msg-wrap ${item.role}`}>
+                  <div className="msg-bubble">
+                    <div className="msg-label">{isCounsellor?"You (Counsellor)":"Client"}</div>
+                    {item.text}
+                  </div>
+                  {/* Reaction buttons — only on counsellor messages */}
+                  {isCounsellor&&(
+                    <div className="msg-reactions">
+                      {isLastCounsellor&&!selectedReaction
+                        ? REACTIONS.map(r=>(
+                            <button key={r.id} className="msg-reaction-btn" onClick={()=>setMsgReaction(item.id,r.id)}
+                              title={r.id==="went_well"?"This exchange felt effective"
+                                :r.id==="breakthrough"?"Something clicked — an insight or shift"
+                                :r.id==="unsure"?"Not sure if that was right — worth reflecting on"
+                                :"Felt stuck or uncertain how to proceed"}>
+                              {r.emoji} {r.label}
+                            </button>
+                          ))
+                        : selectedReaction&&(()=>{
+                            const r=REACTIONS.find(r=>r.id===selectedReaction);
+                            return(
+                              <button className={`msg-reaction-btn ${r?.color||"selected"}`}
+                                onClick={()=>setMsgReaction(item.id,selectedReaction)}
+                                title="Click to remove">
+                                {r?.emoji} {r?.label}
+                              </button>
+                            );
+                          })()
+                      }
+                    </div>
+                  )}
                 </div>
               );
             }
@@ -1005,7 +1007,7 @@ Respond ONLY with valid JSON (no markdown):
         {/* Note input popup */}
         {showNoteInput&&(
           <div className="note-popup">
-            <div className="note-popup-title">📝 Session note — capture what you're noticing</div>
+            <div className="note-popup-title">📝 Session note</div>
             <textarea ref={noteInputRef} className="note-input" rows={3}
               placeholder="e.g. I wanted to reflect more here but wasn't sure how… / The client seemed to shift when I asked about family…"
               value={noteText} onChange={e=>setNoteText(e.target.value)}
@@ -1046,14 +1048,15 @@ Respond ONLY with valid JSON (no markdown):
     const earned=finalFeedback?(RP[finalFeedback.overall]||0)*diff_.pts:0;
     const rs=finalFeedback?ratingStyle(finalFeedback.overall):ratingStyle("okay");
     const reactionCounts={};
-    reactions.forEach(r=>{reactionCounts[r.type]=(reactionCounts[r.type]||0)+1;});
+    Object.values(msgReactions).forEach(r=>{reactionCounts[r]=(reactionCounts[r]||0)+1;});
+    const reactionsArray=Object.entries(msgReactions).map(([msgId,reactionId])=>({type:reactionId,msgId}));
 
     return(
       <div className="page">
         <div style={{marginBottom:"1.5rem"}}>
           <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:4}}>Session Debrief</div>
           <div style={{fontSize:13,color:"var(--mid)"}}>{getApLabel(approach)} · {sc_?.label} · {diff_?.label}{isCrisis?" · Crisis":""} · {exchangeCount} exchanges</div>
-          {studentName&&<div style={{fontSize:13,color:"var(--mid)",marginTop:2}}>{studentName} · {new Date(sessionDate).toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"})}</div>}
+          {studentName&&<div style={{fontSize:13,color:"var(--mid)",marginTop:2}}>{studentName} · {formatDate(sessionDate)}</div>}
         </div>
 
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:"var(--r-lg)",background:"var(--sage-pale)",border:"1px solid var(--sage-mid)",marginBottom:"1rem"}}>
@@ -1064,11 +1067,10 @@ Respond ONLY with valid JSON (no markdown):
           </div>
         </div>
 
-        {/* In-session feedback summary */}
-        {(reactions.length>0||sessionNotes.length>0)&&(
+        {(Object.keys(msgReactions).length>0||sessionNotes.length>0)&&(
           <div className="card" style={{marginBottom:"1rem",background:"#fffbf0",borderColor:"var(--amber-mid)"}}>
             <div className="fb-label" style={{color:"var(--amber)",marginBottom:8}}>Your in-session feedback</div>
-            {reactions.length>0&&(
+            {Object.keys(msgReactions).length>0&&(
               <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:sessionNotes.length>0?10:0}}>
                 {REACTIONS.map(r=>reactionCounts[r.id]?(
                   <span key={r.id} style={{fontSize:12,padding:"3px 10px",borderRadius:20,background:"white",border:"1px solid var(--amber-mid)",color:"var(--amber)"}}>
@@ -1144,16 +1146,15 @@ Respond ONLY with valid JSON (no markdown):
           </>
         )}
 
-        {/* Download PDF */}
         <div className="card" style={{marginBottom:"1rem",background:"var(--teal-pale)",borderColor:"var(--teal-mid)"}}>
           <div className="fb-label" style={{color:"var(--teal)",marginBottom:8}}>Download your summary</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"8px 16px"}}
-              onClick={()=>generatePDF({includeTranscript:false,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
+              onClick={()=>generatePDF({includeTranscript:false,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions:reactionsArray,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
               📄 Summary only
             </button>
             <button className="btn btn-ghost" style={{fontSize:13,padding:"8px 16px",border:"1px solid var(--teal-mid)",color:"var(--teal)"}}
-              onClick={()=>generatePDF({includeTranscript:true,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
+              onClick={()=>generatePDF({includeTranscript:true,studentName,sessionDate,scenario,approach:getApLabel(approach),difficulty,exchanges:exchangeCount,reactions:reactionsArray,notes:sessionNotes,selfRating,reflection,debrief:finalFeedback,messages})}>
               📋 With full transcript
             </button>
           </div>
@@ -1205,7 +1206,7 @@ Respond ONLY with valid JSON (no markdown):
               <div style={{fontSize:22,fontWeight:600}}>{totalPoints}</div>
             </div>
           </div>
-          <div className="prog-wrap">
+          <div className="prog-wrap" style={{flex:"unset",height:6}}>
             <div className="prog-fill" style={{width:`${pct}%`,background:level.color}}/>
           </div>
           <p style={{fontSize:12,color:"var(--muted)",margin:"5px 0 0"}}>{level.max?`${totalPoints} / ${level.max} pts`:"Maximum level reached"}</p>
