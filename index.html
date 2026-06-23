@@ -40,13 +40,11 @@ button { cursor: pointer; }
 .btn-primary:hover:not(:disabled) { opacity: 0.9; }
 .btn-ghost { background: var(--border-light); color: var(--mid); }
 .btn-ghost:hover:not(:disabled) { background: var(--border); }
-
 .approach-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
 .scenario-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
 .option-row { display: grid; gap: 8px; margin-bottom: 1.5rem; }
 .option-row-3 { grid-template-columns: repeat(3, 1fr); }
 .option-row-2 { grid-template-columns: repeat(2, 1fr); }
-
 .sel-card { padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--border-light); background: var(--warm); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
 .sel-card:hover { border-color: var(--border); }
 .sel-card.active { border: 2px solid var(--sage); background: var(--sage-pale); }
@@ -55,22 +53,18 @@ button { cursor: pointer; }
 .sel-card.crisis-base { border-color: var(--indigo-mid); background: #f8f8ff; }
 .sel-card-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
 .sel-card-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
-
 .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.75rem; }
 .filter-tab { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--warm); color: var(--mid); cursor: pointer; transition: all 0.15s; }
 .filter-tab.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
 .filter-tab.active-crisis { background: var(--indigo); border-color: var(--indigo); color: white; }
-
 .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 2rem; }
 .qs-card { padding: 12px; border-radius: var(--r); border: 1px solid; cursor: pointer; text-align: left; transition: opacity 0.15s; }
 .qs-card:hover { opacity: 0.85; }
 .qs-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
 .qs-desc { font-size: 11px; line-height: 1.4; opacity: 0.8; }
-
 .session-layout { display: flex; flex-direction: column; height: 100dvh; max-width: 680px; margin: 0 auto; }
 .session-header { background: var(--warm); border-bottom: 1px solid var(--border-light); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
 .chat-area { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
-
 .msg-wrap { display: flex; flex-direction: column; }
 .msg-wrap.counsellor { align-items: flex-end; }
 .msg-wrap.client { align-items: flex-start; }
@@ -84,7 +78,6 @@ button { cursor: pointer; }
 .dot:nth-child(2) { animation-delay: 0.2s; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes pulse { 0%,80%,100%{opacity:0.3;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
-
 .msg-actions { display: flex; gap: 4px; margin-top: 5px; max-width: 90%; flex-wrap: wrap; align-items: center; }
 .msg-reaction-btn { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 20px; border: 1px solid var(--border); background: white; font-size: 11px; color: var(--mid); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .msg-reaction-btn:hover { border-color: var(--sage-mid); background: var(--sage-pale); color: var(--sage); }
@@ -96,21 +89,17 @@ button { cursor: pointer; }
 .msg-actions-divider { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; margin: 0 2px; }
 .msg-note-display { max-width: 78%; margin-top: 4px; padding: 6px 10px; background: #fffbf0; border: 1px solid var(--amber-mid); border-radius: var(--r); font-size: 12px; color: var(--amber); line-height: 1.5; }
 .msg-note-display-header { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--amber); opacity: 0.7; margin-bottom: 2px; }
-
 .note-popup { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 2px solid var(--amber-mid); padding: 12px 14px; z-index: 40; max-width: 680px; margin: 0 auto; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
 .note-popup-context { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .note-popup-title { font-size: 12px; font-weight: 600; color: var(--amber); margin-bottom: 6px; }
 .note-input { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 8px 10px; font-size: 13px; resize: none; outline: none; line-height: 1.5; }
 .note-input:focus { border-color: var(--amber-mid); }
-
 .progress-strip { background: #f0ede8; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); padding: 5px 14px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .prog-wrap { height: 6px; background: var(--border-light); border-radius: 3px; flex: 1; overflow: hidden; }
 .prog-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-
 .tooltip-wrap { position: relative; display: inline-flex; }
 .tooltip-wrap .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--charcoal); color: white; font-size: 11px; padding: 5px 9px; border-radius: 6px; pointer-events: none; z-index: 50; line-height: 1.4; max-width: 240px; white-space: normal; text-align: center; }
 .tooltip-wrap:hover .tooltip { display: block; }
-
 .fb-card { border-radius: var(--r-lg); padding: 14px 16px; border: 1px solid; }
 .fb-section { margin-bottom: 10px; }
 .fb-section:last-child { margin-bottom: 0; }
@@ -118,7 +107,6 @@ button { cursor: pointer; }
 .fb-text { font-size: 13px; line-height: 1.6; }
 .example-box { padding: 8px 12px; border-radius: 8px; font-size: 13px; font-style: italic; line-height: 1.6; }
 .crisis-banner { background: var(--indigo-pale); border: 1px solid var(--indigo-mid); border-radius: var(--r); padding: 10px 14px; margin: 8px 14px 0; flex-shrink: 0; }
-
 .input-area { background: var(--warm); border-top: 1px solid var(--border-light); padding: 10px 14px; padding-bottom: max(10px, env(safe-area-inset-bottom)); flex-shrink: 0; }
 .input-row { display: flex; gap: 8px; align-items: flex-end; }
 .chat-input { flex: 1; resize: none; padding: 9px 12px; font-size: 14px; border-radius: var(--r); border: 1px solid var(--border); background: var(--cream); color: var(--charcoal); line-height: 1.5; min-height: 42px; max-height: 110px; outline: none; transition: border-color 0.15s; }
@@ -132,7 +120,6 @@ button { cursor: pointer; }
 .action-btn:hover:not(:disabled) { border-color: var(--charcoal); color: var(--charcoal); }
 .action-btn.primary { background: var(--amber-pale); border-color: var(--amber-mid); color: var(--amber); }
 .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
 .home-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.75rem; gap: 12px; }
 .home-title { font-family: 'Instrument Serif', serif; font-size: 26px; line-height: 1.2; margin-bottom: 4px; }
 .home-sub { font-size: 14px; color: var(--mid); }
@@ -140,14 +127,12 @@ button { cursor: pointer; }
 .pts-btn:hover { border-color: var(--border); }
 .pts-num { font-size: 20px; font-weight: 600; color: var(--sage); line-height: 1; }
 .pts-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
 .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 1rem; }
 .stat-card { padding: 10px 8px; border-radius: var(--r); border: 1px solid var(--border-light); text-align: center; background: var(--warm); }
 .stat-num { font-size: 20px; font-weight: 600; line-height: 1; margin-bottom: 2px; }
 .stat-label { font-size: 11px; color: var(--muted); }
 .debrief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
 .exchange-counter { font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
-
 .eos-form { background: var(--warm); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: 1.25rem; margin-bottom: 1rem; }
 .eos-form input, .eos-form textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--r); padding: 9px 12px; font-size: 14px; outline: none; transition: border-color 0.15s; background: var(--cream); }
 .eos-form input:focus, .eos-form textarea:focus { border-color: var(--sage-mid); }
@@ -157,29 +142,22 @@ button { cursor: pointer; }
 .star-btn { width: 40px; height: 40px; border-radius: var(--r); border: 1px solid var(--border); background: var(--cream); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
 .star-btn.active { background: var(--amber-pale); border-color: var(--amber-mid); }
 .star-btn:hover { border-color: var(--amber-mid); }
-
-/* Post-debrief feedback form */
 .post-debrief-form { background: var(--teal-pale); border: 1px solid var(--teal-mid); border-radius: var(--r-lg); padding: 1.25rem; margin-bottom: 1rem; }
 .post-debrief-form textarea { width: 100%; border: 1px solid var(--teal-mid); border-radius: var(--r); padding: 9px 12px; font-size: 13px; outline: none; transition: border-color 0.15s; background: white; resize: vertical; line-height: 1.5; }
 .post-debrief-form textarea:focus { border-color: var(--teal); }
-
-/* Client realism rating */
 .realism-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .realism-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--cream); font-size: 12px; font-weight: 500; color: var(--mid); cursor: pointer; transition: all 0.15s; }
 .realism-btn:hover { border-color: var(--teal-mid); color: var(--teal); }
 .realism-btn.active { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); font-weight: 600; }
-
 @media print {
   body * { visibility: hidden; }
   #pdf-content, #pdf-content * { visibility: visible; }
   #pdf-content { position: fixed; left: 0; top: 0; width: 100%; padding: 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.6; color: #1c1c1a; }
 }
 #pdf-content { display: none; }
-
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
 @media (max-width: 500px) {
   .quick-grid { grid-template-columns: 1fr; gap: 6px; }
   .approach-grid { grid-template-columns: repeat(2, 1fr); }
@@ -212,7 +190,6 @@ const APPROACHES = [
   { id:"gestalt", label:"Gestalt", desc:"Present focus, unfinished business, contact, experiment" },
   { id:"act", label:"ACT", desc:"Acceptance, defusion, values clarification, psychological flexibility" },
 ];
-
 const SCENARIOS = [
   {id:"anxiety",label:"Anxiety & Worry",desc:"Overwhelmed by work and constant anxious thoughts",cat:"Mood"},
   {id:"grief",label:"Grief & Loss",desc:"Recently lost a loved one, struggling to cope",cat:"Life Events"},
@@ -237,7 +214,6 @@ const SCENARIOS = [
   {id:"crisis_dv",label:"Domestic Violence",desc:"Client discloses ongoing abuse at home",cat:"Crisis"},
   {id:"crisis_distress",label:"Acute Distress",desc:"Client presents highly distressed and overwhelmed",cat:"Crisis"},
 ];
-
 const CRISIS_IDS = ["crisis_suicidal","crisis_selfharm","crisis_dv","crisis_distress"];
 const DIFFICULTIES = [
   {id:"beginner",label:"Beginner",desc:"Cooperative and open, responds well to empathy",pts:1,color:"var(--sage)",pale:"var(--sage-pale)",border:"var(--sage-mid)"},
@@ -292,21 +268,30 @@ function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function formatTime(ts){ const d=new Date(ts); return d.toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"}); }
 function formatDate(ds){ try{ return new Date(ds).toLocaleDateString("en-AU",{day:"numeric",month:"long",year:"numeric"}); }catch{ return ds; } }
 function truncate(str,n){ return str&&str.length>n?str.slice(0,n)+"…":str; }
-
 function ratingStyle(r){
   if(r==="good") return {bg:"var(--sage-pale)",border:"var(--sage-mid)",color:"var(--sage)",label:"Good"};
   if(r==="okay") return {bg:"var(--amber-pale)",border:"var(--amber-mid)",color:"var(--amber)",label:"Okay"};
   return {bg:"var(--red-pale)",border:"var(--red-mid)",color:"var(--red)",label:"Needs work"};
 }
 
-async function saveToSupabase(sessionData) {
+async function saveAllToSupabase(sessionData) {
   try {
-    await fetch("/api/db", {
+    const res = await fetch("/api/db", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(sessionData),
     });
-  } catch(e) { console.warn("Could not save to database:", e); }
+    const text = await res.text();
+    if (!res.ok) {
+      console.error("Save failed:", res.status, text);
+      return { ok: false, error: text };
+    }
+    console.log("Saved successfully:", text);
+    return { ok: true };
+  } catch(e) {
+    console.error("Save error:", e);
+    return { ok: false, error: e.message };
+  }
 }
 
 function generatePDF(opts) {
@@ -318,12 +303,12 @@ function generatePDF(opts) {
   Object.values(msgReactions||{}).forEach(r=>{ reactionCounts[r]=(reactionCounts[r]||0)+1; });
   const reactionSummary = REACTIONS.map(r=> reactionCounts[r.id] ? `${r.emoji} ${r.label}: ${reactionCounts[r.id]}` : null).filter(Boolean).join("  ·  ");
   const notesHTML = Object.keys(msgNotes||{}).length > 0
-    ? `<div style="margin-top:12px"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Session Notes</strong>${Object.entries(msgNotes).map(([msgId,note])=>`<div style="margin-top:8px;padding:8px 10px;background:#fffbf0;border-left:3px solid #f0c080;font-size:13px;border-radius:4px"><div style="font-size:11px;color:#aaa;margin-bottom:3px">${formatTime(note.timestamp)} · On: "${truncate(note.msgText,80)}"</div><div>${note.text}</div></div>`).join("")}</div>`
+    ? `<div style="margin-top:12px"><strong style="font-size:12px;text-transform:uppercase;color:#888">Session Notes</strong>${Object.entries(msgNotes).map(([msgId,note])=>`<div style="margin-top:8px;padding:8px 10px;background:#fffbf0;border-left:3px solid #f0c080;font-size:13px;border-radius:4px"><div style="font-size:11px;color:#aaa;margin-bottom:3px">${formatTime(note.timestamp)} · On: "${truncate(note.msgText,80)}"</div><div>${note.text}</div></div>`).join("")}</div>`
     : "";
   const transcriptHTML = includeTranscript && messages && messages.length > 0
-    ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Full Transcript</strong>${messages.map(m=>{const reaction=msgReactions?.[m.id];const note=msgNotes?.[m.id];const r=reaction?REACTIONS.find(r=>r.id===reaction):null;return`<div style="margin-top:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:${m.role==="counsellor"?"#4a6741":"#888"};margin-bottom:3px">${m.role==="counsellor"?"You (Counsellor)":"Client"}</div><div style="font-size:13px;line-height:1.6;padding:8px 12px;background:${m.role==="counsellor"?"#eef3ed":"#fafaf8"};border-radius:8px">${m.text}</div>${r?`<div style="font-size:11px;color:#888;margin-top:3px;padding-left:4px">${r.emoji} ${r.label}</div>`:""} ${note?`<div style="font-size:12px;color:#b06010;background:#fffbf0;border-left:2px solid #f0c080;padding:4px 8px;margin-top:4px;border-radius:4px">📝 ${note.text}</div>`:""}</div>`;}).join("")}</div>`
+    ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;color:#888">Full Transcript</strong>${messages.map(m=>{const reaction=msgReactions?.[m.id];const note=msgNotes?.[m.id];const r=reaction?REACTIONS.find(r=>r.id===reaction):null;return`<div style="margin-top:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:${m.role==="counsellor"?"#4a6741":"#888"};margin-bottom:3px">${m.role==="counsellor"?"You (Counsellor)":"Client"}</div><div style="font-size:13px;line-height:1.6;padding:8px 12px;background:${m.role==="counsellor"?"#eef3ed":"#fafaf8"};border-radius:8px">${m.text}</div>${r?`<div style="font-size:11px;color:#888;margin-top:3px">${r.emoji} ${r.label}</div>`:""} ${note?`<div style="font-size:12px;color:#b06010;background:#fffbf0;border-left:2px solid #f0c080;padding:4px 8px;margin-top:4px;border-radius:4px">📝 ${note.text}</div>`:""}</div>`;}).join("")}</div>`
     : "";
-  const debriefHTML = debrief ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:#888">Supervisor Debrief</strong><div style="margin-top:8px;padding:12px;background:${rs.bg};border:1px solid ${rs.border};border-radius:8px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:${rs.color};margin-bottom:6px">Overall: ${rs.label}</div><p style="font-size:13px;line-height:1.6;margin:0 0 10px">${debrief.summary||""}</p>${debrief.strengths?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#4a6741">Strengths</strong>${debrief.strengths.map(s=>`<p style="font-size:13px;margin:3px 0;color:#4a6741">· ${s}</p>`).join("")}</div>`:""}${debrief.areas?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">To develop</strong>${debrief.areas.map(a=>`<p style="font-size:13px;margin:3px 0;color:#b06010">· ${a}</p>`).join("")}</div>`:""}${debrief.key_moment?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Key moment</strong><p style="font-size:13px;margin:3px 0;line-height:1.6">${debrief.key_moment}</p></div>`:""}${debrief.example_response?`<div><strong style="font-size:11px;text-transform:uppercase;color:#3c3c8c">Stronger response example</strong><p style="font-size:13px;margin:4px 0;font-style:italic;color:#3c3c8c;line-height:1.6">${debrief.example_response}</p></div>`:""}</div></div>` : "";
+  const debriefHTML = debrief ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;color:#888">Supervisor Debrief</strong><div style="margin-top:8px;padding:12px;background:${rs.bg};border:1px solid ${rs.border};border-radius:8px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:${rs.color};margin-bottom:6px">Overall: ${rs.label}</div><p style="font-size:13px;line-height:1.6;margin:0 0 10px">${debrief.summary||""}</p>${debrief.strengths?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#4a6741">Strengths</strong>${debrief.strengths.map(s=>`<p style="font-size:13px;margin:3px 0;color:#4a6741">· ${s}</p>`).join("")}</div>`:""}${debrief.areas?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">To develop</strong>${debrief.areas.map(a=>`<p style="font-size:13px;margin:3px 0;color:#b06010">· ${a}</p>`).join("")}</div>`:""}${debrief.key_moment?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Key moment</strong><p style="font-size:13px;margin:3px 0;line-height:1.6">${debrief.key_moment}</p></div>`:""}${debrief.example_response?`<div><strong style="font-size:11px;text-transform:uppercase;color:#3c3c8c">Stronger response example</strong><p style="font-size:13px;margin:4px 0;font-style:italic;color:#3c3c8c;line-height:1.6">${debrief.example_response}</p></div>`:""}</div></div>` : "";
 
   const html = `<div style="font-family:'DM Sans',sans-serif;max-width:680px;margin:0 auto;padding:24px;color:#1c1c1a">
     <div style="border-bottom:2px solid #4a6741;padding-bottom:12px;margin-bottom:20px">
@@ -348,7 +333,7 @@ function generatePDF(opts) {
     ${clientRealism?`<div style="margin-top:8px;font-size:13px"><strong>Client realism:</strong> ${REALISM_OPTIONS.find(r=>r.id===clientRealism)?.label||clientRealism}</div>`:""}
     ${transcriptHTML}
     <div style="margin-top:24px;padding-top:12px;border-top:1px solid #eee;font-size:11px;color:#aaa;text-align:center">
-      Counselling Role-Play Practice · counselling-roleplay.vercel.app · For training purposes only · Designed to support counselling students in developing ethical, evidence-based practice skills aligned with Australian professional counselling standards.
+      Counselling Role-Play Practice · counselling-roleplay.vercel.app · For training purposes only · Designed to support counselling students developing ethical, evidence-based practice skills aligned with Australian professional counselling standards.
     </div>
   </div>`;
 
@@ -387,12 +372,14 @@ function App(){
   const [sessionDate,setSessionDate]=useState(new Date().toISOString().split("T")[0]);
   const [selfRating,setSelfRating]=useState(0);
   const [reflection,setReflection]=useState("");
-  // Post-debrief feedback (1, 2, 4)
+  // Post-debrief feedback
   const [debriefRating,setDebriefRating]=useState(0);
   const [debriefMissed,setDebriefMissed]=useState("");
   const [clientRealism,setClientRealism]=useState("");
-  const [showPostFeedback,setShowPostFeedback]=useState(false);
-  const [postFeedbackSaved,setPostFeedbackSaved]=useState(false);
+  const [feedbackSaved,setFeedbackSaved]=useState(false);
+  const [savingFeedback,setSavingFeedback]=useState(false);
+  // Pending session data — held until post-debrief feedback submitted
+  const [pendingSessionData,setPendingSessionData]=useState(null);
 
   const bottomRef=useRef(null);
   const noteInputRef=useRef(null);
@@ -406,7 +393,6 @@ function App(){
     return base.includes(id)?base.filter(a=>a!==id):[...base,id];
   });
   const getApLabel=(ap)=>(!ap||ap.length===0||ap.includes("any"))?"Eclectic":ap.map(id=>AP_LABEL[id]).join(" + ");
-
   const isCrisis=CRISIS_IDS.includes(scenario);
   const canStart=approach.length>0&&scenario&&difficulty&&feedbackMode&&sessionLength;
   const maxEx=SESSION_LENGTHS.find(s=>s.id===sessionLength)?.max||10;
@@ -433,7 +419,7 @@ function App(){
     const apNames=ap.filter(id=>id!=="any").map(id=>APPROACHES.find(a=>a.id===id)?.label).filter(Boolean);
     const approachGuide=isAny?"Evaluate universal counselling skills: empathy, active listening, reflection of feeling, open questions, paraphrasing, summarising, pacing.":`Evaluate use of ${apNames.join(" and ")} techniques specifically, as well as general counselling skills.`;
     const crisisNote=CRISIS_IDS.includes(sc)?`This is a CRISIS scenario (${sc_.label}). Assess: Did they stay calm? Ask directly about risk? Show empathy before problem-solving?`:"";
-    if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST — do NOT reframe poor responses positively.
+    if(mode==="step") return `You are a counselling supervisor giving brief formative feedback. ${approachGuide} ${crisisNote} Use Australian English. Be warm but HONEST. Do NOT reframe poor responses positively.
 
 IMPORTANT for crisis scenarios: follow a GRADUATED assessment approach. Sequence: (1) reflect and validate, (2) clarify ideation, (3) explore frequency and intensity, (4) explore intent, (5) plan and means. Suggest only the NEXT appropriate step.
 
@@ -449,11 +435,11 @@ Respond ONLY with valid JSON (no markdown):
     setScreen("session"); setLoading(true);
     setMessages([]); setMsgReactions({}); setMsgNotes({});
     setActiveNoteFor(null); setNoteText("");
-    setStepFeedback(null); setFinalFeedback(null);
+    setStepFeedback(null); setFinalFeedback(null); setPendingSessionData(null);
     setShowCrisisGuide(false); setExchangeCount(0); setShowingFeedback(false);
     setStudentName(""); setSelfRating(0); setReflection("");
     setDebriefRating(0); setDebriefMissed(""); setClientRealism("");
-    setShowPostFeedback(false); setPostFeedbackSaved(false);
+    setFeedbackSaved(false); setSavingFeedback(false);
     setSessionDate(new Date().toISOString().split("T")[0]);
     try {
       const text=await callAPI(clientSystem(ap,sc,diff),[{role:"user",content:"Begin the session."}]);
@@ -543,7 +529,7 @@ Respond ONLY with valid JSON (no markdown):
   const getFinalFeedback=()=>{ if(!gettingFinal) setScreen("eos"); };
 
   const submitEosAndGetDebrief=async()=>{
-    setScreen("session"); setGettingFinal(true);
+    setScreen("loading"); setGettingFinal(true);
     const transcript=messages.map(m=>`${m.role==="counsellor"?"Counsellor":"Client"}: ${m.text}`).join("\n");
     const sc_=SCENARIOS.find(s=>s.id===scenario);
     try{
@@ -551,45 +537,45 @@ Respond ONLY with valid JSON (no markdown):
         [{role:"user",content:`Approach: ${getApLabel(approach)}\nScenario: ${sc_.label}\nDifficulty: ${difficulty}\n\nFull transcript:\n${transcript}`}],2500);
       let fb; try{const m=raw.match(/\{[\s\S]*\}/);fb=JSON.parse(m?m[0]:raw.trim());}
       catch{fb={overall:"okay",summary:"Session complete.",strengths:["You engaged with the client."],areas:["Continue developing your skills."],technique_use:"Keep practising.",relational_quality:"",key_moment:"",example_response:"Try using more open questions."};}
-      setFinalFeedback(fb); recordSession(fb);
+      setFinalFeedback(fb);
+      recordSession(fb);
+
+      // Build session data but DON'T save yet — wait for post-debrief feedback
       const reactionsArray=Object.entries(msgReactions).map(([msgId,type])=>({msgId,type,msgText:messages.find(m=>m.id===msgId)?.text||""}));
       const notesArray=Object.entries(msgNotes).map(([msgId,n])=>({msgId,...n}));
-      await saveToSupabase({
-        student_name:studentName||null,
-        session_date:sessionDate,
+      setPendingSessionData({
+        student_name: studentName||null,
+        session_date: sessionDate,
         scenario,
-        transcript:messages,
-        debrief:fb,
-        reactions:reactionsArray,
-        notes:notesArray,
-        self_rating:selfRating||null,
-        final_reflection:reflection||null,
-        score_data:{overall:fb.overall,exchanges:exchangeCount,approach:getApLabel(approach),difficulty},
+        transcript: messages,
+        debrief: fb,
+        reactions: reactionsArray,
+        notes: notesArray,
+        self_rating: selfRating||null,
+        final_reflection: reflection||null,
+        score_data: { overall: fb.overall, exchanges: exchangeCount, approach: getApLabel(approach), difficulty },
       });
+
       setScreen("feedback");
     }catch{setScreen("feedback");}
     setGettingFinal(false);
   };
 
-  const savePostFeedback=async()=>{
-    setPostFeedbackSaved(true);
-    // Update Supabase with post-debrief feedback — fire and forget
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_name: studentName||null,
-          session_date: sessionDate,
-          scenario,
-          debrief_rating: debriefRating||null,
-          debrief_missed: debriefMissed||null,
-          client_realism: clientRealism||null,
-          score_data: { overall: finalFeedback?.overall, exchanges: exchangeCount, approach: getApLabel(approach), difficulty },
-          _post_feedback_only: true,
-        }),
-      });
-    } catch(e) { console.warn("Post feedback save failed:", e); }
+  // Called when student submits the three post-debrief questions
+  const submitPostFeedback=async()=>{
+    setSavingFeedback(true);
+    const fullData = {
+      ...pendingSessionData,
+      debrief_rating: debriefRating||null,
+      debrief_missed: debriefMissed||null,
+      client_realism: clientRealism||null,
+    };
+    const result = await saveAllToSupabase(fullData);
+    setFeedbackSaved(true);
+    setSavingFeedback(false);
+    if (!result?.ok) {
+      console.error("Save failed, data:", JSON.stringify(fullData).slice(0,200));
+    }
   };
 
   const recordSession=(fb)=>{
@@ -604,11 +590,11 @@ Respond ONLY with valid JSON (no markdown):
   const reset=()=>{
     setScreen("home");setMessages([]);setMsgReactions({});setMsgNotes({});
     setActiveNoteFor(null);setNoteText("");setInput("");
-    setStepFeedback(null);setFinalFeedback(null);setShowingFeedback(false);
-    setExchangeCount(0);setShowCrisisGuide(false);
+    setStepFeedback(null);setFinalFeedback(null);setPendingSessionData(null);
+    setShowingFeedback(false);setExchangeCount(0);setShowCrisisGuide(false);
     setStudentName("");setSelfRating(0);setReflection("");
     setDebriefRating(0);setDebriefMissed("");setClientRealism("");
-    setShowPostFeedback(false);setPostFeedbackSaved(false);
+    setFeedbackSaved(false);setSavingFeedback(false);
     setSessionDate(new Date().toISOString().split("T")[0]);
   };
 
@@ -647,7 +633,6 @@ Respond ONLY with valid JSON (no markdown):
           <div className="pts-label">pts · Progress</div>
         </button>
       </div>
-
       <div style={{marginBottom:"2rem"}}>
         <span className="label-upper">Quick start</span>
         <div className="quick-grid">
@@ -663,7 +648,6 @@ Respond ONLY with valid JSON (no markdown):
           ))}
         </div>
       </div>
-
       <span className="label-upper">1. Choose approach(es) — select one or more</span>
       <div className="approach-grid">
         {APPROACHES.map(a=>{
@@ -675,7 +659,6 @@ Respond ONLY with valid JSON (no markdown):
           </div>);
         })}
       </div>
-
       <span className="label-upper">2. Choose a client scenario</span>
       <div className="filter-tabs">
         {CATS.map(cat=>(
@@ -696,7 +679,6 @@ Respond ONLY with valid JSON (no markdown):
           </div>);
         })}
       </div>
-
       <span className="label-upper">3. Difficulty level</span>
       <div className="option-row option-row-3">
         {DIFFICULTIES.map(d=>{
@@ -707,7 +689,6 @@ Respond ONLY with valid JSON (no markdown):
           </div>);
         })}
       </div>
-
       <span className="label-upper">4. Feedback style</span>
       <div className="option-row option-row-2">
         {FEEDBACK_MODES.map(f=>{
@@ -718,7 +699,6 @@ Respond ONLY with valid JSON (no markdown):
           </div>);
         })}
       </div>
-
       <span className="label-upper">5. Session length</span>
       <div className="option-row option-row-3" style={{marginBottom:"2rem"}}>
         {SESSION_LENGTHS.map(l=>{
@@ -729,7 +709,6 @@ Respond ONLY with valid JSON (no markdown):
           </div>);
         })}
       </div>
-
       <button className="btn btn-primary" style={{width:"100%",padding:"13px",fontSize:15}} disabled={!canStart} onClick={()=>doStart(approach,scenario,difficulty,feedbackMode,sessionLength)}>
         Start Session →
       </button>
@@ -777,6 +756,26 @@ Respond ONLY with valid JSON (no markdown):
   );
 
   // ── SESSION ──
+  // ── LOADING SCREEN ──
+  if(screen==="loading") return(
+    <div style={{height:"100dvh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"var(--cream)",padding:"2rem",textAlign:"center",maxWidth:680,margin:"0 auto"}}>
+      <div style={{marginBottom:"2rem"}}>
+        <div style={{width:56,height:56,border:"3px solid var(--sage-mid)",borderTop:"3px solid var(--sage)",borderRadius:"50%",animation:"spin 1s linear infinite",margin:"0 auto 1.5rem"}}/>
+        <div style={{fontFamily:"Instrument Serif, serif",fontSize:26,color:"var(--sage)",marginBottom:"0.5rem"}}>Reviewing your session…</div>
+        <p style={{fontSize:14,color:"var(--mid)",lineHeight:1.7,maxWidth:340,margin:"0 auto"}}>Your supervisor is reading through the transcript and preparing personalised feedback. This usually takes 10–20 seconds.</p>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,opacity:0.5}}>
+        {["Reading the transcript","Identifying key moments","Preparing your debrief"].map((step,i)=>(
+          <div key={i} style={{fontSize:13,color:"var(--mid)",display:"flex",alignItems:"center",gap:8,justifyContent:"center"}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:"var(--sage-mid)"}}/>
+            {step}
+          </div>
+        ))}
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+
   if(screen==="session"){
     const diff_=DIFFICULTIES.find(d=>d.id===difficulty);
     const sc_=SCENARIOS.find(s=>s.id===scenario);
@@ -794,7 +793,6 @@ Respond ONLY with valid JSON (no markdown):
           </div>
           <button className="btn btn-ghost" style={{padding:"5px 12px",fontSize:13}} onClick={reset}>End</button>
         </div>
-
         <div className="progress-strip">
           <div className="prog-wrap">
             <div className="prog-fill" style={{width:`${progPct}%`,background:nearEnd?"var(--amber)":"var(--sage)"}}/>
@@ -803,7 +801,6 @@ Respond ONLY with valid JSON (no markdown):
             {nearEnd?"Consider finishing":exchangeCount+" / "+maxEx+" exchanges"}
           </span>
         </div>
-
         {isCrisis&&(
           <div className="crisis-banner">
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -818,7 +815,6 @@ Respond ONLY with valid JSON (no markdown):
             )}
           </div>
         )}
-
         <div className="chat-area">
           {messages.map((m,i)=>{
             const isCounsellor=m.role==="counsellor";
@@ -867,13 +863,11 @@ Respond ONLY with valid JSON (no markdown):
               </div>
             );
           })}
-
           {loading&&(
             <div className="msg-wrap client">
               <div className="typing-bubble"><div className="dot"/><div className="dot"/><div className="dot"/></div>
             </div>
           )}
-
           {stepFeedback&&showingFeedback&&(()=>{
             const rs=ratingStyle(stepFeedback.rating);
             return(
@@ -899,7 +893,6 @@ Respond ONLY with valid JSON (no markdown):
           })()}
           <div ref={bottomRef}/>
         </div>
-
         {activeNoteFor&&(()=>{
           const msg=messages.find(m=>m.id===activeNoteFor);
           return(
@@ -918,7 +911,6 @@ Respond ONLY with valid JSON (no markdown):
             </div>
           );
         })()}
-
         <div className="input-area">
           <div className="input-row">
             <textarea className="chat-input" rows={1} value={input}
@@ -1042,13 +1034,11 @@ Respond ONLY with valid JSON (no markdown):
           </>
         )}
 
-        {/* Post-debrief feedback — shown after debrief loads */}
+        {/* Post-debrief feedback — MUST submit to save everything */}
         <div className="post-debrief-form">
-          <div style={{fontWeight:600,fontSize:14,color:"var(--teal)",marginBottom:12}}>
-            🧪 Help us improve — 3 quick questions
-          </div>
+          <div style={{fontWeight:600,fontSize:14,color:"var(--teal)",marginBottom:4}}>🧪 Help us improve — 3 quick questions</div>
+          <p style={{fontSize:12,color:"var(--teal)",opacity:0.8,marginBottom:14}}>Your session is saved when you submit this — it only takes a moment.</p>
 
-          {/* 1. Debrief quality rating */}
           <div style={{marginBottom:14}}>
             <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>How useful was the supervisor feedback?</div>
             <div className="star-row">
@@ -1065,15 +1055,13 @@ Respond ONLY with valid JSON (no markdown):
             </div>
           </div>
 
-          {/* 2. What did feedback miss */}
           <div style={{marginBottom:14}}>
             <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>Anything the feedback missed or got wrong? <span style={{fontWeight:400,color:"var(--muted)"}}>(optional)</span></div>
             <textarea rows={2} placeholder="e.g. It didn't pick up that I used a scaling question… / The feedback felt too generic…"
               value={debriefMissed} onChange={e=>setDebriefMissed(e.target.value)}/>
           </div>
 
-          {/* 4. Client realism */}
-          <div style={{marginBottom:14}}>
+          <div style={{marginBottom:16}}>
             <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>Did the AI client feel realistic?</div>
             <div className="realism-row">
               {REALISM_OPTIONS.map(opt=>(
@@ -1085,11 +1073,12 @@ Respond ONLY with valid JSON (no markdown):
             </div>
           </div>
 
-          {!postFeedbackSaved
-            ? <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"8px 18px"}} onClick={savePostFeedback}>
-                Submit feedback
+          {!feedbackSaved
+            ? <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"9px 20px"}}
+                onClick={submitPostFeedback} disabled={savingFeedback}>
+                {savingFeedback?"Saving…":"Submit & save session"}
               </button>
-            : <div style={{fontSize:13,color:"var(--teal)",fontWeight:500}}>✓ Thank you — your feedback has been saved.</div>
+            : <div style={{fontSize:13,color:"var(--teal)",fontWeight:500}}>✓ Session saved — thank you for your feedback.</div>
           }
         </div>
 
