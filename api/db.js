@@ -1,4 +1,4 @@
-const SHEETS_WEBHOOK = "https://script.google.com/macros/s/AKfycbyPpyRvRfuvBBSvRHg3a-N5MMrsgT6Z0y8eCY-A1kFn4NHonvR3gTv6XR5RjPDKRxSSeg/exec";
+const SHEETS_WEBHOOK = "https://script.google.com/macros/s/AKfycbxxz5QgKMiXO0IPvhcloUhah4UjO8ry3URutsi7dN-3ShBKDwE04ExIdBXPmAw_ptAtZg/exec";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
