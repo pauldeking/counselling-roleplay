@@ -736,7 +736,7 @@ Respond ONLY with valid JSON (no markdown):
         <div style={{background:"var(--warm)",borderRadius:"var(--r-lg)",padding:"1.5rem 1.25rem",maxWidth:420,width:"100%"}}>
           <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,marginBottom:"0.75rem"}}>Before you begin</div>
           <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"0.75rem"}}>
-            This is a <strong style={{color:"var(--charcoal)"}}>counselling practice tool for students</strong> — it simulates real client sessions using AI and is designed for skill development only.
+            This is an <strong style={{color:"var(--charcoal)"}}>AI-powered practice tool for counselling students and practitioners</strong> — it simulates real client sessions and is designed for skill development and professional practice.
           </p>
           <div style={{background:"#f0f7f4",border:"1px solid var(--sage-mid)",borderRadius:"var(--r)",padding:"10px 12px",marginBottom:"0.75rem"}}>
             <p style={{fontSize:13,lineHeight:1.7,color:"var(--sage)",margin:0}}>
@@ -1172,6 +1172,36 @@ Respond ONLY with valid JSON (no markdown):
                 <p style={{fontSize:13,color:"var(--indigo)",fontStyle:"italic",lineHeight:1.6,margin:0}}>{finalFeedback.example_response}</p>
               </div>
             )}
+
+            {/* Smart drill recommendation based on feedback */}
+            {(()=>{
+              const areas=(finalFeedback.areas||[]).join(" ").toLowerCase();
+              const techUse=(finalFeedback.technique_use||"").toLowerCase();
+              const summary=(finalFeedback.summary||"").toLowerCase();
+              const combined=areas+" "+techUse+" "+summary;
+              let recommended=null;
+              if(combined.match(/reflect|feeling|emotion|empathy|empathic/)) recommended=DRILLS.find(d=>d.id==="reflection")||DRILLS.find(d=>d.id==="empathy");
+              else if(combined.match(/question|closed|open question/)) recommended=DRILLS.find(d=>d.id==="open_q");
+              else if(combined.match(/paraphras|restat/)) recommended=DRILLS.find(d=>d.id==="paraphrase");
+              else if(combined.match(/summar/)) recommended=DRILLS.find(d=>d.id==="summarise");
+              else if(combined.match(/challeng|inconsisten|avoid/)) recommended=DRILLS.find(d=>d.id==="challenging");
+              else if(combined.match(/refram|perspect|alternative/)) recommended=DRILLS.find(d=>d.id==="reframing");
+              else if(combined.match(/notic|notic|present|aware/)) recommended=DRILLS.find(d=>d.id==="noticing");
+              if(!recommended) return null;
+              return(
+                <div style={{margin:"0 0 1rem",padding:"12px 14px",borderRadius:"var(--r-lg)",background:"var(--teal-pale)",border:"1px solid var(--teal-mid)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:600,color:"var(--teal)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>💡 Recommended drill</div>
+                    <div style={{fontSize:14,fontWeight:500,color:"var(--charcoal)"}}>{recommended.emoji} {recommended.label}</div>
+                    <div style={{fontSize:12,color:"var(--mid)",marginTop:2}}>{recommended.desc} · 4 exchanges · +1pt</div>
+                  </div>
+                  <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"8px 16px",flexShrink:0}}
+                    onClick={()=>startDrill(recommended)}>
+                    Start drill →
+                  </button>
+                </div>
+              );
+            })()}
           </>
         )}
 
