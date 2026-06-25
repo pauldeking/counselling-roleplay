@@ -374,9 +374,19 @@ function generatePDF(opts) {
 }
 
 function App(){
+  // Load saved email from localStorage
+  const savedEmail = (() => { try { return localStorage.getItem("crp_email")||""; } catch{ return ""; } })();
+  const savedName = (() => { try { return localStorage.getItem("crp_name")||""; } catch{ return ""; } })();
+
   const [screen,setScreen]=useState("home");
   const [approach,setApproach]=useState([]);
-  const [showDisclaimer,setShowDisclaimer]=useState(true);
+  const [showDisclaimer,setShowDisclaimer]=useState(!savedEmail); // skip if already have email
+  const [showEmailCapture,setShowEmailCapture]=useState(false);
+  const [emailInput,setEmailInput]=useState("");
+  const [nameInput,setNameInput]=useState("");
+  const [emailError,setEmailError]=useState("");
+  const [userEmail,setUserEmail]=useState(savedEmail);
+  const [userName,setUserName]=useState(savedName);
   const [scenario,setScenario]=useState(null);
   const [difficulty,setDifficulty]=useState(null);
   const [feedbackMode,setFeedbackMode]=useState(null);
@@ -398,6 +408,7 @@ function App(){
   const [exchangeCount,setExchangeCount]=useState(0);
   // Pre-debrief form
   const [studentName,setStudentName]=useState("");
+  const [studentEmail,setStudentEmail]=useState("");
   const [sessionDate,setSessionDate]=useState(new Date().toISOString().split("T")[0]);
   const [selfRating,setSelfRating]=useState(0);
   const [reflection,setReflection]=useState("");
@@ -480,7 +491,7 @@ Respond ONLY with valid JSON (no markdown):
     setActiveNoteFor(null); setNoteText("");
     setStepFeedback(null); setFinalFeedback(null); setPendingSessionData(null);
     setShowCrisisGuide(false); setExchangeCount(0); setShowingFeedback(false);
-    setStudentName(""); setSelfRating(0); setReflection("");
+    setStudentName(""); setStudentEmail(""); setSelfRating(0); setReflection("");
     setDebriefRating(0); setDebriefMissed(""); setClientRealism("");
     setFeedbackSaved(false); setSavingFeedback(false);
     setSessionDate(new Date().toISOString().split("T")[0]);
@@ -588,6 +599,7 @@ Respond ONLY with valid JSON (no markdown):
       const notesArray=Object.entries(msgNotes).map(([msgId,n])=>({msgId,...n}));
       setPendingSessionData({
         student_name: studentName||null,
+        student_email: userEmail||null,
         session_date: sessionDate,
         scenario,
         transcript: messages,
@@ -630,12 +642,27 @@ Respond ONLY with valid JSON (no markdown):
     setProgress(updated); saveProg(updated);
   };
 
+  const handleEmailSubmit=()=>{
+    if(!emailInput.trim()||!emailInput.includes("@")){
+      setEmailError("Please enter a valid email address"); return;
+    }
+    const email=emailInput.trim();
+    const name=nameInput.trim();
+    setUserEmail(email); setUserName(name);
+    try{ localStorage.setItem("crp_email",email); if(name) localStorage.setItem("crp_name",name); }catch{}
+    setShowEmailCapture(false);
+    // Save to Supabase
+    fetch("/api/db",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({_waitlist:true,email,name:name||null,signed_up_at:new Date().toISOString()})
+    }).catch(()=>{});
+  };
+
   const reset=()=>{
     setScreen("home");setMessages([]);setMsgReactions({});setMsgNotes({});
     setActiveNoteFor(null);setNoteText("");setInput("");
     setStepFeedback(null);setFinalFeedback(null);setPendingSessionData(null);
     setShowingFeedback(false);setExchangeCount(0);setShowCrisisGuide(false);
-    setStudentName("");setSelfRating(0);setReflection("");
+    setStudentName("");setStudentEmail("");setSelfRating(0);setReflection("");
     setDebriefRating(0);setDebriefMissed("");setClientRealism("");
     setFeedbackSaved(false);setSavingFeedback(false);
     setActiveDrill(null);setDrillMessages([]);setDrillFeedbacks([]);
@@ -746,15 +773,50 @@ Respond ONLY with valid JSON (no markdown):
           <p style={{fontSize:13,lineHeight:1.6,color:"var(--muted)",marginBottom:"1.25rem"}}>
             This is <strong style={{color:"var(--charcoal)"}}>not a mental health service</strong>. If you need support: <strong style={{color:"var(--charcoal)"}}>Lifeline 13 11 14</strong> · <strong style={{color:"var(--charcoal)"}}>Beyond Blue 1300 22 4636</strong>
           </p>
-          <button className="btn btn-primary" style={{width:"100%"}} onClick={()=>setShowDisclaimer(false)}>I understand — get started</button>
+          <button className="btn btn-primary" style={{width:"100%"}} onClick={()=>{setShowDisclaimer(false);setShowEmailCapture(true);}}>I understand — get started</button>
         </div>
       </div>
     )}
+
+    {/* Email capture overlay */}
+    {showEmailCapture&&(
+      <div style={{position:"fixed",inset:0,background:"rgba(28,28,26,0.6)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:"1.25rem"}}>
+        <div style={{background:"var(--warm)",borderRadius:"var(--r-lg)",padding:"1.75rem 1.25rem",maxWidth:420,width:"100%"}}>
+          <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,marginBottom:"0.5rem"}}>Let's get you set up</div>
+          <p style={{fontSize:14,lineHeight:1.7,color:"var(--mid)",marginBottom:"1.25rem"}}>
+            Enter your details to save your progress and stay updated on new features. We won't spam you.
+          </p>
+          <div style={{marginBottom:"1rem"}}>
+            <label style={{fontSize:13,fontWeight:500,color:"var(--mid)",display:"block",marginBottom:5}}>Your name <span style={{fontWeight:400,color:"var(--muted)"}}>(optional)</span></label>
+            <input type="text" placeholder="e.g. Jane Smith"
+              value={nameInput} onChange={e=>setNameInput(e.target.value)}
+              style={{width:"100%",border:"1px solid var(--border)",borderRadius:"var(--r)",padding:"10px 12px",fontSize:14,outline:"none",background:"var(--cream)",fontFamily:"inherit"}}/>
+          </div>
+          <div style={{marginBottom:"1.25rem"}}>
+            <label style={{fontSize:13,fontWeight:500,color:"var(--mid)",display:"block",marginBottom:5}}>Your email <span style={{fontWeight:400,color:"var(--muted)"}}>(required)</span></label>
+            <input type="email" placeholder="e.g. jane@email.com"
+              value={emailInput} onChange={e=>{setEmailInput(e.target.value);setEmailError("");}}
+              onKeyDown={e=>{if(e.key==="Enter") handleEmailSubmit();}}
+              style={{width:"100%",border:`1px solid ${emailError?"var(--red-mid)":"var(--border)"}`,borderRadius:"var(--r)",padding:"10px 12px",fontSize:14,outline:"none",background:"var(--cream)",fontFamily:"inherit"}}/>
+            {emailError&&<p style={{fontSize:12,color:"var(--red)",marginTop:4}}>{emailError}</p>}
+          </div>
+          <button className="btn btn-primary" style={{width:"100%",padding:"12px",fontSize:15}} onClick={handleEmailSubmit}>
+            Start practising →
+          </button>
+          <button style={{width:"100%",marginTop:"0.6rem",background:"none",border:"none",fontSize:13,color:"var(--muted)",cursor:"pointer",padding:"6px"}}
+            onClick={()=>{ setShowEmailCapture(false); }}>
+            Skip for now
+          </button>
+        </div>
+      </div>
+    )}
+
     <div className="page">
       <div className="home-header">
         <div>
           <div className="home-title">Counselling<br/><em style={{fontStyle:"italic",color:"var(--sage-light)"}}>Role-Play Practice</em></div>
           <div className="home-sub">AI-powered client sessions with supervisor feedback.</div>
+          {userEmail&&<div style={{fontSize:12,color:"var(--muted)",marginTop:4}}>👤 {userName||userEmail} · <button style={{background:"none",border:"none",fontSize:12,color:"var(--muted)",cursor:"pointer",textDecoration:"underline",padding:0}} onClick={()=>{try{localStorage.removeItem("crp_email");localStorage.removeItem("crp_name");}catch{}setUserEmail("");setUserName("");setShowDisclaimer(true);}}>switch account</button></div>}
         </div>
         <button className="pts-btn" onClick={()=>setScreen("progress")}>
           <div className="pts-num">{progress.totalPoints}</div>
@@ -863,9 +925,10 @@ Respond ONLY with valid JSON (no markdown):
       <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:"0.5rem"}}>Before your debrief</div>
       <p style={{fontSize:14,color:"var(--mid)",marginBottom:"1.5rem",lineHeight:1.6}}>Just a few quick details — saved with your session summary.</p>
       <div className="eos-form">
+        {/* Name pre-filled from signup if available */}
         <div className="field">
           <label>Your name <span style={{color:"var(--muted)",fontWeight:400}}>(optional)</span></label>
-          <input type="text" placeholder="e.g. Jane Smith" value={studentName} onChange={e=>setStudentName(e.target.value)}/>
+          <input type="text" placeholder="e.g. Jane Smith" value={studentName||userName} onChange={e=>setStudentName(e.target.value)}/>
         </div>
         <div className="field">
           <label>Session date</label>
@@ -1089,7 +1152,7 @@ Respond ONLY with valid JSON (no markdown):
         <div style={{marginBottom:"1.5rem"}}>
           <div style={{fontFamily:"Instrument Serif, serif",fontSize:24,marginBottom:4}}>Session Debrief</div>
           <div style={{fontSize:13,color:"var(--mid)"}}>{getApLabel(approach)} · {sc_?.label} · {diff_?.label}{isCrisis?" · Crisis":""} · {exchangeCount} exchanges</div>
-          {studentName&&<div style={{fontSize:13,color:"var(--mid)",marginTop:2}}>{studentName} · {formatDate(sessionDate)}</div>}
+          {(studentName||userName)&&<div style={{fontSize:13,color:"var(--mid)",marginTop:2}}>{studentName||userName}{userEmail?" · "+userEmail:""} · {formatDate(sessionDate)}</div>}
         </div>
 
         <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:"var(--r-lg)",background:"var(--sage-pale)",border:"1px solid var(--sage-mid)",marginBottom:"1rem"}}>
