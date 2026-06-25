@@ -911,6 +911,19 @@ Respond ONLY with valid JSON (no markdown):
       <button className="btn btn-primary" style={{width:"100%",padding:"13px",fontSize:15}} disabled={!canStart} onClick={()=>doStart(approach,scenario,difficulty,feedbackMode,sessionLength)}>
         Start Session →
       </button>
+
+      {/* Beta testing reset */}
+      <div style={{textAlign:"center",marginTop:"1.5rem",paddingTop:"1rem",borderTop:"1px solid var(--border-light)"}}>
+        <p style={{fontSize:11,color:"var(--muted)",marginBottom:6}}>🧪 Beta version · <a href="mailto:paul@counsellingroleplay.com.au" style={{color:"var(--muted)"}}>Send feedback</a></p>
+        <button style={{fontSize:11,color:"var(--muted)",background:"none",border:"none",cursor:"pointer",textDecoration:"underline",padding:0}}
+          onClick={()=>{
+            try{localStorage.removeItem("crp_email");localStorage.removeItem("crp_name");}catch{}
+            setUserEmail("");setUserName("");setEmailInput("");setNameInput("");
+            setShowDisclaimer(true);
+          }}>
+          Change email / reset account
+        </button>
+      </div>
     </div>
     </>
   );
