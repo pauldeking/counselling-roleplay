@@ -950,7 +950,7 @@ Respond ONLY with valid JSON (no markdown):
 
       {/* Beta testing reset */}
       <div style={{textAlign:"center",marginTop:"1.5rem",paddingTop:"1rem",borderTop:"1px solid var(--border-light)"}}>
-        <p style={{fontSize:11,color:"var(--muted)",marginBottom:6}}>🧪 Beta version · <a href="mailto:paul@counsellingroleplay.com.au" style={{color:"var(--muted)"}}>Send feedback</a></p>
+        <p style={{fontSize:11,color:"var(--muted)",marginBottom:6}}>🧪 Beta version · <a href="mailto:paul.de.king@gmail.com?subject=Counselling App Feedback" style={{color:"var(--muted)"}}>Get in touch</a></p>
         <button style={{fontSize:11,color:"var(--muted)",background:"none",border:"none",cursor:"pointer",textDecoration:"underline",padding:0}}
           onClick={()=>{
             try{localStorage.removeItem("crp_email");localStorage.removeItem("crp_name");}catch{}
@@ -1281,43 +1281,13 @@ Respond ONLY with valid JSON (no markdown):
               </div>
             )}
 
-            {/* Smart drill recommendation based on feedback */}
-            {(()=>{
-              const areas=(finalFeedback.areas||[]).join(" ").toLowerCase();
-              const techUse=(finalFeedback.technique_use||"").toLowerCase();
-              const summary=(finalFeedback.summary||"").toLowerCase();
-              const combined=areas+" "+techUse+" "+summary;
-              let recommended=null;
-              if(combined.match(/reflect|feeling|emotion|empathy|empathic/)) recommended=DRILLS.find(d=>d.id==="reflection")||DRILLS.find(d=>d.id==="empathy");
-              else if(combined.match(/question|closed|open question/)) recommended=DRILLS.find(d=>d.id==="open_q");
-              else if(combined.match(/paraphras|restat/)) recommended=DRILLS.find(d=>d.id==="paraphrase");
-              else if(combined.match(/summar/)) recommended=DRILLS.find(d=>d.id==="summarise");
-              else if(combined.match(/challeng|inconsisten|avoid/)) recommended=DRILLS.find(d=>d.id==="challenging");
-              else if(combined.match(/refram|perspect|alternative/)) recommended=DRILLS.find(d=>d.id==="reframing");
-              else if(combined.match(/notic|notic|present|aware/)) recommended=DRILLS.find(d=>d.id==="noticing");
-              if(!recommended) return null;
-              return(
-                <div style={{margin:"0 0 1rem",padding:"12px 14px",borderRadius:"var(--r-lg)",background:"var(--teal-pale)",border:"1px solid var(--teal-mid)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
-                  <div>
-                    <div style={{fontSize:12,fontWeight:600,color:"var(--teal)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>💡 Recommended drill</div>
-                    <div style={{fontSize:14,fontWeight:500,color:"var(--charcoal)"}}>{recommended.emoji} {recommended.label}</div>
-                    <div style={{fontSize:12,color:"var(--mid)",marginTop:2}}>{recommended.desc} · 4 exchanges · +1pt</div>
-                  </div>
-                  <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"8px 16px",flexShrink:0}}
-                    onClick={()=>startDrill(recommended)}>
-                    Start drill →
-                  </button>
-                </div>
-              );
-            })()}
           </>
         )}
 
-        {/* Post-debrief feedback — MUST submit to save everything */}
+        {/* Post-debrief feedback — submit to save */}
         <div className="post-debrief-form">
           <div style={{fontWeight:600,fontSize:14,color:"var(--teal)",marginBottom:4}}>🧪 Help us improve — 3 quick questions</div>
           <p style={{fontSize:12,color:"var(--teal)",opacity:0.8,marginBottom:14}}>Your session is saved when you submit this — it only takes a moment.</p>
-
           <div style={{marginBottom:14}}>
             <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>How useful was the supervisor feedback?</div>
             <div className="star-row">
@@ -1333,13 +1303,11 @@ Respond ONLY with valid JSON (no markdown):
               </span>}
             </div>
           </div>
-
           <div style={{marginBottom:14}}>
             <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>Anything the feedback missed or got wrong? <span style={{fontWeight:400,color:"var(--muted)"}}>(optional)</span></div>
             <textarea rows={2} placeholder="e.g. It didn't pick up that I used a scaling question… / The feedback felt too generic…"
               value={debriefMissed} onChange={e=>setDebriefMissed(e.target.value)}/>
           </div>
-
           <div style={{marginBottom:16}}>
             <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>Did the AI client feel realistic?</div>
             <div className="realism-row">
@@ -1351,7 +1319,6 @@ Respond ONLY with valid JSON (no markdown):
               ))}
             </div>
           </div>
-
           {!feedbackSaved
             ? <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"9px 20px"}}
                 onClick={submitPostFeedback} disabled={savingFeedback}>
@@ -1360,6 +1327,53 @@ Respond ONLY with valid JSON (no markdown):
             : <div style={{fontSize:13,color:"var(--teal)",fontWeight:500}}>✓ Session saved — thank you for your feedback.</div>
           }
         </div>
+
+        {/* After submit: recommended drill + one-click waitlist */}
+        {feedbackSaved&&(()=>{
+          const areas=(finalFeedback?.areas||[]).join(" ").toLowerCase();
+          const techUse=(finalFeedback?.technique_use||"").toLowerCase();
+          const summary=(finalFeedback?.summary||"").toLowerCase();
+          const combined=areas+" "+techUse+" "+summary;
+          let recommended=null;
+          if(combined.match(/reflect|feeling|emotion|empathy|empathic/)) recommended=DRILLS.find(d=>d.id==="reflection")||DRILLS.find(d=>d.id==="empathy");
+          else if(combined.match(/question|closed|open question/)) recommended=DRILLS.find(d=>d.id==="open_q");
+          else if(combined.match(/paraphras|restat/)) recommended=DRILLS.find(d=>d.id==="paraphrase");
+          else if(combined.match(/summar/)) recommended=DRILLS.find(d=>d.id==="summarise");
+          else if(combined.match(/challeng|inconsisten|avoid/)) recommended=DRILLS.find(d=>d.id==="challenging");
+          else if(combined.match(/refram|perspect|alternative/)) recommended=DRILLS.find(d=>d.id==="reframing");
+          else if(combined.match(/notic|present|aware/)) recommended=DRILLS.find(d=>d.id==="noticing");
+          return(
+            <>
+              {recommended&&(
+                <div style={{marginBottom:"1rem",padding:"12px 14px",borderRadius:"var(--r-lg)",background:"var(--teal-pale)",border:"1px solid var(--teal-mid)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:600,color:"var(--teal)",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:3}}>💡 Recommended next — drill this skill</div>
+                    <div style={{fontSize:14,fontWeight:500,color:"var(--charcoal)"}}>{recommended.emoji} {recommended.label}</div>
+                    <div style={{fontSize:12,color:"var(--mid)",marginTop:2}}>{recommended.desc} · 4 exchanges · +1pt</div>
+                  </div>
+                  <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"8px 16px",flexShrink:0}}
+                    onClick={()=>startDrill(recommended)}>Start drill →</button>
+                </div>
+              )}
+              {userEmail&&(
+                <div style={{marginBottom:"1rem",padding:"12px 16px",borderRadius:"var(--r-lg)",background:"linear-gradient(135deg, #1a6b5c 0%, #4a6741 100%)",color:"white"}}>
+                  <div style={{fontWeight:600,fontSize:14,marginBottom:4}}>🚀 Get founding member pricing</div>
+                  <p style={{fontSize:13,opacity:0.9,marginBottom:10,lineHeight:1.5}}>We're launching a paid plan soon — founding members get a lifetime discount.</p>
+                  {!waitlistSent
+                    ? <button className="btn" style={{background:"white",color:"var(--sage)",fontWeight:600,fontSize:13,padding:"8px 18px"}}
+                        onClick={()=>{
+                          fetch("/api/db",{method:"POST",headers:{"Content-Type":"application/json"},
+                            body:JSON.stringify({_waitlist:true,email:userEmail,name:userName||null,signed_up_at:new Date().toISOString()})
+                          }).catch(()=>{});
+                          setWaitlistSent(true);
+                        }}>Yes, notify me →</button>
+                    : <div style={{fontSize:13,fontWeight:500}}>✓ You're on the list — we'll be in touch.</div>
+                  }
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* Download */}
         <div className="card" style={{marginBottom:"1rem",background:"var(--sage-pale)",borderColor:"var(--sage-mid)"}}>
@@ -1381,27 +1395,6 @@ Respond ONLY with valid JSON (no markdown):
           <button className="btn btn-primary" style={{flex:1,padding:"12px"}} onClick={reset}>New session</button>
           <button className="btn btn-ghost" style={{padding:"12px 16px"}} onClick={()=>setScreen("progress")}>Progress</button>
         </div>
-
-        {/* Waitlist */}
-        {!waitlistSent ? (
-          <div className="waitlist-form" style={{marginTop:"1rem"}}>
-            <div style={{fontWeight:600,fontSize:15,marginBottom:4}}>🚀 Early access pricing</div>
-            <p style={{fontSize:13,opacity:0.9,marginBottom:12,lineHeight:1.6}}>We're launching a paid plan soon. Join the waitlist and get <strong>founding member pricing</strong> — locked in for life.</p>
-            <div style={{display:"flex",gap:8}}>
-              <input type="email" placeholder="your@email.com" value={waitlistEmail} onChange={e=>setWaitlistEmail(e.target.value)}
-                onKeyDown={e=>{if(e.key==="Enter") submitWaitlist();}}/>
-              <button className="btn" style={{background:"white",color:"var(--sage)",fontWeight:600,fontSize:13,padding:"10px 16px",flexShrink:0,whiteSpace:"nowrap"}}
-                onClick={submitWaitlist} disabled={waitlistLoading}>
-                {waitlistLoading?"...":"Join waitlist"}
-              </button>
-            </div>
-            <p style={{fontSize:11,opacity:0.7,marginTop:8}}>No spam. Just a heads-up when we launch.</p>
-          </div>
-        ) : (
-          <div style={{marginTop:"1rem",padding:"12px 16px",background:"var(--sage-pale)",border:"1px solid var(--sage-mid)",borderRadius:"var(--r-lg)",fontSize:13,color:"var(--sage)",fontWeight:500,textAlign:"center"}}>
-            ✓ You're on the list — we'll be in touch with founding member pricing.
-          </div>
-        )}
       </div>
     );
   }
