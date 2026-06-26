@@ -429,6 +429,11 @@ function App(){
   const [drillExchange,setDrillExchange]=useState(0);
   const [drillFeedbacks,setDrillFeedbacks]=useState([]);
   const [drillDone,setDrillDone]=useState(false);
+  const [drillFeedbackRating,setDrillFeedbackRating]=useState(0);
+  const [drillHelpful,setDrillHelpful]=useState("");
+  const [drillNote,setDrillNote]=useState("");
+  const [drillFeedbackSaved,setDrillFeedbackSaved]=useState(false);
+  const [drillFeedbackSaving,setDrillFeedbackSaving]=useState(false);
 
   // Waitlist state
   const [waitlistEmail,setWaitlistEmail]=useState("");
@@ -642,6 +647,33 @@ Respond ONLY with valid JSON (no markdown):
     setProgress(updated); saveProg(updated);
   };
 
+  const saveDrillFeedback=async()=>{
+    setDrillFeedbackSaving(true);
+    const successCount=drillFeedbacks.filter(f=>f.did_the_skill).length;
+    const data={
+      _drill: true,
+      skill: activeDrill?.id,
+      skill_label: activeDrill?.label,
+      scenario: activeDrill?.scenario?.id,
+      scenario_label: activeDrill?.scenario?.label,
+      difficulty: activeDrill?.difficulty?.id,
+      exchanges: drillExchange,
+      success_count: successCount,
+      total_count: drillFeedbacks.length,
+      experience_rating: drillFeedbackRating||null,
+      helpful: drillHelpful||null,
+      note: drillNote||null,
+      student_email: userEmail||null,
+      student_name: userName||null,
+      completed_at: new Date().toISOString(),
+    };
+    try {
+      await fetch("/api/db",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+    } catch(e){ console.warn("Drill save failed:",e); }
+    setDrillFeedbackSaved(true);
+    setDrillFeedbackSaving(false);
+  };
+
   const handleEmailSubmit=()=>{
     if(!emailInput.trim()||!emailInput.includes("@")){
       setEmailError("Please enter a valid email address"); return;
@@ -667,6 +699,8 @@ Respond ONLY with valid JSON (no markdown):
     setFeedbackSaved(false);setSavingFeedback(false);
     setActiveDrill(null);setDrillMessages([]);setDrillFeedbacks([]);
     setDrillExchange(0);setDrillDone(false);setDrillInput("");
+    setDrillFeedbackRating(0);setDrillHelpful("");setDrillNote("");
+    setDrillFeedbackSaved(false);setDrillFeedbackSaving(false);
     setSessionDate(new Date().toISOString().split("T")[0]);
   };
 
@@ -677,6 +711,8 @@ Respond ONLY with valid JSON (no markdown):
     setActiveDrill({...drill, scenario:sc_, difficulty:diff_});
     setDrillMessages([]); setDrillFeedbacks([]); setDrillExchange(0);
     setDrillDone(false); setDrillInput(""); setDrillLoading(true);
+    setDrillFeedbackRating(0); setDrillHelpful(""); setDrillNote("");
+    setDrillFeedbackSaved(false); setDrillFeedbackSaving(false);
     setScreen("drill");
     try {
       const text=await callAPI(
@@ -1422,13 +1458,67 @@ Respond ONLY with valid JSON (no markdown):
           )}
 
           {drillDone&&(
-            <div style={{padding:"16px",borderRadius:"var(--r-lg)",background:"var(--teal-pale)",border:"1px solid var(--teal-mid)",textAlign:"center",margin:"8px 0"}}>
-              <div style={{fontSize:20,marginBottom:4}}>✨ Drill complete!</div>
-              <div style={{fontSize:14,color:"var(--teal)",fontWeight:600,marginBottom:4}}>+1 point earned</div>
-              <div style={{fontSize:13,color:"var(--mid)",marginBottom:12}}>
-                {drillFeedbacks.filter(f=>f.did_the_skill).length} of {drillFeedbacks.length} responses demonstrated {activeDrill.label.toLowerCase()} effectively.
+            <div style={{margin:"8px 0"}}>
+              {/* Score summary */}
+              <div style={{padding:"14px 16px",borderRadius:"var(--r-lg)",background:"var(--teal-pale)",border:"1px solid var(--teal-mid)",textAlign:"center",marginBottom:"0.75rem"}}>
+                <div style={{fontSize:22,marginBottom:4}}>✨ Drill complete!</div>
+                <div style={{fontSize:14,color:"var(--teal)",fontWeight:600,marginBottom:6}}>+1 point earned</div>
+                <div style={{fontSize:13,color:"var(--mid)"}}>
+                  {drillFeedbacks.filter(f=>f.did_the_skill).length} of {drillFeedbacks.length} responses demonstrated <strong>{activeDrill.label.toLowerCase()}</strong> effectively.
+                </div>
               </div>
-              <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
+
+              {/* Feedback form */}
+              <div className="post-debrief-form">
+                <div style={{fontWeight:600,fontSize:14,color:"var(--teal)",marginBottom:4}}>🧪 Quick feedback — helps us improve</div>
+                <p style={{fontSize:12,color:"var(--teal)",opacity:0.8,marginBottom:14}}>Your drill is saved when you submit this.</p>
+
+                <div style={{marginBottom:14}}>
+                  <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>How did that feel overall?</div>
+                  <div className="star-row">
+                    {[1,2,3,4,5].map(n=>(
+                      <button key={n} className={`star-btn ${drillFeedbackRating>=n?"active":""}`}
+                        style={{borderColor:drillFeedbackRating>=n?"var(--teal)":"var(--border)",background:drillFeedbackRating>=n?"var(--teal-pale)":"var(--cream)"}}
+                        onClick={()=>setDrillFeedbackRating(drillFeedbackRating===n?0:n)}>
+                        {drillFeedbackRating>=n?"⭐":"☆"}
+                      </button>
+                    ))}
+                    {drillFeedbackRating>0&&<span style={{fontSize:13,color:"var(--teal)",marginLeft:4}}>
+                      {["","Too hard","Challenging","About right","Good practice","Excellent"][drillFeedbackRating]}
+                    </span>}
+                  </div>
+                </div>
+
+                <div style={{marginBottom:14}}>
+                  <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>Did this drill help your understanding of {activeDrill.label.toLowerCase()}?</div>
+                  <div className="realism-row">
+                    {["Definitely","Somewhat","Not really","Already knew it"].map(opt=>(
+                      <button key={opt} className={`realism-btn ${drillHelpful===opt?"active":""}`}
+                        onClick={()=>setDrillHelpful(drillHelpful===opt?"":opt)}>
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{marginBottom:16}}>
+                  <div style={{fontSize:13,fontWeight:500,color:"var(--mid)",marginBottom:6}}>Any observations or suggestions? <span style={{fontWeight:400,color:"var(--muted)"}}>(optional)</span></div>
+                  <textarea rows={2} placeholder="e.g. The client felt too cooperative / I'd like more variety in scenarios…"
+                    value={drillNote} onChange={e=>setDrillNote(e.target.value)}
+                    style={{width:"100%",border:"1px solid var(--teal-mid)",borderRadius:"var(--r)",padding:"9px 12px",fontSize:13,outline:"none",background:"white",resize:"vertical",lineHeight:1.5,fontFamily:"inherit"}}/>
+                </div>
+
+                {!drillFeedbackSaved
+                  ? <button className="btn" style={{background:"var(--teal)",color:"white",fontSize:13,padding:"9px 20px"}}
+                      onClick={saveDrillFeedback} disabled={drillFeedbackSaving}>
+                      {drillFeedbackSaving?"Saving…":"Submit & save drill"}
+                    </button>
+                  : <div style={{fontSize:13,color:"var(--teal)",fontWeight:500}}>✓ Saved — thank you!</div>
+                }
+              </div>
+
+              {/* Action buttons */}
+              <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:"0.75rem"}}>
                 <button className="btn btn-primary" style={{fontSize:13}} onClick={()=>startDrill(activeDrill)}>Try again</button>
                 <button className="btn btn-ghost" style={{fontSize:13}} onClick={()=>{ setScreen("home"); setActiveDrill(null); }}>Back to home</button>
               </div>
