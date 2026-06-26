@@ -19,20 +19,56 @@ export default async function handler(req, res) {
     "Authorization": `Bearer ${SUPABASE_KEY}`,
   };
 
-  // Save a session
   if (req.method === "POST") {
     try {
       const body = req.body;
 
-      // 1. Save to Supabase
+      // Handle waitlist signups separately
+      if (body._waitlist) {
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+            method: "POST",
+            headers: { ...headers, "Prefer": "return=representation" },
+            body: JSON.stringify({ email: body.email, name: body.name||null, signed_up_at: body.signed_up_at }),
+          });
+        } catch(e) { console.warn("Waitlist save failed:", e); }
+        return res.status(200).json({ ok: true });
+      }
+
+      // Handle drill saves — go to Supabase drills table + Google Sheets
+      if (body._drill) {
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/drills`, {
+            method: "POST",
+            headers: { ...headers, "Prefer": "return=representation" },
+            body: JSON.stringify(body),
+          });
+        } catch(e) { console.warn("Drill Supabase save failed:", e); }
+
+        // Send to Google Sheets (Drills tab)
+        try {
+          await fetch(SHEETS_WEBHOOK, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+        } catch(e) { console.warn("Drill sheets sync failed:", e); }
+
+        return res.status(200).json({ ok: true });
+      }
+
+      // Regular session save
       const supabaseRes = await fetch(`${SUPABASE_URL}/rest/v1/sessions`, {
         method: "POST",
         headers: { ...headers, "Prefer": "return=representation" },
         body: JSON.stringify(body),
       });
       const supabaseData = await supabaseRes.json();
+      if (!supabaseRes.ok) {
+        console.error("Supabase session save failed:", supabaseRes.status, JSON.stringify(supabaseData));
+      }
 
-      // 2. Send to Google Sheets (fire and forget — don't block on failure)
+      // Send to Google Sheets
       try {
         await fetch(SHEETS_WEBHOOK, {
           method: "POST",
@@ -40,7 +76,7 @@ export default async function handler(req, res) {
           body: JSON.stringify(body),
         });
       } catch(sheetErr) {
-        console.warn("Google Sheets sync failed (non-fatal):", sheetErr.message);
+        console.warn("Google Sheets sync failed:", sheetErr.message);
       }
 
       return res.status(supabaseRes.ok ? 200 : 500).json(supabaseData);
@@ -50,7 +86,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // Load sessions for a student
   if (req.method === "GET") {
     try {
       const { student_id } = req.query;
