@@ -302,6 +302,11 @@ function ratingStyle(r){
   if(r==="okay") return {bg:"var(--amber-pale)",border:"var(--amber-mid)",color:"var(--amber)",label:"Okay"};
   return {bg:"var(--red-pale)",border:"var(--red-mid)",color:"var(--red)",label:"Needs work"};
 }
+// Neutral, non-judgmental style for feedback moments — no single evaluative word is shown to the student.
+// The underlying good/okay/needs_work rating is still used internally (points, history), just not surfaced as a label here.
+function feedbackStyle(){
+  return {bg:"var(--sage-pale)",border:"var(--sage-mid)",color:"var(--sage)"};
+}
 
 async function saveAllToSupabase(sessionData) {
   try {
@@ -337,7 +342,7 @@ function generatePDF(opts) {
   const transcriptHTML = includeTranscript && messages && messages.length > 0
     ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;color:#888">Full Transcript</strong>${messages.map(m=>{const reaction=msgReactions?.[m.id];const note=msgNotes?.[m.id];const r=reaction?REACTIONS.find(r=>r.id===reaction):null;return`<div style="margin-top:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;color:${m.role==="counsellor"?"#4a6741":"#888"};margin-bottom:3px">${m.role==="counsellor"?"You (Counsellor)":"Client"}</div><div style="font-size:13px;line-height:1.6;padding:8px 12px;background:${m.role==="counsellor"?"#eef3ed":"#fafaf8"};border-radius:8px">${m.text}</div>${r?`<div style="font-size:11px;color:#888;margin-top:3px">${r.emoji} ${r.label}</div>`:""} ${note?`<div style="font-size:12px;color:#b06010;background:#fffbf0;border-left:2px solid #f0c080;padding:4px 8px;margin-top:4px;border-radius:4px">📝 ${note.text}</div>`:""}</div>`;}).join("")}</div>`
     : "";
-  const debriefHTML = debrief ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;color:#888">Supervisor Debrief</strong><div style="margin-top:8px;padding:12px;background:${rs.bg};border:1px solid ${rs.border};border-radius:8px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:${rs.color};margin-bottom:6px">Overall: ${rs.label}</div><p style="font-size:13px;line-height:1.6;margin:0 0 10px">${debrief.summary||""}</p>${debrief.strengths?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#4a6741">Strengths</strong>${debrief.strengths.map(s=>`<p style="font-size:13px;margin:3px 0;color:#4a6741">· ${s}</p>`).join("")}</div>`:""}${debrief.areas?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">To develop</strong>${debrief.areas.map(a=>`<p style="font-size:13px;margin:3px 0;color:#b06010">· ${a}</p>`).join("")}</div>`:""}${debrief.key_moment?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Key moment</strong><p style="font-size:13px;margin:3px 0;line-height:1.6">${debrief.key_moment}</p></div>`:""}${debrief.example_response?`<div><strong style="font-size:11px;text-transform:uppercase;color:#3c3c8c">Stronger response example</strong><p style="font-size:13px;margin:4px 0;font-style:italic;color:#3c3c8c;line-height:1.6">${debrief.example_response}</p></div>`:""}</div></div>` : "";
+  const debriefHTML = debrief ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid #eee"><strong style="font-size:12px;text-transform:uppercase;color:#888">Supervisor Debrief</strong><div style="margin-top:8px;padding:12px;background:${rs.bg};border:1px solid ${rs.border};border-radius:8px"><p style="font-size:13px;line-height:1.6;margin:0 0 10px">${debrief.summary||""}</p>${debrief.strengths?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#4a6741">Strengths</strong>${debrief.strengths.map(s=>`<p style="font-size:13px;margin:3px 0;color:#4a6741">· ${s}</p>`).join("")}</div>`:""}${debrief.areas?.length?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Areas to build on</strong>${debrief.areas.map(a=>`<p style="font-size:13px;margin:3px 0;color:#b06010">· ${a}</p>`).join("")}</div>`:""}${debrief.key_moment?`<div style="margin-bottom:8px"><strong style="font-size:11px;text-transform:uppercase;color:#b06010">Key moment</strong><p style="font-size:13px;margin:3px 0;line-height:1.6">${debrief.key_moment}</p></div>`:""}${debrief.example_response?`<div><strong style="font-size:11px;text-transform:uppercase;color:#3c3c8c">Stronger response example</strong><p style="font-size:13px;margin:4px 0;font-style:italic;color:#3c3c8c;line-height:1.6">${debrief.example_response}</p></div>`:""}</div></div>` : "";
 
   const html = `<div style="font-family:'DM Sans',sans-serif;max-width:680px;margin:0 auto;padding:24px;color:#1c1c1a">
     <div style="border-bottom:2px solid #4a6741;padding-bottom:12px;margin-bottom:20px">
@@ -1118,18 +1123,17 @@ Respond ONLY with valid JSON (no markdown):
             </div>
           )}
           {stepFeedback&&showingFeedback&&(()=>{
-            const rs=ratingStyle(stepFeedback.rating);
+            const rs=feedbackStyle();
             return(
               <div className="fb-card" style={{background:rs.bg,borderColor:rs.border,margin:"4px 0"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                  <span className="badge" style={{background:rs.color,color:"white"}}>{rs.label}</span>
                   <span style={{fontSize:13,fontWeight:500,color:rs.color}}>Supervisor Feedback</span>
                   {stepFeedback.technique&&stepFeedback.technique!=="—"&&(
                     <span className="badge" style={{background:"rgba(0,0,0,0.06)",color:rs.color,fontSize:10}}>{stepFeedback.technique}</span>
                   )}
                 </div>
-                <div className="fb-section"><div className="fb-label" style={{color:rs.color}}>✓ What worked</div><div className="fb-text">{stepFeedback.strength}</div></div>
-                <div className="fb-section"><div className="fb-label" style={{color:rs.color}}>↑ To improve</div><div className="fb-text">{stepFeedback.improve}</div></div>
+                <div className="fb-section"><div className="fb-label" style={{color:rs.color}}>Strengths</div><div className="fb-text">{stepFeedback.strength}</div></div>
+                <div className="fb-section"><div className="fb-label" style={{color:rs.color}}>Areas to build on</div><div className="fb-text">{stepFeedback.improve}</div></div>
                 {stepFeedback.example&&(
                   <div className="fb-section">
                     <div className="fb-label" style={{color:rs.color}}>💬 Stronger response</div>
@@ -1186,7 +1190,7 @@ Respond ONLY with valid JSON (no markdown):
     const diff_=DIFFICULTIES.find(d=>d.id===difficulty);
     const sc_=SCENARIOS.find(s=>s.id===scenario);
     const earned=finalFeedback?(RP[finalFeedback.overall]||0)*diff_.pts:0;
-    const rs=finalFeedback?ratingStyle(finalFeedback.overall):ratingStyle("okay");
+    const rs=feedbackStyle();
     const reactionCounts={};
     Object.values(msgReactions).forEach(r=>{reactionCounts[r]=(reactionCounts[r]||0)+1;});
     const notesArray=Object.entries(msgNotes).map(([msgId,n])=>({msgId,...n}));
@@ -1204,7 +1208,7 @@ Respond ONLY with valid JSON (no markdown):
           <div style={{fontSize:28,fontWeight:700,color:"var(--sage)",fontFamily:"Instrument Serif, serif"}}>+{earned}</div>
           <div>
             <div style={{fontSize:13,fontWeight:600,color:"var(--sage)"}}>Points earned</div>
-            <div style={{fontSize:12,color:"var(--sage-light)"}}>{rs.label} × {diff_?.pts} difficulty · Total: {progress.totalPoints} pts</div>
+            <div style={{fontSize:12,color:"var(--sage-light)"}}>Difficulty ×{diff_?.pts} · Total: {progress.totalPoints} pts</div>
           </div>
         </div>
 
@@ -1242,10 +1246,11 @@ Respond ONLY with valid JSON (no markdown):
         {finalFeedback&&(
           <>
             <div className="fb-card" style={{background:rs.bg,borderColor:rs.border,marginBottom:"1rem"}}>
+              {isCrisis&&(
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                <span className="badge" style={{background:rs.color,color:"white"}}>Overall: {rs.label}</span>
-                {isCrisis&&<span className="badge" style={{background:"var(--indigo-pale)",color:"var(--indigo)"}}>Crisis response</span>}
+                <span className="badge" style={{background:"var(--indigo-pale)",color:"var(--indigo)"}}>Crisis response</span>
               </div>
+              )}
               <p style={{fontSize:14,lineHeight:1.6,color:"var(--charcoal)"}}>{finalFeedback.summary}</p>
             </div>
             <div className="debrief-grid">
@@ -1254,7 +1259,7 @@ Respond ONLY with valid JSON (no markdown):
                 {(finalFeedback.strengths||[]).map((s,i)=><p key={i} style={{fontSize:13,color:"var(--sage)",margin:"0 0 4px",lineHeight:1.5}}>· {s}</p>)}
               </div>
               <div className="card" style={{background:"var(--amber-pale)",borderColor:"var(--amber-mid)"}}>
-                <div className="fb-label" style={{color:"var(--amber)"}}>To develop</div>
+                <div className="fb-label" style={{color:"var(--amber)"}}>Areas to build on</div>
                 {(finalFeedback.areas||[]).map((a,i)=><p key={i} style={{fontSize:13,color:"var(--amber)",margin:"0 0 4px",lineHeight:1.5}}>· {a}</p>)}
               </div>
             </div>
@@ -1541,10 +1546,9 @@ Respond ONLY with valid JSON (no markdown):
 
   if(screen==="progress"){
     const {sessions,totalSessions,totalPoints}=progress;
-    const good=sessions.filter(s=>s.overall==="good").length;
-    const okay=sessions.filter(s=>s.overall==="okay").length;
-    const nw=sessions.filter(s=>s.overall==="needs_work").length;
     const crisis=sessions.filter(s=>s.crisis).length;
+    const totalExchanges=sessions.reduce((sum,s)=>sum+(s.exchanges||0),0);
+    const avgExchanges=sessions.length?Math.round(totalExchanges/sessions.length):0;
     const levels=[{label:"Trainee",max:10,color:"var(--muted)"},{label:"Practitioner",max:25,color:"var(--teal)"},{label:"Skilled",max:50,color:"var(--sage)"},{label:"Advanced",max:100,color:"var(--amber)"},{label:"Expert",max:null,color:"var(--red)"}];
     const level=levels.find(l=>l.max===null||totalPoints<l.max)||levels[levels.length-1];
     const pct=level.max?Math.min(100,Math.round((totalPoints/level.max)*100)):100;
@@ -1567,7 +1571,7 @@ Respond ONLY with valid JSON (no markdown):
           <p style={{fontSize:12,color:"var(--muted)",margin:"5px 0 0"}}>{level.max?`${totalPoints} / ${level.max} pts`:"Maximum level reached"}</p>
         </div>
         <div className="stat-grid" style={{marginBottom:"1rem"}}>
-          {[{label:"Sessions",val:totalSessions,color:"var(--charcoal)"},{label:"Good",val:good,color:"var(--sage)"},{label:"Okay",val:okay,color:"var(--amber)"},{label:"Needs work",val:nw,color:"var(--red)"},{label:"Crisis",val:crisis,color:"var(--indigo)"}].map(({label,val,color})=>(
+          {[{label:"Sessions",val:totalSessions,color:"var(--charcoal)"},{label:"Total points",val:totalPoints,color:"var(--sage)"},{label:"Avg exchanges",val:avgExchanges,color:"var(--teal)"},{label:"Crisis",val:crisis,color:"var(--indigo)"}].map(({label,val,color})=>(
             <div key={label} className="stat-card"><div className="stat-num" style={{color}}>{val}</div><div className="stat-label">{label}</div></div>
           ))}
         </div>
@@ -1577,16 +1581,14 @@ Respond ONLY with valid JSON (no markdown):
           ?<p style={{color:"var(--muted)",fontSize:14}}>No sessions yet — complete a role-play to see your history.</p>
           :<div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:"1rem"}}>
             {sessions.map((s,i)=>{
-              const rs=ratingStyle(s.overall);
               return(<div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:"var(--r)",background:"var(--warm)",border:"1px solid var(--border-light)"}}>
-                <div style={{width:8,height:8,borderRadius:"50%",background:rs.color,flexShrink:0}}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.scenario}{s.crisis&&<span style={{fontSize:10,background:"var(--indigo-pale)",color:"var(--indigo)",padding:"1px 6px",borderRadius:10,marginLeft:4}}>Crisis</span>}</div>
                   <div style={{fontSize:12,color:"var(--muted)"}}>{s.approach} · {s.difficulty} · {s.exchanges} exchanges</div>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
-                  <div style={{fontSize:12,fontWeight:500,color:rs.color}}>{rs.label}</div>
-                  <div style={{fontSize:11,color:"var(--muted)"}}>+{s.points} pts · {s.date}</div>
+                  <div style={{fontSize:12,fontWeight:500,color:"var(--sage)"}}>+{s.points} pts</div>
+                  <div style={{fontSize:11,color:"var(--muted)"}}>{s.date}</div>
                 </div>
               </div>);
             })}
