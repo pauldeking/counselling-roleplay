@@ -457,12 +457,24 @@ function App(){
   useEffect(()=>{
     const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!SpeechRecognition){ setVoiceAvailable(false); return; }
-    if(navigator.permissions&&navigator.permissions.query){
-      navigator.permissions.query({name:"microphone"}).then(status=>{
-        setVoiceAvailable(status.state!=="denied");
-      }).catch(()=>setVoiceAvailable(true));
+    const checkMicPermission=()=>{
+      if(navigator.permissions&&navigator.permissions.query){
+        navigator.permissions.query({name:"microphone"}).then(status=>{
+          setVoiceAvailable(status.state!=="denied");
+        }).catch(()=>setVoiceAvailable(true));
+      } else {
+        setVoiceAvailable(true);
+      }
+    };
+    // Brave exposes the SpeechRecognition API but blocks the Google speech
+    // backend it depends on, so it always fails with a "network" error.
+    // Detect Brave and hide the button rather than show something broken.
+    if(navigator.brave&&typeof navigator.brave.isBrave==="function"){
+      navigator.brave.isBrave().then(isBrave=>{
+        if(isBrave){ setVoiceAvailable(false); } else { checkMicPermission(); }
+      }).catch(checkMicPermission);
     } else {
-      setVoiceAvailable(true);
+      checkMicPermission();
     }
   },[]);
 
@@ -490,6 +502,8 @@ function App(){
         setVoiceError("Microphone access was blocked — check your browser/site permissions and try again.");
       } else if(e.error==="no-speech"){
         // not a real error, ignore
+      } else if(e.error==="network"){
+        setVoiceError("Voice capture isn't available in this browser — try Chrome instead.");
       } else {
         setVoiceError("Voice capture stopped unexpectedly — you can keep typing instead.");
       }
