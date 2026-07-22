@@ -448,6 +448,63 @@ function App(){
   const bottomRef=useRef(null);
   const noteInputRef=useRef(null);
 
+  // ── Voice-to-text (Web Speech API) ──
+  const [voiceAvailable,setVoiceAvailable]=useState(false);
+  const [listening,setListening]=useState(false);
+  const [voiceError,setVoiceError]=useState("");
+  const recognitionRef=useRef(null);
+
+  useEffect(()=>{
+    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SpeechRecognition){ setVoiceAvailable(false); return; }
+    if(navigator.permissions&&navigator.permissions.query){
+      navigator.permissions.query({name:"microphone"}).then(status=>{
+        setVoiceAvailable(status.state!=="denied");
+      }).catch(()=>setVoiceAvailable(true));
+    } else {
+      setVoiceAvailable(true);
+    }
+  },[]);
+
+  function startVoice(setter){
+    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SpeechRecognition) return;
+    const recognition=new SpeechRecognition();
+    recognition.continuous=true;
+    recognition.interimResults=true;
+    recognition.lang="en-AU";
+    recognition.onresult=(e)=>{
+      let finalText="";
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal) finalText+=e.results[i][0].transcript;
+      }
+      if(finalText.trim()){
+        setter(prev=>{
+          const sep=prev&&!prev.endsWith(" ")?" ":"";
+          return prev+sep+finalText.trim();
+        });
+      }
+    };
+    recognition.onerror=(e)=>{
+      if(e.error==="not-allowed"||e.error==="service-not-allowed"){
+        setVoiceError("Microphone access was blocked — check your browser/site permissions and try again.");
+      } else if(e.error==="no-speech"){
+        // not a real error, ignore
+      } else {
+        setVoiceError("Voice capture stopped unexpectedly — you can keep typing instead.");
+      }
+    };
+    recognition.onend=()=>{ setListening(false); };
+    setVoiceError("");
+    recognitionRef.current=recognition;
+    setListening(true);
+    recognition.start();
+  }
+
+  function stopVoice(){
+    recognitionRef.current?.stop();
+  }
+
   useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[messages,stepFeedback,finalFeedback,loading]);
   useEffect(()=>{ if(activeNoteFor&&noteInputRef.current) noteInputRef.current.focus(); },[activeNoteFor]);
 
@@ -1170,10 +1227,18 @@ Respond ONLY with valid JSON (no markdown):
               onChange={e=>{setInput(e.target.value);e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,110)+"px";}}
               onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}}}
               placeholder="Type your counsellor response…" disabled={loading||showingFeedback||!!activeNoteFor}/>
+            {voiceAvailable&&(
+              <button type="button" className="btn btn-ghost" style={{fontSize:12,padding:"8px 10px",whiteSpace:"nowrap"}}
+                disabled={loading||showingFeedback||!!activeNoteFor}
+                onClick={()=>listening?stopVoice():startVoice(setInput)}>
+                {listening?"● Stop listening":"🎙️ Speak it"}
+              </button>
+            )}
             <button className="send-btn" disabled={loading||showingFeedback||!!activeNoteFor||!input.trim()} onClick={sendMessage}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-5 14-2-5-5-3z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="none"/></svg>
             </button>
           </div>
+          {voiceError&&<p style={{fontSize:11,color:"var(--red)",textAlign:"center",marginTop:5}}>{voiceError}</p>}
           <div className="action-row">
             <button className={`action-btn ${exchangeCount>=2?"primary":""}`} disabled={exchangeCount<2||gettingFinal||loading} onClick={getFinalFeedback}>
               {gettingFinal?"Getting debrief…":"Finish & get debrief"}
@@ -1533,10 +1598,18 @@ Respond ONLY with valid JSON (no markdown):
                 onChange={e=>{setDrillInput(e.target.value);e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,110)+"px";}}
                 onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendDrillMessage();}}}
                 placeholder={`Practise ${activeDrill.label.toLowerCase()} here…`} disabled={drillLoading}/>
+              {voiceAvailable&&(
+                <button type="button" className="btn btn-ghost" style={{fontSize:12,padding:"8px 10px",whiteSpace:"nowrap"}}
+                  disabled={drillLoading}
+                  onClick={()=>listening?stopVoice():startVoice(setDrillInput)}>
+                  {listening?"● Stop listening":"🎙️ Speak it"}
+                </button>
+              )}
               <button className="send-btn" disabled={drillLoading||!drillInput.trim()} onClick={sendDrillMessage}>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-5 14-2-5-5-3z" stroke="white" strokeWidth="1.5" strokeLinejoin="round" fill="none"/></svg>
               </button>
             </div>
+            {voiceError&&<p style={{fontSize:11,color:"var(--red)",textAlign:"center",marginTop:5}}>{voiceError}</p>}
             <p style={{fontSize:11,color:"var(--muted)",textAlign:"center",marginTop:5}}>Enter to send · Shift+Enter for new line</p>
           </div>
         )}
